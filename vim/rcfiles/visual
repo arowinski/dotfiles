@@ -48,4 +48,14 @@ set signcolumn=yes
 set diffopt+=iwhite
 set diffopt+=vertical
 
+" neovim 0.4.0+: transparent popup-menu
+if exists('&pumblend')
+    set pumblend=10
+endif
+
+" neovim 0.4.0+: transparent floating windows
+if exists('&winblend')
+    set winblend=10
+endif
+
 " vim:ft=vim
