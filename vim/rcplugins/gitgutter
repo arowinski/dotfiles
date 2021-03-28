@@ -7,4 +7,6 @@ set updatetime=100
 nmap ]h <Plug>(GitGutterNextHunk)
 nmap [h <Plug>(GitGutterPrevHunk)
 
+let g:gitgutter_sign_priority = 9
+
 " vim:ft=vim
