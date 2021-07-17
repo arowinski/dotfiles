@@ -6,10 +6,10 @@ Plug 'rhysd/git-messenger.vim'
 " Autoclean fugitive buffers
 autocmd BufReadPost fugitive://* set bufhidden=delete
 
-nnoremap g<space> :Gstatus<cr>
+nnoremap g<space> :Git<cr>
 
 nnoremap <leader>gw :Gwrite<CR>
 nnoremap <leader>gr :Gread<CR>
-noremap <leader>gl :0Glog<CR>
+noremap <leader>gl :0Gclog<CR>
 
 " vim:ft=vim
