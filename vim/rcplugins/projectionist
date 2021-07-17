@@ -41,8 +41,8 @@ fun! s:alternate()
   endif
 endfun
 
-command! ROV silent only|RV
-command! AOV silent only|call s:alternate()
+command! ROV silent only|RV|write|edit
+command! AOV silent only|call s:alternate()|write|edit
 
 noremap <Leader>av :AOV<cr>
 noremap <Leader>rv :ROV<cr>
