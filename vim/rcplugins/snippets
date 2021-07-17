@@ -1,0 +1,10 @@
+Plug 'hrsh7th/vim-vsnip'
+
+let g:vsnip_snippet_dir = '~/.vim/vsnip'
+
+nmap s <Plug>(vsnip-select-text)c
+xmap s <Plug>(vsnip-select-text)c
+nmap S <Plug>(vsnip-cut-text)c
+xmap S <Plug>(vsnip-cut-text)c
+
+" vim:ft=vim

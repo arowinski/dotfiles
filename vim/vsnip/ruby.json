@@ -1,0 +1,94 @@
+{
+  "module": {
+    "prefix": ["module"],
+    "body": [ "# frozen_string_literal: true\n",
+      "${VIM:luaeval('require(\"snippet\").ruby.open(\"module\")')}$0",
+      "${VIM:luaeval('require(\"snippet\").ruby.close()')}"
+    ]
+  },
+  "class": {
+    "prefix": ["class"],
+    "body": [
+      "# frozen_string_literal: true\n",
+      "${VIM:luaeval('require(\"snippet\").ruby.open(\"class\")')}$0",
+      "${VIM:luaeval('require(\"snippet\").ruby.close()')}"
+    ]
+  },
+  "lambda ->": {
+    "prefix": ["->"],
+    "body": ["-> { $1 }"]
+  },
+  "attr_reader": {
+    "prefix": ["r"],
+    "body": ["attr_reader :$0"]
+  },
+  "attr_writer": {
+    "prefix": ["w"],
+    "body": ["attr_writer :$0"]
+  },
+  "attr_accessor": {
+    "prefix": ["rw"],
+    "body": ["attr_accessor :$0"]
+  },
+  "private": {
+    "prefix": ["pr"],
+    "body": ["private\n\n$0"]
+  },
+  "define method": {
+    "prefix": ["def"],
+    "body": ["def ${1:name}(${2:args})\n\t$0\nend"]
+  },
+  "initializer": {
+    "prefix": ["defi"],
+    "body": ["def initialize(${1:args})\n\t$0\nend"]
+  },
+  "delegate": {
+    "prefix": ["del"],
+    "body": ["delegate :$1, to: $0"]
+  },
+  "require": {
+    "prefix": ["req"],
+    "body": ["require \"$0\""]
+  },
+  "require_relative": {
+    "prefix": ["reqr"],
+    "body": ["require_relativ \"$0\""]
+  },
+
+  "spec": {
+    "prefix": ["spec"],
+    "body": [
+      "# frozen_string_literal: true",
+      "${VIM:g:is_rails ? \"\nrequire 'rails_helper'\n\" : ''}",
+      "RSpec.describe ${VIM:ruby#class_name()} do\n\t$0\nend"
+    ]
+  },
+  "describe": {
+    "prefix": ["desc"],
+    "body": ["describe '$1' do\n\t${0:$TM_SELECTED_TEXT}\nend"]
+  },
+  "context": {
+    "prefix": ["cont"],
+    "body": ["context '$1' do\n\t${0:$TM_SELECTED_TEXT}\nend"]
+  },
+  "it": {
+    "prefix": ["it"],
+    "body": ["it '$1' do\n\t$0\nend"]
+  },
+  "is expected": {
+    "prefix": ["iiexp"],
+    "body": ["it { is_expected.to $0 }"]
+  },
+  "described_class": {
+    "prefix": ["dc"],
+    "body": ["described_class"]
+  },
+  "var = described_class": {
+    "prefix": ["dcc"],
+    "body": ["${1:var} = described_class$0"]
+  },
+  "expect": {
+    "prefix": ["exp"],
+    "body": ["expect($1).to ${2|eq,be_a,be,have_attributes,change|}($3)"]
+  }
+}
