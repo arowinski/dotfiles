@@ -12,6 +12,7 @@ vnoremap <C-@> <Esc>gV
 onoremap <C-@> <Esc>
 cnoremap <C-@> <C-c>
 inoremap <C-@> <Esc>
+nnoremap <silent> <Esc> <Esc>:noh<CR>
 
 " Convenience
 nnoremap H ^
