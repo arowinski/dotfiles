@@ -1,10 +1,9 @@
 local nvim_lsp = require('lspconfig')
-local nmap = require('utils').nmap
 local efm_config = require('efm/config')
 
 -- LSP  Settings
 
-nmap('<leader>p', "<cmd>lua vim.lsp.buf.formatting()<CR>")
+U.nmap('<leader>p', "<cmd>lua vim.lsp.buf.formatting()<CR>")
 
 local lsp = {
   efm = efm_config,

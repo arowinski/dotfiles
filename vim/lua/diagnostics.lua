@@ -1,5 +1,3 @@
-local nmap = require('utils').nmap
-
 require("lsp-colors").setup({
   Error = "#db4b4b",
   Warning = "#e0af68",
@@ -50,10 +48,10 @@ for type, icon in pairs(signs) do
   vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = "" })
 end
 
-nmap('<leader>e', "<cmd>TroubleToggle<cr>")
+U.nmap('<leader>e', "<cmd>TroubleToggle<cr>")
 
-nmap('[r', '<cmd>lua vim.lsp.diagnostic.goto_prev({enable_popup = false})<CR>')
-nmap(']r', '<cmd>lua vim.lsp.diagnostic.goto_next({enable_popup = false})<CR>')
+U.nmap('[r', '<cmd>lua vim.lsp.diagnostic.goto_prev({enable_popup = false})<CR>')
+U.nmap(']r', '<cmd>lua vim.lsp.diagnostic.goto_next({enable_popup = false})<CR>')
 
 vim.cmd [[autocmd CursorHold * lua vim.lsp.diagnostic.show_line_diagnostics({focusable = false})]]
 

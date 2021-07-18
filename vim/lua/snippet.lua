@@ -1,4 +1,4 @@
-local utils = require('utils')
+local reduce = U.list.reduce
 
 local ruby = {}
 local snippet = { ruby = ruby }
@@ -13,12 +13,12 @@ function ruby.open(type)
   local path = vim.fn['ruby#class_name'](1)
   local size = #path
 
-  local value = utils.reduce(path, '', function(acc, value, index)
+  local value = reduce(path, '', function(acc, value, index)
     local width = vim.bo.shiftwidth
     local shift = string.rep(' ', width * (index - 1))
 
     if index == size then
-      return acc .. shift  .. type .. " " .. value
+      return acc .. shift .. type .. " " .. value
     else
       return acc .. shift .. "module " .. value .. "\n"
     end
@@ -32,10 +32,9 @@ function ruby.close()
   local size = #list
   local width = vim.bo.shiftwidth
 
-  return utils.reduce(list, '', function(acc, value, index)
+  return reduce(list, '', function(acc, _, index)
     return acc .. string.rep(' ', (size - index) * width) .. "end\n"
   end)
 end
-
 
 return snippet;

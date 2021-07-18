@@ -1,5 +1,3 @@
-local t = require('utils').t
-
 require'compe'.setup {
   enabled = true,
   autocomplete = true,
@@ -21,9 +19,13 @@ require'compe'.setup {
     nvim_lsp = true,
     nvim_lua = true,
     treesitter = true,
-    vsnip = { kind = "﬌ Snippet", menu = '[VSnip]' };
+    vsnip = { kind = "﬌ Snippet", menu = '[VSnip]' }
   }
 }
+
+local t = function(str)
+  return vim.api.nvim_replace_termcodes(str, true, true, true)
+end
 
 _G.tab_complete = function()
   if vim.fn.pumvisible() and vim.fn['compe#_has_completed_item']() then
@@ -57,36 +59,33 @@ _G.prev_completion = function()
   end
 end
 
-vim.api
-    .nvim_set_keymap('i', "<C-j>", "v:lua.next_completion()", { expr = true })
-vim.api
-    .nvim_set_keymap('i', "<C-k>", "v:lua.prev_completion()", { expr = true })
-vim.api.nvim_set_keymap('i', "<C-l>", "v:lua.tab_complete()", { expr = true })
-
+U.imap("<C-j>", "v:lua.next_completion()", { expr = true })
+U.imap("<C-k>", "v:lua.prev_completion()", { expr = true })
+U.imap("<C-l>", "v:lua.tab_complete()", { expr = true })
 
 require('lspkind').init({
-    with_text = true,
-    preset = 'codicons',
-    symbol_map = {
-      Text = '',
-      Method = 'ƒ',
-      Function = '',
-      Constructor = '',
-      Variable = '',
-      Class = '',
-      Interface = 'ﰮ',
-      Module = '',
-      Property = '',
-      Unit = '',
-      Value = '',
-      Enum = '了',
-      Keyword = '',
-      Snippet = '﬌',
-      Color = '',
-      File = '',
-      Folder = '',
-      EnumMember = '',
-      Constant = '',
-      Struct = ''
-    },
+  with_text = true,
+  preset = 'codicons',
+  symbol_map = {
+    Text = '',
+    Method = 'ƒ',
+    Function = '',
+    Constructor = '',
+    Variable = '',
+    Class = '',
+    Interface = 'ﰮ',
+    Module = '',
+    Property = '',
+    Unit = '',
+    Value = '',
+    Enum = '了',
+    Keyword = '',
+    Snippet = '﬌',
+    Color = '',
+    File = '',
+    Folder = '',
+    EnumMember = '',
+    Constant = '',
+    Struct = ''
+  }
 })

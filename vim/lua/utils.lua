@@ -1,17 +1,16 @@
-local utils = {}
+U = { list = {} }
 
-function utils.reduce(list, acc, fn)
+local function map_keys(mode, command, value, opts)
+  opts = opts or { noremap = true, silent = true }
+
+  vim.api.nvim_set_keymap(mode, command, value, opts)
+end
+
+function U.nmap(command, value, opts) map_keys('n', command, value, opts) end
+function U.imap(command, value, opts) map_keys('i', command, value, opts) end
+
+function U.list.reduce(list, acc, fn)
   for k, v in ipairs(list) do acc = fn(acc, v, k) end
 
   return acc
 end
-
-function utils.t(str)
-  return vim.api.nvim_replace_termcodes(str, true, true, true)
-end
-
-function utils.nmap(k, f)
-  return vim.api.nvim_set_keymap('n', k, f, {noremap = true, silent = true})
-end
-
-return utils;
