@@ -9,6 +9,8 @@ Plug 'onsails/lspkind-nvim'
 Plug 'folke/lsp-colors.nvim'
 Plug 'folke/trouble.nvim'
 
+Plug 'rafcamlet/nvim-luapad'
+
 set completeopt=menuone,noinsert,noselect
 set shortmess+=c
 
