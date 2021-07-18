@@ -34,6 +34,7 @@ end
 nvim_lsp.solargraph.setup {
   root_dir = nvim_lsp.util.root_pattern(".git"),
   cmd = { "solargraph", "stdio" },
+  settings = { solargraph = { useBundler = true } },
   filetypes = { "ruby" },
   flags = { debounce_text_changes = 150 }
 }

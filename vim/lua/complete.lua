@@ -1,29 +1,28 @@
 local t = require('utils').t
 
 require'compe'.setup {
-  enabled = true;
-  autocomplete = true;
-  debug = false;
-  min_length = 2;
-  allow_prefix_unmatch = false,
-  preselect = 'disable';
-  throttle_time = 80;
-  source_timeout = 200;
-  incomplete_delay = 400;
+  enabled = true,
+  autocomplete = true,
+  debug = false,
   min_length = 1,
-  max_abbr_width = 100;
-  max_kind_width = 100;
-  max_menu_width = 100;
-  documentation = true;
+  allow_prefix_unmatch = false,
+  preselect = 'disable',
+  throttle_time = 80,
+  source_timeout = 200,
+  incomplete_delay = 400,
+  max_abbr_width = 100,
+  max_kind_width = 100,
+  max_menu_width = 100,
+  documentation = true,
 
   source = {
-    path = true;
-    buffer = true;
-    nvim_lsp = true;
-    nvim_lua = true;
-    treesitter = true;
-    vsnip = { priority = 9999 };
-  };
+    path = true,
+    buffer = true,
+    nvim_lsp = true,
+    nvim_lua = true,
+    treesitter = true,
+    vsnip = { kind = "﬌ Snippet", menu = '[VSnip]' };
+  }
 }
 
 _G.tab_complete = function()
@@ -32,7 +31,7 @@ _G.tab_complete = function()
   elseif vim.fn['vsnip#available'](1) == 1 then
     return t "<Plug>(vsnip-expand-or-jump)"
   elseif vim.fn.pumvisible() and not vim.fn['compe#_has_completed_item']() then
-    return vim.fn['compe#confirm']({select = true})
+    return vim.fn['compe#confirm']({ select = true })
   else
     return vim.fn['compe#complete']()
   end
@@ -58,6 +57,36 @@ _G.prev_completion = function()
   end
 end
 
-vim.api.nvim_set_keymap('i', "<C-j>", "v:lua.next_completion()", {expr = true})
-vim.api.nvim_set_keymap('i', "<C-k>", "v:lua.prev_completion()", {expr = true})
-vim.api.nvim_set_keymap('i', "<C-l>", "v:lua.tab_complete()", {expr = true})
+vim.api
+    .nvim_set_keymap('i', "<C-j>", "v:lua.next_completion()", { expr = true })
+vim.api
+    .nvim_set_keymap('i', "<C-k>", "v:lua.prev_completion()", { expr = true })
+vim.api.nvim_set_keymap('i', "<C-l>", "v:lua.tab_complete()", { expr = true })
+
+
+require('lspkind').init({
+    with_text = true,
+    preset = 'codicons',
+    symbol_map = {
+      Text = '',
+      Method = 'ƒ',
+      Function = '',
+      Constructor = '',
+      Variable = '',
+      Class = '',
+      Interface = 'ﰮ',
+      Module = '',
+      Property = '',
+      Unit = '',
+      Value = '',
+      Enum = '了',
+      Keyword = '',
+      Snippet = '﬌',
+      Color = '',
+      File = '',
+      Folder = '',
+      EnumMember = '',
+      Constant = '',
+      Struct = ''
+    },
+})
