@@ -1,8 +1,6 @@
 local nvim_lsp = require('lspconfig')
 local efm_config = require('efm/config')
 
--- LSP  Settings
-
 U.nmap('<leader>p', "<cmd>lua vim.lsp.buf.formatting()<CR>")
 
 local lsp = {
@@ -10,7 +8,11 @@ local lsp = {
   lua = {
     settings = { Lua = { diagnostics = { enable = true, globals = { "vim" } } } }
   },
-  json = {}
+  json = {},
+  yaml = {},
+  html = {},
+  css = {},
+  vim = {}
 }
 
 local function setup_servers()
