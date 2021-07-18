@@ -6,7 +6,11 @@ U.nmap('<leader>p', "<cmd>lua vim.lsp.buf.formatting()<CR>")
 local lsp = {
   efm = efm_config,
   lua = {
-    settings = { Lua = { diagnostics = { enable = true, globals = { "vim" } } } }
+    settings = {
+      Lua = {
+        diagnostics = { enable = true, globals = { "vim", "U", "MPairs" } }
+      }
+    }
   },
   json = {},
   yaml = {},
