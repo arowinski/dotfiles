@@ -66,6 +66,4 @@ endfun
 nnoremap <Leader>fl :Files lib/<CR>
 nnoremap <Leader>fs :Files spec/<CR>
 
-let b:AutoPairs = AutoPairsDefine({'|' : '|'})
-
 " vim:ft=vim

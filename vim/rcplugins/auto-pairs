@@ -1,12 +1,6 @@
 " Auto-Pairs - autoclosin quotes, brackets
 
-Plug 'jiangmiao/auto-pairs'
-Plug 'luochen1990/rainbow'
-
-let g:AutoPairsFlyMode = 0
-let g:AutoPairsMultilineClose = 0
-let g:AutoPairsShortcutFastWrap = '<C-w>'
-
-let g:rainbow_active = 1
+Plug 'windwp/nvim-autopairs'
+Plug 'p00f/nvim-ts-rainbow'
 
 " vim:ft=vim
