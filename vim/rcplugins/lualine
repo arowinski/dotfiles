@@ -1,0 +1,5 @@
+" Power up status bar
+
+Plug 'hoob3rt/lualine.nvim'
+
+" vim:ft=vim
