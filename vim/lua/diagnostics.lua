@@ -6,57 +6,62 @@ require("lsp-colors").setup({
 })
 
 require("trouble").setup({
-    position = "bottom",
-    height = 10,
-    width = 50,
-    icons = true,
-    mode = "lsp_workspace_diagnostics",
-    fold_open = "",
-    fold_closed = "",
-    action_keys = {
-        close = "q",
-        cancel = "<esc>",
-        refresh = "r",
-        jump = {"<cr>", "g"},
-        open_split = { "<c-x>" },
-        open_vsplit = { "<c-v>" },
-        jump_close = {"o"},
-        toggle_mode = "m",
-        toggle_preview = "P",
-        hover = "K",
-        preview = "p",
-        previous = "k",
-        next = "j"
-    },
-    indent_lines = true,
-    auto_preview = true,
-    signs = {
-        error = "",
-        warning = "",
-        hint = "",
-        information = "",
-        other = "﫠"
-    }
+  position = "bottom",
+  height = 10,
+  width = 50,
+  icons = true,
+  mode = "lsp_workspace_diagnostics",
+  fold_open = "",
+  fold_closed = "",
+  action_keys = {
+    close = "q",
+    cancel = "<esc>",
+    refresh = "r",
+    jump = { "<cr>", "g" },
+    open_split = { "<c-x>" },
+    open_vsplit = { "<c-v>" },
+    jump_close = { "o" },
+    toggle_mode = "m",
+    toggle_preview = "P",
+    hover = "K",
+    preview = "p",
+    previous = "k",
+    next = "j"
+  },
+  indent_lines = true,
+  auto_preview = true,
+  signs = {
+    error = "",
+    warning = "",
+    hint = "",
+    information = "",
+    other = "﫠"
+  }
 })
 
 -- Signs fix
 
-local signs = { Error = " ", Warning = " ", Hint = " ", Information = " " }
+local signs = {
+  Error = " ",
+  Warning = " ",
+  Hint = " ",
+  Information = " "
+}
 
 for type, icon in pairs(signs) do
   local hl = "LspDiagnosticsSign" .. type
   vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = "" })
 end
 
-U.nmap('<leader>e', "<cmd>TroubleToggle<cr>")
+local nmap = function(lhs, rhs) U.nmap(lhs, "<cmd>" .. rhs .. '<CR>') end
 
-U.nmap('[r', '<cmd>lua vim.lsp.diagnostic.goto_prev({enable_popup = false})<CR>')
-U.nmap(']r', '<cmd>lua vim.lsp.diagnostic.goto_next({enable_popup = false})<CR>')
+nmap('<leader>e', "TroubleToggle")
 
-vim.cmd [[autocmd CursorHold * lua vim.lsp.diagnostic.show_line_diagnostics({focusable = false})]]
+nmap('[r', "lua require'lspsaga.diagnostic'.lsp_jump_diagnostic_prev()")
+nmap(']r', "lua require'lspsaga.diagnostic'.lsp_jump_diagnostic_next()")
+-- nmap('[r', 'lua vim.lsp.diagnostic.goto_prev({enable_popup = false})')
+-- nmap(']r', 'lua vim.lsp.diagnostic.goto_next({enable_popup = false})')
 
-vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
-        vim.lsp.diagnostic.on_publish_diagnostics,
-        {virtual_text = false, underline = true, signs = true}
-    )
-
+vim.lsp.handlers["textDocument/publishDiagnostics"] =
+    vim.lsp.with(vim.lsp.diagnostic.on_publish_diagnostics,
+                 { virtual_text = false, underline = true, signs = true })
