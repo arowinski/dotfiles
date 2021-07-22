@@ -4,13 +4,14 @@ Plug 'nvim-lua/plenary.nvim'
 
 Plug 'hrsh7th/nvim-compe'
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
-Plug  'ray-x/lsp_signature.nvim'
+Plug 'ray-x/lsp_signature.nvim'
 Plug 'glepnir/lspsaga.nvim'
 
 Plug 'kyazdani42/nvim-web-devicons'
 Plug 'onsails/lspkind-nvim'
 Plug 'folke/lsp-colors.nvim'
 Plug 'folke/trouble.nvim'
+Plug 'kevinhwang91/nvim-bqf'
 
 Plug 'rafcamlet/nvim-luapad'
 
