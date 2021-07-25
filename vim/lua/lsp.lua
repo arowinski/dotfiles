@@ -2,6 +2,7 @@ local nvim_lsp = require('lspconfig')
 local efm_config = require('efm.config')
 local make_config = require('lsp.make_config')
 local on_attach = require('lsp.on_attach')
+local ts_utils_attach = require('lsp.ts_utils')
 
 U.nmap('<leader>p', "<cmd>lua vim.lsp.buf.formatting()<CR>")
 
@@ -29,6 +30,7 @@ local lsp_config = {
     root_dir = nvim_lsp.util.root_pattern(".git", "yarn.lock"),
     on_attach = function(client, bufnr)
       client.resolved_capabilities.document_formatting = false
+      ts_utils_attach(client)
       on_attach(client, bufnr)
     end,
     settings = { documentFormatting = false }

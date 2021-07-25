@@ -17,6 +17,6 @@ return function(client, _)
   buf_map('<C-d>', "require('lspsaga.action').smart_scroll_with_saga(-1)")
 
   if client.resolved_capabilities.document_range_formatting then
-    buf_map("<Leader>p", "<cmd>lua vim.lsp.buf.range_formatting()<CR>")
+    U.buf_vmap("<Leader>p", "<cmd>lua vim.lsp.buf.range_formatting()<CR>")
   end
 end
