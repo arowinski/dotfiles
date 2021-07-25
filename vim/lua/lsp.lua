@@ -5,7 +5,7 @@ local on_attach = require('lsp.on_attach')
 
 U.nmap('<leader>p', "<cmd>lua vim.lsp.buf.formatting()<CR>")
 
-local lsp = {
+local lsp_config = {
   efm = efm_config,
   lua = {
     settings = {
@@ -25,7 +25,7 @@ local lsp = {
     filetypes = { "ruby" },
     flags = { debounce_text_changes = 150 }
   },
-  tsserver = {
+  typescript = {
     root_dir = nvim_lsp.util.root_pattern(".git", "yarn.lock"),
     on_attach = function(client, bufnr)
       client.resolved_capabilities.document_formatting = false
@@ -35,15 +35,25 @@ local lsp = {
   }
 }
 
+local required_lsp_servers = {
+  'efm', 'lua', 'json', 'yaml', 'html', 'vim', 'typescript'
+}
+
 local function setup_servers()
   require'lspinstall'.setup()
+
   local servers = require'lspinstall'.installed_servers()
 
-  table.insert(servers, "tsserver")
+  for _, server in pairs(required_lsp_servers) do
+    if not vim.tbl_contains(servers, server) then
+      require'lspinstall'.install_server(server)
+    end
+  end
+
   table.insert(servers, "solargraph")
 
   for _, server in pairs(servers) do
-    local config = lsp[server] and lsp[server] or {};
+    local config = lsp_config[server] and lsp_config[server] or {};
 
     require'lspconfig'[server].setup(make_config(config))
   end
