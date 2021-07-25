@@ -1,6 +1,6 @@
 local nvim_lsp = require('lspconfig')
-local prettier = require('efm/prettier')
-local eslint = require('efm/eslint')
+local prettier = require('efm.prettier')
+local eslint = require('efm.eslint')
 local stylelint = require('efm.stylelint')
 
 local languages = {
