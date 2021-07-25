@@ -15,7 +15,7 @@ local lsp_config = {
       }
     }
   },
-  json = {},
+  json = { settings = { json = { schemas = require('lsp.json_schemas') } } },
   yaml = {},
   html = {},
   vim = {},
