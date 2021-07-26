@@ -16,7 +16,7 @@ set autowrite                           " Automatically write before running com
 set timeoutlen=1000 ttimeoutlen=0       " Waiting time for mapping fire
 set formatoptions-=t                    " Don't auto-break long lines
 
-" Softabs, 2 spaces
+" Sof tabs, 2 spaces
 set smarttab
 set shiftwidth=2
 set tabstop=2
@@ -61,5 +61,7 @@ set confirm
 set undofile
 set undodir=~/.vim-undo
 set undolevels=10000
+
+set nospell
 
 " vim:ft=vim
