@@ -1,3 +1,3 @@
-nnoremap <Leader>bp odebugger;<Esc>
-nnoremap <Leader>bP Odebugger;<Esc>
-nnoremap <silent> <Leader>br :g/debugger/d<CR>
+nnoremap <buffer> <Leader>bp odebugger;<Esc>
+nnoremap <buffer> <Leader>bP Odebugger;<Esc>
+nnoremap <buffer> <silent> <Leader>br :g/debugger/d<CR>

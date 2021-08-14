@@ -1,9 +1,9 @@
 " Ruby related configs
 
 " Binding pry
-nnoremap <Leader>bp orequire "pry"; binding.pry<Esc>
-nnoremap <Leader>bP Orequire "pry"; binding.pry<Esc>
-nnoremap <silent> <Leader>br :g/binding.pry/d<CR>
+nnoremap <buffer> <Leader>bp orequire "pry"; binding.pry<Esc>
+nnoremap <buffer> <Leader>bP Orequire "pry"; binding.pry<Esc>
+nnoremap <buffer> <silent> <Leader>br :g/binding.pry/d<CR>
 
 nnoremap <Leader>bb orequire "byebug"; byebug<Esc>
 
