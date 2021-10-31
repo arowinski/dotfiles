@@ -8,17 +8,18 @@ U.nmap('<leader>p', "<cmd>lua vim.lsp.buf.formatting()<CR>")
 
 local lsp_config = {
   efm = efm_config,
-  lua = {
+  sumneko_lua = {
     settings = {
       Lua = {
         diagnostics = { enable = true, globals = { "vim", "U", "MPairs" } }
       }
     }
   },
-  json = { settings = { json = { schemas = require('lsp.json_schemas') } } },
-  yaml = {},
+  jsonls = { settings = { json = { schemas = require('lsp.json_schemas') } } },
+  yamlls = {},
   html = { filetypes = { 'html' } },
-  vim = {},
+  vimls = {},
+  svelte = {},
   solargraph = {
     root_dir = nvim_lsp.util.root_pattern(".git"),
     cmd = { "solargraph", "stdio" },
@@ -26,7 +27,8 @@ local lsp_config = {
     filetypes = { "ruby" },
     flags = { debounce_text_changes = 150 }
   },
-  typescript = {
+  tailwindcss = {},
+  tsserver = {
     root_dir = nvim_lsp.util.root_pattern(".git", "yarn.lock"),
     on_attach = function(client, bufnr)
       client.resolved_capabilities.document_formatting = false
@@ -37,34 +39,27 @@ local lsp_config = {
   }
 }
 
-local required_lsp_servers = {
-  'efm', 'lua', 'json', 'yaml', 'html', 'vim', 'typescript'
-}
+local lsp_installer = require("nvim-lsp-installer")
 
-local function setup_servers()
-  require'lspinstall'.setup()
+lsp_installer.on_server_ready(function(server)
+  local config = lsp_config[server.name] and lsp_config[server.name];
 
-  local servers = require'lspinstall'.installed_servers()
+  server:setup(make_config(config))
+end)
 
-  for _, server in pairs(required_lsp_servers) do
-    if not vim.tbl_contains(servers, server) then
-      require'lspinstall'.install_server(server)
+require'lspconfig'.solargraph.setup(make_config(lsp_config.solargraph))
+
+local auto_install = function()
+  local required = vim.tbl_keys(lsp_config)
+  local installed = vim.tbl_map(function(v) return (v.name) end,
+                                lsp_installer.get_installed_servers())
+
+  for _, server in pairs(required) do
+    if not vim.tbl_contains(installed, server) then
+      lsp_installer.install(server)
     end
   end
-
-  table.insert(servers, "solargraph")
-
-  for _, server in pairs(servers) do
-    local config = lsp_config[server] and lsp_config[server] or {};
-
-    require'lspconfig'[server].setup(make_config(config))
-  end
 end
 
-setup_servers()
-
-require'lspinstall'.post_install_hook = function()
-  setup_servers()
-
-  vim.cmd("bufdo e")
-end
+-- TODO: convert to command
+auto_install()
