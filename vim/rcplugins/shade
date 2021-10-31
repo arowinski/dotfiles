@@ -1,5 +1,0 @@
-" Dims inactive windows
-
-Plug 'sunjon/shade.nvim'
-
-" vim:ft=vim
