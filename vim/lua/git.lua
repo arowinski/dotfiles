@@ -64,7 +64,7 @@ require('gitsigns').setup {
   update_debounce = 100,
   status_formatter = nil,
   word_diff = false,
-  use_internal_diff = true,
+  diff_opts = { internal = true },
   current_line_blame_opts = {
     virt_text = true,
     virt_text_pos = 'eol',
