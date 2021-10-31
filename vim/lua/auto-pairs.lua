@@ -5,7 +5,7 @@ npairs.setup({
   fast_wrap = {
     map = '<C-w>',
     chars = { '{', '[', '(', '"', "'" },
-    pattern = string.gsub([[ [%'%"%)%>%]%)%}%,] ]], '%s+', ''),
+    pattern = string.gsub([[ [%'%"%)%>%]%)%}%,%s+] ]], '%s+', ''),
     end_key = 'w',
     keys = 'qertyuiopzxcvbnmasdfghjkl',
     check_comma = true,
