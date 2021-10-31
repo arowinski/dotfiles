@@ -5,7 +5,7 @@ require('utils')
 
 require('lsp')
 require('diagnostics')
-require('complete')
+require('snippets')
 require('treesitter')
 
 require('shade').setup({ overlay_opacity = 50, opacity_step = 1 })

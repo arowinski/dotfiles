@@ -89,6 +89,6 @@
   },
   "expect": {
     "prefix": ["exp"],
-    "body": ["expect($1).to ${2|eq,be_a,be,have_attributes,change|}($3)"]
+    "body": ["expect($1).to ${2:eq}($3)"]
   }
 }
