@@ -12,8 +12,8 @@ local languages = {
   yaml = { prettier },
   json = { prettier },
   html = { stylelint, prettier },
-  scss = { stylelint, prettier },
-  css = { stylelint, prettier },
+  scss = { prettier, stylelint },
+  css = { prettier, stylelint },
   markdown = { prettier }
 }
 

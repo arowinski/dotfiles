@@ -17,7 +17,7 @@ local lsp_config = {
   },
   json = { settings = { json = { schemas = require('lsp.json_schemas') } } },
   yaml = {},
-  html = {},
+  html = { filetypes = { 'html' } },
   vim = {},
   solargraph = {
     root_dir = nvim_lsp.util.root_pattern(".git"),
