@@ -8,7 +8,6 @@ require('diagnostics')
 require('snippets')
 require('treesitter')
 
-require('luabuffer')
 require('status-line')
 require('auto-pairs')
 require('git')
