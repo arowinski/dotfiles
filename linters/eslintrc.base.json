@@ -1,11 +1,10 @@
 {
-  "plugins": ["import", "prettier", "jsx-a11y"],
+  "plugins": ["import"],
   "extends": [
     "plugin:import/errors",
     "plugin:import/warnings",
     "eslint:recommended",
-    "plugin:prettier/recommended",
-    "airbnb"
+    "eslint-config-prettier"
   ],
   "env": {
     "browser": true,
@@ -18,6 +17,7 @@
     "no-eval": "error",
     "semi": ["error", "never"],
     "comma-dangle": ["error", "never"],
+    "operator-linebreak": ["error", "after"],
     "import/prefer-default-export": "off",
     "max-len": [
       "warn",

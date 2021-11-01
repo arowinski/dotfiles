@@ -1,10 +1,11 @@
 {
-  "plugins": ["react"],
+  "plugins": ["react", "jsx-a11y"],
   "extends": [
     "./eslintrc.base.json",
     "plugin:react/recommended",
     "prettier/react",
-    "react-hooks"
+    "react-hooks",
+    "plugin:jsx-a11y/recommended"
   ],
   "env": {
     "jest": true

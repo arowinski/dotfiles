@@ -5,10 +5,10 @@ local stylelint = require('efm.stylelint')
 
 local languages = {
   lua = { require('efm/luafmt') },
-  typescript = { prettier, eslint },
-  javascript = { prettier, eslint },
-  typescriptreact = { stylelint, prettier, eslint },
-  javascriptreact = { stylelint, prettier, eslint },
+  typescript = { eslint, prettier },
+  javascript = { eslint, prettier },
+  typescriptreact = { stylelint, eslint, prettier },
+  javascriptreact = { stylelint, eslint, prettier },
   yaml = { prettier },
   json = { prettier },
   html = { stylelint, prettier },
