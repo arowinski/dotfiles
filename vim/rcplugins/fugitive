@@ -11,5 +11,7 @@ nnoremap g<space> :Git<cr>
 nnoremap <leader>gw :Gwrite<CR>
 nnoremap <leader>gr :Gread<CR>
 noremap <leader>gl :0Gclog<CR>
+nnoremap <leader>gc :G difftool --name-only<CR>
+nnoremap <leader>gq :Git difftool<CR>
 
 " vim:ft=vim
