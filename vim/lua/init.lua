@@ -5,7 +5,6 @@ require('utils')
 
 require('lsp')
 require('diagnostics')
-require('snippets')
 require('treesitter')
 
 require('status-line')

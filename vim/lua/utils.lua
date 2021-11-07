@@ -24,3 +24,8 @@ function U.dict.merge(target, source)
 
   return target;
 end
+
+function U.feed_key(key, mode)
+  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(key, true, true, true),
+                        mode, true)
+end
