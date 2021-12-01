@@ -49,8 +49,11 @@ end)
 
 require'lspconfig'.solargraph.setup(make_config(lsp_config.solargraph))
 
-local auto_install = function()
-  local required = vim.tbl_keys(lsp_config)
+LspInstallDefined = function()
+  local exclude = { 'solargraph' }
+  local required = vim.tbl_filter(function(element)
+    return not vim.tbl_contains(exclude, element)
+  end, vim.tbl_keys(lsp_config))
   local installed = vim.tbl_map(function(v) return (v.name) end,
                                 lsp_installer.get_installed_servers())
 
@@ -60,6 +63,3 @@ local auto_install = function()
     end
   end
 end
-
--- TODO: convert to command
-auto_install()
