@@ -2,8 +2,6 @@
 
 syntax on
 
-colorscheme jellybeans
-
 " Colorize current line
 set cursorline
 

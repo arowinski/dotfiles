@@ -1,5 +1,5 @@
 " Color scheme
 
-Plug 'metalelf0/jellybeans-nvim'
+Plug 'folke/tokyonight.nvim'
 
 " vim:ft=vim

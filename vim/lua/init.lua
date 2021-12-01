@@ -9,6 +9,7 @@ require('treesitter')
 
 require('status-line')
 require('auto-pairs')
+require('color-scheme')
 require('git')
 require'lspsaga'.init_lsp_saga({
   use_saga_diagnostic_sign = false,
