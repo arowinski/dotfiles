@@ -31,7 +31,7 @@ require("trouble").setup({
   indent_lines = true,
   auto_preview = true,
   signs = {
-    error = "",
+    error = "✗",
     warning = "",
     hint = "",
     information = "",
@@ -41,24 +41,18 @@ require("trouble").setup({
 
 -- Signs fix
 
-local signs = {
-  Error = " ",
-  Warning = " ",
-  Hint = " ",
-  Information = " "
-}
-
+local signs = { Error = "✗ ", Warn = " ", Hint = " ", Info = " " }
 for type, icon in pairs(signs) do
-  local hl = "LspDiagnosticsSign" .. type
-  vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = "" })
+  local hl = "DiagnosticSign" .. type
+  vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
 end
 
 local nmap = function(lhs, rhs) U.nmap(lhs, "<cmd>" .. rhs .. '<CR>') end
 
 nmap('<leader>e', "TroubleToggle")
 
-nmap('[r', "lua require'lspsaga.diagnostic'.lsp_jump_diagnostic_prev()")
-nmap(']r', "lua require'lspsaga.diagnostic'.lsp_jump_diagnostic_next()")
+nmap('[r', "Lspsaga diagnostic_jump_prev")
+nmap(']r', "Lspsaga diagnostic_jump_next")
 -- nmap('[r', 'lua vim.lsp.diagnostic.goto_prev({enable_popup = false})')
 -- nmap(']r', 'lua vim.lsp.diagnostic.goto_next({enable_popup = false})')
 
