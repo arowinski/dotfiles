@@ -7,7 +7,6 @@ Plug 'ray-x/lsp_signature.nvim'
 
 Plug 'kyazdani42/nvim-web-devicons'
 Plug 'onsails/lspkind-nvim'
-Plug 'folke/lsp-colors.nvim'
 Plug 'folke/trouble.nvim'
 Plug 'kevinhwang91/nvim-bqf'
 
