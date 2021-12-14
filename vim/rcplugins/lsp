@@ -23,5 +23,6 @@ Plug 'hrsh7th/cmp-path'
 Plug 'hrsh7th/cmp-vsnip'
 
 Plug 'tami5/lspsaga.nvim'
+Plug 'b0o/SchemaStore.nvim'
 
 " vim:ft=vim

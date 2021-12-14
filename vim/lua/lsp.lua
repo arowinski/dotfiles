@@ -13,7 +13,9 @@ local lsp_config = {
       },
     },
   },
-  jsonls = { settings = { json = { schemas = require("lsp.json_schemas") } } },
+  jsonls = {
+    settings = { json = { schemas = require("schemastore").json.schemas() } },
+  },
   yamlls = {},
   html = { filetypes = { "html" } },
   vimls = {},
