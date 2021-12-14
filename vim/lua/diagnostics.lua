@@ -49,6 +49,8 @@ nmap(']r', "Lspsaga diagnostic_jump_next")
 -- nmap('[r', 'lua vim.lsp.diagnostic.goto_prev({enable_popup = false})')
 -- nmap(']r', 'lua vim.lsp.diagnostic.goto_next({enable_popup = false})')
 
-vim.lsp.handlers["textDocument/publishDiagnostics"] =
-    vim.lsp.with(vim.lsp.diagnostic.on_publish_diagnostics,
-                 { virtual_text = false, underline = true, signs = true })
+vim.diagnostic.config({
+  virtual_text = false,
+  float = { source = "always" },
+  severity_sort = true
+})
