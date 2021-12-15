@@ -58,4 +58,10 @@ endif
 " completion entries
 set pumheight=20
 
+" highlight yank
+augroup highlight_yank
+    autocmd!
+    au TextYankPost * silent! lua vim.highlight.on_yank { higroup='IncSearch', timeout=500 }
+augroup END
+
 " vim:ft=vim
