@@ -42,7 +42,7 @@ fun! s:alternate()
 endfun
 
 command! ROV silent only|RV|LspStart
-command! AOV silent only|call s:alternate()|LspStart
+command! AOV silent only|AV|LspStart
 
 noremap <Leader>av :AOV<cr>
 noremap <Leader>rv :ROV<cr>

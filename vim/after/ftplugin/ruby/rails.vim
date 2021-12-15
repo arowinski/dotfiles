@@ -1,12 +1,12 @@
-nnoremap <Leader>fa :Files app/<CR>
-nnoremap <Leader>fm :Files app/models/<CR>
-nnoremap <Leader>fc :Files app/controllers/<CR>
-nnoremap <Leader>fv :Files app/views/<CR>
+let g:is_rails = 0
 
-let g:is_rails = RailsDetect()
+if exists("*RailsDetect")
+  let g:is_rails = RailsDetect()
+end
 
 fun! s:load_rails_projections()
   if g:is_rails && !exists('g:rails_projections')
+    echo 'detect'
     let g:rails_projections = projections#load_projections('rails')
     autocmd User ProjectionistActivate :call projections#set_projections('rails')
   endif
