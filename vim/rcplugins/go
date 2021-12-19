@@ -1,6 +1,6 @@
 " Golang stuff
 
-Plug 'fatih/vim-go'
+Plug 'fatih/vim-go', { 'for': 'golang' }
 
 let g:go_def_mode='gopls'
 let g:go_info_mode='gopls'
