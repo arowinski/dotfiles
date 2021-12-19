@@ -4,6 +4,7 @@ Plug 'jose-elias-alvarez/nvim-lsp-ts-utils'
 Plug 'jose-elias-alvarez/null-ls.nvim'
 
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
+Plug 'nvim-treesitter/nvim-treesitter-textobjects'
 
 Plug 'williamboman/nvim-lsp-installer'
 command! LspInstallDefined :lua LspInstallDefined()<CR> 
