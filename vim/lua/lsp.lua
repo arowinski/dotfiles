@@ -27,7 +27,9 @@ local lsp_config = {
     filetypes = { "ruby" },
     flags = { debounce_text_changes = 150 },
   },
-  tailwindcss = {},
+  tailwindcss = {
+    root_dir = nvim_lsp.util.root_pattern("tailwind.config.js"),
+  },
   tsserver = {
     root_dir = nvim_lsp.util.root_pattern(".git", "yarn.lock"),
     on_attach = function(client, bufnr)
@@ -44,7 +46,10 @@ local lsp_installer = require("nvim-lsp-installer")
 lsp_installer.on_server_ready(function(server)
   local config = lsp_config[server.name] and lsp_config[server.name]
 
-  server:setup(make_config(config))
+  -- Don't start when defined root directory no found
+  if not config.root_dir or config.root_dir(vim.fn.getcwd()) then
+    server:setup(make_config(config))
+  end
 end)
 
 require("lspconfig").solargraph.setup(make_config(lsp_config.solargraph))
