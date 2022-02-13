@@ -1,0 +1,11 @@
+{
+  "name": "local",
+  "contributes": {
+    "snippets": [
+      {
+        "language": "ruby",
+        "path": "./ruby.json"
+      }
+    ]
+  }
+}
