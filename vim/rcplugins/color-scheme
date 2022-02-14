@@ -1,5 +1,0 @@
-" Color scheme
-
-Plug 'folke/tokyonight.nvim'
-
-" vim:ft=vim

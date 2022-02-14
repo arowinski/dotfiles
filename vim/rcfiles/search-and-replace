@@ -1,8 +1,0 @@
-" Search / Subtitute config
-
-set ignorecase
-set hlsearch
-set incsearch
-set smartcase
-
-" vim:ft=vim

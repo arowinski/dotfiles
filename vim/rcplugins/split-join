@@ -1,5 +1,0 @@
-" Split-Join allows to split or join various elements
-
-Plug 'AndrewRadev/splitjoin.vim'
-
-" vim:ft=vim

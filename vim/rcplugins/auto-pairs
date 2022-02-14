@@ -1,6 +1,0 @@
-" Auto-Pairs - autoclosin quotes, brackets
-
-Plug 'windwp/nvim-autopairs'
-Plug 'p00f/nvim-ts-rainbow'
-
-" vim:ft=vim

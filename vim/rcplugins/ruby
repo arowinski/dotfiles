@@ -1,6 +1,0 @@
-" Ruby - More up to date Ruby filetype settings
-
-Plug 'vim-ruby/vim-ruby', { 'for': 'ruby' }
-Plug 'joker1007/vim-ruby-heredoc-syntax', { 'for': 'ruby' }
-
-" vim:ft=vim

@@ -1,9 +1,0 @@
-" Fast switch between defined
-
-Plug 'AndrewRadev/switch.vim'
-
-let g:switch_mapping = ""
-
-nnoremap S :Switch<cr>
-
-" vim:ft=vim
