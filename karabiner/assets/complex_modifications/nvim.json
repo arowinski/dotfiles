@@ -1,0 +1,71 @@
+{
+  "title": "NVIM modifications",
+  "rules": [
+    {
+      "description": "C-S-l",
+      "manipulators": [
+        {
+          "type": "basic",
+          "from": {
+            "modifiers": {
+              "mandatory": ["left_control", "left_shift"]
+            },
+            "key_code": "l"
+          },
+          "to": [
+            {
+              "key_code": "f2"
+            },
+            {
+              "key_code": "1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "C-S-j",
+      "manipulators": [
+        {
+          "type": "basic",
+          "from": {
+            "modifiers": {
+              "mandatory": ["left_control", "left_shift"]
+            },
+            "key_code": "j"
+          },
+          "to": [
+            {
+              "key_code": "f2"
+            },
+            {
+              "key_code": "2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "C-S-k",
+      "manipulators": [
+        {
+          "type": "basic",
+          "from": {
+            "modifiers": {
+              "mandatory": ["left_control", "left_shift"]
+            },
+            "key_code": "k"
+          },
+          "to": [
+            {
+              "key_code": "f2"
+            },
+            {
+              "key_code": "3"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

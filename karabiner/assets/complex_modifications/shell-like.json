@@ -1,0 +1,65 @@
+{
+  "title": "Shell aka bindings",
+  "rules": [
+    {
+      "description": "Return",
+      "manipulators": [
+        {
+          "type": "basic",
+          "from": {
+            "modifiers": {
+              "mandatory": ["right_control"]
+            },
+            "key_code": "m"
+          },
+          "to": [
+            {
+              "repeat": true,
+              "key_code": "return_or_enter"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Backspace",
+      "manipulators": [
+        {
+          "type": "basic",
+          "from": {
+            "modifiers": {
+              "mandatory": ["right_control"]
+            },
+            "key_code": "n"
+          },
+          "to": [
+            {
+              "repeat": true,
+              "key_code": "delete_or_backspace"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Escape",
+      "manipulators": [
+        {
+          "type": "basic",
+          "from": {
+            "modifiers": {
+              "mandatory": ["right_control"]
+            },
+            "key_code": "spacebar"
+          },
+          "to": [
+            {
+              "repeat": true,
+              "key_code": "escape"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
