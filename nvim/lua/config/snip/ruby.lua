@@ -50,7 +50,7 @@ local formatted_const_name = function(_, _, _, object_type)
   return snippet_node(nil, {
     text_node(tbl.merge(def_top, {""})),
     text_node(string.rep("\t", #names)),
-    insert_node(0),
+    insert_node(1),
     text_node(tbl.merge({ "" }, def_bottom)),
   })
 end
