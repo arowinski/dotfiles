@@ -1,6 +1,6 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-ln -sfn $DIR/ag/ignore $HOME/.agignore
+ln -sfn $DIR/rgignore $HOME/.rgignore
 ln -sfn $DIR/zsh $HOME/.zsh
 ln -sfn $DIR/bin $HOME/.bin
 ln -sfn $DIR/git/gitconfig $HOME/.gitconfig
