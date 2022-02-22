@@ -2,6 +2,7 @@ local util = require("util")
 local lsp = require("lspconfig")
 
 require("config.lsp.diagnostics").setup()
+require("config.lsp.handlers").setup()
 
 local runtime_path = vim.split(package.path, ";")
 table.insert(runtime_path, "lua/?.lua")
