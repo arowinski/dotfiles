@@ -297,4 +297,7 @@ require("packer").startup(function()
     "rhysd/conflict-marker.vim",
     config = [[require("config.conflict-marker")]],
   })
+
+	-- Replacement for matchit, more features
+	use({ "andymass/vim-matchup" })
 end)
