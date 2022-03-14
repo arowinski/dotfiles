@@ -48,7 +48,7 @@ local formatted_const_name = function(_, _, _, object_type)
   end, names)
 
   return snippet_node(nil, {
-    text_node(tbl.merge(def_top, {""})),
+    text_node(tbl.merge(def_top, { "" })),
     text_node(string.rep("\t", #names)),
     insert_node(1),
     text_node(tbl.merge({ "" }, def_bottom)),
@@ -61,8 +61,16 @@ end
 
 return {
   definitions = {
-    snippet("class", { dynamic_node(1, formatted_const_name, {}, "class") }),
-    snippet("module", { dynamic_node(1, formatted_const_name, {}, "module") }),
+    snippet(
+      "class",
+      { dynamic_node(1, formatted_const_name, {}, { user_args = { "class" } }) }
+    ),
+    snippet(
+      "module",
+      {
+        dynamic_node(1, formatted_const_name, {}, { user_args = { "module" } }),
+      }
+    ),
     snippet("spec", {
       text_node({ "# frozen_string_literal: true", "", "RSpec.describe " }),
       function_node(const_name, nil),
