@@ -23,10 +23,6 @@
     "prefix": ["def"],
     "body": ["def ${1:name}(${2:args})\n\t$0\nend"]
   },
-  "initializer": {
-    "prefix": ["defi"],
-    "body": ["def initialize(${1:args})\n\t$0\nend"]
-  },
   "def_call": {
     "prefix": ["defc"],
     "body": ["def call(${1:args})\n\t$0\nend"]
@@ -67,9 +63,5 @@
   "var = described_class": {
     "prefix": ["dcc"],
     "body": ["${1:var} = described_class$0"]
-  },
-  "expect": {
-    "prefix": ["exp"],
-    "body": ["expect($1).to ${2:eq}($3)"]
   }
 }

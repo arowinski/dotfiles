@@ -17,5 +17,5 @@ require("luasnip/loaders/from_vscode").lazy_load({
 })
 
 luasnip.snippets = {
-  ruby = require("config.snip.ruby").definitions,
+  ruby = require("snip.ruby"),
 }
