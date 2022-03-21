@@ -1,18 +1,7 @@
-local util = require("util")
-
 -- Set completeopt to have a better completion experience
 vim.o.completeopt = "menuone,noselect"
 
-local function prequire(...)
-  local status, lib = pcall(require, ...)
-  if status then
-    return lib
-  end
-  return nil
-end
-
 local cmp = require("cmp")
-local luasnip = prequire("luasnip")
 
 local has_words_before = function()
   local line, col = unpack(vim.api.nvim_win_get_cursor(0))
@@ -33,18 +22,24 @@ cmp.setup({
     { name = "buffer", keyword_length = 3 },
   },
   mapping = {
-    ["<C-d>"] = cmp.mapping.scroll_docs(-4),
-    ["<C-f>"] = cmp.mapping.scroll_docs(4),
+    ["<C-d>"] = cmp.mapping(function(fallback)
+      if cmp.visible({ select = false }) then
+        cmp.scroll_docs(-4)
+      else
+        fallback()
+      end
+    end),
+    ["<C-f>"] = cmp.mapping(function(fallback)
+      if cmp.visible({ select = false }) then
+        cmp.scroll_docs(4)
+      else
+        fallback()
+      end
+    end),
     ["<C-q>"] = cmp.mapping.close(),
     ["<c-l>"] = cmp.mapping(function(fallback)
       if cmp.visible({ select = true }) then
-        if luasnip.expand_or_locally_jumpable(1) then
-          return util.feed_keys("<Plug>luasnip-expand-or-jump", "")
-        else
-          cmp.confirm({ select = true })
-        end
-      elseif luasnip.expand_or_locally_jumpable(1) then
-        util.feed_keys("<Plug>luasnip-expand-or-jump", "")
+        cmp.confirm({ select = true })
       elseif has_words_before() then
         cmp.complete()
       else
@@ -54,8 +49,6 @@ cmp.setup({
     ["<C-j>"] = cmp.mapping(function()
       if cmp.visible() then
         cmp.select_next_item()
-      elseif luasnip and luasnip.jumpable(1) then
-        return util.feed_keys("<Plug>luasnip-jump-next", "")
       elseif has_words_before() then
         cmp.complete()
       end
@@ -63,8 +56,6 @@ cmp.setup({
     ["<C-k>"] = cmp.mapping(function()
       if cmp.visible() then
         cmp.select_prev_item()
-      elseif luasnip and luasnip.jumpable(-1) then
-        return util.feed_keys("<Plug>luasnip-jump-prev", "")
       elseif has_words_before() then
         cmp.complete()
       end
@@ -75,7 +66,7 @@ cmp.setup({
       cmp.config.compare.offset,
       cmp.config.compare.exact,
       cmp.config.compare.score,
-			cmp.config.compare.recently_user,
+      cmp.config.compare.recently_user,
       cmp.config.compare.kind,
       cmp.config.compare.sort_text,
       cmp.config.compare.length,
