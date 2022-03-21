@@ -5,7 +5,7 @@ npairs.setup({
   fast_wrap = {
     map = "<C-w>",
     chars = { "{", "[", "(", '"', "'", "`" },
-    -- pattern = string.gsub([[ [%'%"%)%>%]% })%}%,%(,s+)] ]], "%s+", ""),
+    pattern = string.gsub([[ [%'%"%)%>%]% })%}%,%(,s+)%.%s] ]], "%s+", ""),
     end_key = "w",
     keys = "qertyuiopzxcvbnmasdfghjkl",
     check_comma = true,
@@ -13,7 +13,6 @@ npairs.setup({
   },
 })
 
--- TODO: add rule for ruby block `do | |` and `{ || }`
 local Rule = require("nvim-autopairs.rule")
 local cond = require("nvim-autopairs.conds")
 
