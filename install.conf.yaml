@@ -1,0 +1,24 @@
+---
+- defaults:
+    link:
+      relink: true
+      create: true
+
+- clean: ["~", "~/.config"]
+
+- link:
+    ~/.Brewfile: Brewfile
+    ~/.bin: bin
+    ~/.config/karabiner: karabiner
+    ~/.config/nvim: nvim
+    ~/.config/solargraph: solargraph
+    ~/.ctags: ctags
+    ~/.gitconfig: git/gitconfig
+    ~/.pryrc: pry/pryrc
+    ~/.psqlrc: psql/psqlrc
+    ~/.rgignore: rgignore
+    ~/.rspec: rspec/rspec
+    ~/.tmux.conf: tmux/tmux.conf
+    ~/.zlogin: zsh/zlogin
+    ~/.zsh: zsh
+    ~/.zshrc: zsh/zshrc
