@@ -45,6 +45,4 @@ require("luasnip/loaders/from_vscode").lazy_load({
   paths = { "~/.config/nvim/snippets/" },
 })
 
-luasnip.snippets = {
-  ruby = require("snip.ruby"),
-}
+luasnip.add_snippets('ruby', require('snip.ruby'))
