@@ -2,6 +2,7 @@
   editor = nvim
   excludesfile = ~/.gitignore
   autocrlf = input
+	pager = diff-so-fancy | less --tabs=4 -RFX
 [alias]
   conflicted = !nvim +Conflicted
 [color]
@@ -36,3 +37,5 @@
   email = arowinski02@gmail.com
 [include]
   path = ~/.gitconfig.local
+[interactive]
+	diffFilter = diff-so-fancy --patch
