@@ -26,7 +26,7 @@ return {
     "exp",
     fmt("expect({}).{} {}({})", {
       insert_node(1),
-      choice_node(2, { text_node("to "), text_node("not_to ") }),
+      choice_node(2, { text_node("to"), text_node("not_to") }),
       insert_node(3, "eq"),
       insert_node(4),
     })
