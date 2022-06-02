@@ -13,6 +13,6 @@ for config in $HOME/.zsh/configs/*; do
   source $config
 done
 
-. /usr/local/opt/asdf/asdf.sh
+. /opt/homebrew/opt/asdf/libexec/asdf.sh
 eval "$(asdf exec direnv hook zsh)"
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
