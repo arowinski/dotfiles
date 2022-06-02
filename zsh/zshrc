@@ -1,7 +1,5 @@
 source $HOME/.zsh/zshenv
 
-[[ -f $HOME/.zshrc-local ]] && source $HOME/.zshrc-local
-
 export VISUAL=nvim
 export EDITOR="$VISUAL"
 
