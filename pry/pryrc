@@ -19,7 +19,7 @@ env_colors = {
 }
 
 if defined? Rails
-  Pry.config.prompt = proc do |obj, nest_level, _|
+  Pry::Prompt.add(:rails, "Rails prompt") do |obj, nest_level, _|
     color = env_colors.fetch(Rails.env, color_escape_codes[:reset])
     colored_environment_name = "#{color}#{Rails.env}#{color_escape_codes[:reset]}"
     "(#{colored_environment_name}) #{obj}:#{nest_level}> "
