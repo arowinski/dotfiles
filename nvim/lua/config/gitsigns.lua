@@ -37,7 +37,7 @@ require("gitsigns").setup({
   numhl = false,
   linehl = false,
   word_diff = false,
-  max_file_length = 500,
+  max_file_length = 5000,
   on_attach = function()
     local gs = package.loaded.gitsigns
 
