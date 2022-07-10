@@ -300,4 +300,7 @@ require("packer").startup(function()
 
 	-- Replacement for matchit, more features
 	use({ "andymass/vim-matchup" })
+
+	-- GraphQL syntax
+	use({ "jparise/vim-graphql" })
 end)
