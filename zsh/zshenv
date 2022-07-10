@@ -2,4 +2,4 @@ export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 
 export PATH="/usr/local/bin:$PATH"
 export PATH="$HOME/.bin:$PATH"
-export PATH="$HOME/.asdf/bin:$PATH"
+export PATH="$HOME/.asdf/shims:$PATH"
