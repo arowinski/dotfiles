@@ -12,17 +12,22 @@ local lsp_config = {
   sumneko_lua = {
     settings = {
       Lua = {
-        diagnostics = { enable = true, globals = { "vim" } },
-        runtime = {
-          version = "LuaJIT",
-          path = runtime_path,
+        diagnostics = {
+          enable = true,
+          globals = { "vim" },
+          neededFileStatus = { ["codestyle-check"] = "Any", },
         },
-        workspace = {
-          library = vim.api.nvim_get_runtime_file("", true),
+        format = {
+          enable = true,
+          defaultConfig = {
+            indent_style = "space",
+            indent_size = "2",
+            max_line_length = "80"
+          }
         },
-        telemetry = {
-          enable = false,
-        },
+        runtime = { version = "LuaJIT", path = runtime_path, },
+        workspace = { library = vim.api.nvim_get_runtime_file("", true), },
+        telemetry = { enable = false, },
       },
     },
   },
