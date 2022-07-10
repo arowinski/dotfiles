@@ -303,4 +303,10 @@ require("packer").startup(function()
 
 	-- GraphQL syntax
 	use({ "jparise/vim-graphql" })
+
+	-- Better javascript/typescript highlight
+	use({
+		"pangloss/vim-javascript",
+		requires = { "leafgarland/typescript-vim", "peitalin/vim-jsx-typescript" }
+	})
 end)
