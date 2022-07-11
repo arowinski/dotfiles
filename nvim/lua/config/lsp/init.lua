@@ -18,7 +18,7 @@ local lsp_config = {
           neededFileStatus = { ["codestyle-check"] = "Any", },
         },
         format = {
-          enable = true,
+          enable = false,
           defaultConfig = {
             indent_style = "space",
             indent_size = "2",
@@ -48,6 +48,9 @@ local on_attach = function(client, _)
 
   if client.name == "typescript" or client.name == "tsserver" then
     require("config.lsp.ts-utils").setup(client)
+  elseif client.name == 'sumneko_lua' then
+    client.resolved_capabilities.document_formatting = false
+    client.resolved_capabilities.document_range_formatting = false
   end
 end
 
