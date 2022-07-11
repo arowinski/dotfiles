@@ -80,9 +80,17 @@ require("packer").startup(function()
 
   -- LSP
   use({
+    "glepnir/lspsaga.nvim",
+    event = "BufReadPre",
+    branch = "main",
+    config = [[require("config.lsp-saga")]],
+  })
+
+  use({
     "neovim/nvim-lspconfig",
     opt = true,
-    event = "BufReadPre",
+    -- event = "BufReadPre",
+    after = "lspsaga.nvim",
     config = [[require('config.lsp')]],
     wants = {
       "cmp-nvim-lsp",
@@ -298,15 +306,15 @@ require("packer").startup(function()
     config = [[require("config.conflict-marker")]],
   })
 
-	-- Replacement for matchit, more features
-	use({ "andymass/vim-matchup" })
+  -- Replacement for matchit, more features
+  use({ "andymass/vim-matchup" })
 
-	-- GraphQL syntax
-	use({ "jparise/vim-graphql" })
+  -- GraphQL syntax
+  use({ "jparise/vim-graphql" })
 
-	-- Better javascript/typescript highlight
-	use({
-		"pangloss/vim-javascript",
-		requires = { "leafgarland/typescript-vim", "peitalin/vim-jsx-typescript" }
-	})
+  -- Better javascript/typescript highlight
+  use({
+    "pangloss/vim-javascript",
+    requires = { "leafgarland/typescript-vim", "peitalin/vim-jsx-typescript" },
+  })
 end)
