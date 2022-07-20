@@ -112,7 +112,7 @@ require("packer").startup(function()
   -- Completion
   use({
     "hrsh7th/nvim-cmp",
-    event = "InsertEnter",
+    event = "UIEnter",
     opt = true,
     config = [[require('config.cmp')]],
     wants = { "LuaSnip" },
@@ -127,13 +127,16 @@ require("packer").startup(function()
         config = [[require("config.autopairs")]],
       },
       "saadparwaiz1/cmp_luasnip",
-      {
-        "L3MON4D3/LuaSnip",
-        config = function()
-          require("config.snip")
-        end,
-      },
     },
+  })
+
+  use({
+    "L3MON4D3/LuaSnip",
+    config = function()
+      require("config.snip")
+    end,
+    after = "nvim-cmp",
+    requires = { { "rafamadriz/friendly-snippets" } },
   })
 
   -- Delete buffer preserving windows
