@@ -3,6 +3,7 @@ local M = {}
 function M.create_on_save()
   local dir = vim.fn.expand("%:p:h")
 
+  -- Ignore fugitive buffers
   if string.match(dir, "://") then
     return
   end
@@ -13,16 +14,21 @@ function M.create_on_save()
   end
 end
 
-function M.project_root()
-  local expand = vim.fn.expand
-  local root = vim.fn.getcwd()
-  local git_dir = vim.fn.finddir(".git/..", expand("%:p:h") .. ";")
+function M.project_root(file_pattern)
+  local marker = nil
 
-  if string.len(git_dir) > 0 then
-    root = git_dir
+  if file_pattern then
+    marker = vim.fn.fnamemodify(vim.fn.findfile(file_pattern, ".;"), ":p:h")
+  else
+    marker = vim.fn.finddir(".git/..", ".;")
   end
 
-  return string.gsub(expand("%:p:r"), root, "")
+  if string.len(marker) > 0 then
+    return marker
+  else
+    require("util").warn("Couldn't find project root, using cwd")
+    return vim.fn.getcwd()
+  end
 end
 
 return M
