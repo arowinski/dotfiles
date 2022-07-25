@@ -45,8 +45,13 @@ require("packer").startup(function()
   })
   use({
     "christoomey/vim-tmux-runner",
-    keys = { "<c-f>", "<leader>ve", "<leader>vd" },
-    cmd = { "VtrSendLinesToRunner", "VtrSendFile", "VtrSendCommand" },
+    keys = { "<c-f>", "<leader>ve", "<leader>vd", "<leader>vv" },
+    cmd = {
+      "VtrSendLinesToRunner",
+      "VtrSendFile",
+      "VtrSendCommand",
+      "VtrAtachtoPane",
+    },
     config = [[require("config.vtr")]],
   })
 
