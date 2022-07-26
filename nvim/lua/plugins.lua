@@ -80,6 +80,7 @@ require("packer").startup(function()
       "nvim-treesitter/nvim-treesitter-textobjects",
       "RRethy/nvim-treesitter-endwise",
       "p00f/nvim-ts-rainbow",
+      "windwp/nvim-ts-autotag",
     },
   })
 
