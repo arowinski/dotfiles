@@ -65,7 +65,7 @@ function M.warn(msg, name)
 end
 
 function M.error(msg, name)
-  vim.notify(msg, vim.log.levels.WARN, { title = name })
+  vim.notify(msg, vim.log.levels.ERROR, { title = name })
 end
 
 function M.info(msg, name)
