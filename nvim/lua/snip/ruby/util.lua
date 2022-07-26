@@ -1,10 +1,17 @@
-local camelcase = require("util.string").camelcase
-local project_root = require("util.dir").project_root
+local util = require("util")
 
 local M = {}
 
+local function file_relative_path()
+  return util.string.replace(
+    vim.fn.expand("%:p:r"),
+    util.dir.project_root("Gemfile") .. "/",
+    ""
+  )
+end
+
 function M.infer_const_parts()
-  local parts = vim.split(string.sub(project_root(), 2), "/")
+  local parts = vim.split(file_relative_path(), "/")
   local root = parts[1]
 
   if root == "spec" then
@@ -20,7 +27,7 @@ function M.infer_const_parts()
     table.remove(parts, 1)
   end
 
-  return vim.tbl_map(camelcase, parts)
+  return vim.tbl_map(util.string.camelcase, parts)
 end
 
 function M.infer_const()
