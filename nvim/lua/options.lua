@@ -119,6 +119,9 @@ util.nmap("[q", ":cprev<CR>")
 util.nmap("]Q", ":clast<CR>")
 util.nmap("[Q", ":cfirst<CR>")
 
+-- copy to system clipboard
+util.nmap("<Leader>y", '"+y')
+
 vim.cmd([[
   cnoremap <C-a> <Home>
   cnoremap <C-e> <END>
