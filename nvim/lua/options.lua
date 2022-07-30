@@ -42,10 +42,11 @@ vim.o.swapfile = false
 vim.o.backup = false
 vim.o.writebackup = false
 
---Set indentation to 2 always
+--Set indentation to 2 spaces always
 vim.o.shiftwidth = 2
 vim.o.tabstop = 2
 vim.o.softtabstop = 2
+vim.o.expandtab = true
 
 vim.opt.wrap = false
 
