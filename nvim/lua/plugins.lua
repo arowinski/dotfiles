@@ -243,12 +243,6 @@ require("packer").startup(function()
     end,
   })
 
-  use({
-    "rafcamlet/nvim-luapad",
-    cmd = { "Luapad" },
-    config = [[require("luapad").init()]],
-  })
-
   -- Test runner
   use({
     "vim-test/vim-test",
