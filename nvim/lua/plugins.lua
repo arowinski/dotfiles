@@ -215,10 +215,9 @@ require("packer").startup(function()
   })
 
   use({
-    "tpope/vim-surround",
-    config = function()
-      vim.g["surround_no_insert_mappings"] = 1
-    end,
+    "kylechui/nvim-surround",
+    event = "VimEnter",
+    config = [[require("config.surround")]],
   })
 
   use({
