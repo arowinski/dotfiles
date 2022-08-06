@@ -1,74 +1,40 @@
-local util = require("util")
-local lsp = require("lspconfig")
+require("mason").setup()
+require("mason-lspconfig").setup({
+  ensure_installed = {
+    "sumneko_lua",
+    "jsonls",
+    "yamlls",
+    "html",
+    "tailwindcss",
+    "tsserver",
+  },
+})
 
 require("config.lsp.diagnostics").setup()
 require("config.lsp.handlers").setup()
 
-local runtime_path = vim.split(package.path, ";")
-table.insert(runtime_path, "lua/?.lua")
-table.insert(runtime_path, "lua/?/init.lua")
+local lsp = require("lspconfig")
+local options = require("config.lsp.options")
 
-local lsp_config = {
-  sumneko_lua = {
-    settings = {
-      Lua = {
-        diagnostics = {
-          enable = true,
-          globals = { "vim" },
-          neededFileStatus = { ["codestyle-check"] = "Any", },
-        },
-        format = {
-          enable = false,
-          defaultConfig = {
-            indent_style = "space",
-            indent_size = "2",
-            max_line_length = "80"
-          }
-        },
-        runtime = { version = "LuaJIT", path = runtime_path, },
-        workspace = { library = vim.api.nvim_get_runtime_file("", true), },
-        telemetry = { enable = false, },
-      },
-    },
-  },
-  jsonls = {
-    settings = { json = { schemas = require("schemastore").json.schemas() } },
-  },
-  yamlls = {},
-  html = { filetypes = { "html" } },
-  vimls = {},
-  svelte = {},
-  tailwindcss = { root_dir = lsp.util.root_pattern("tailwind.config.js") },
-  tsserver = {},
-}
-
-local on_attach = function(client, _)
-  require("config.lsp.mappings").setup()
-  require("config.lsp.highlight").setup(client)
-
-  if client.name == "typescript" or client.name == "tsserver" then
-    require("config.lsp.ts-utils").setup(client)
-  elseif client.name == 'sumneko_lua' then
-    client.resolved_capabilities.document_formatting = false
-    client.resolved_capabilities.document_range_formatting = false
-  end
-end
-
-local capabilities = vim.lsp.protocol.make_client_capabilities()
-capabilities = require("cmp_nvim_lsp").update_capabilities(capabilities)
-
-local options = {
-  on_attach = on_attach,
-  capabilities = capabilities,
-  flags = { debounce_text_changes = 150 },
-}
-
-local installer = require("config.lsp.install")
-local servers = util.table.merge(vim.tbl_keys(lsp_config), { "eslint" })
-
-installer.ensure(servers)
-installer.setup(lsp_config, options)
-
-require("config.lsp.null-ls").setup(options)
+require("config.lsp.null-ls").setup(lsp, options)
 require("config.lsp.solargraph").setup(lsp, options)
 require("config.lsp.eslint").setup(lsp, options)
+require("config.lsp.sumneko").setup(lsp, options)
+
+local function setup(server, extension)
+  lsp[server].setup(vim.tbl_extend("force", options, extension or {}))
+end
+
+setup(
+  "jsonls",
+  { settings = { json = { schemas = require("schemastore").json.schemas() } } }
+)
+setup("tailwindcss", { root_dir = lsp.util.root_pattern("tailwind.config.js") })
+setup("html")
+setup("yamlls")
+setup("tsserver", {
+  on_attach = function(client, bufnr)
+    options.on_attach(client, bufnr)
+    require("config.lsp.ts-utils").setup(client)
+  end,
+})

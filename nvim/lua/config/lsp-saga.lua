@@ -19,10 +19,3 @@ require("lspsaga").init_lsp_saga({
     scroll_up = "<C-b>",
   },
 })
-
-local nnoremap = require("util").nnoremap
-
-nnoremap("gh", require("lspsaga.finder").lsp_finder)
-nnoremap("gd", require("lspsaga.definition").preview_definition)
-nnoremap("gs", require("lspsaga.signaturehelp").signature_help)
-nnoremap("K", require("lspsaga.hover").render_hover_doc)

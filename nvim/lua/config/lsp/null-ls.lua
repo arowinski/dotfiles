@@ -1,6 +1,6 @@
 local M = {}
 
-function M.setup(options)
+function M.setup(_, options)
   local nls = require("null-ls")
 
   nls.setup({
@@ -8,8 +8,8 @@ function M.setup(options)
       nls.builtins.formatting.prettierd,
       nls.builtins.formatting.stylelint,
       nls.builtins.diagnostics.write_good.with({
-				filetypes = { "gitcommit" }
-			}),
+        filetypes = { "gitcommit" },
+      }),
       nls.builtins.formatting.stylua.with({
         extra_args = {
           "--indent-type=Spaces",
@@ -17,8 +17,8 @@ function M.setup(options)
           "--column-width=80",
         },
       }),
-      -- nls.builtins.code_actions.gitsigns,
       nls.builtins.diagnostics.yamllint,
+      nls.builtins.formatting.shfmt,
     },
     on_attach = options.on_attach,
   })

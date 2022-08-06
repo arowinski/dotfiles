@@ -86,33 +86,31 @@ require("packer").startup(function()
 
   -- LSP
   use({
-    "glepnir/lspsaga.nvim",
-    event = "BufReadPre",
-    branch = "main",
-    config = [[require("config.lsp-saga")]],
-  })
-
-  use({
     "neovim/nvim-lspconfig",
-    opt = true,
-    -- event = "BufReadPre",
-    after = "lspsaga.nvim",
-    config = [[require('config.lsp')]],
+    event = "BufReadPre",
+    config = [[require("config.lsp")]],
     wants = {
       "cmp-nvim-lsp",
       "nvim-lsp-ts-utils",
       "null-ls.nvim",
       "lua-dev.nvim",
-      "nvim-lsp-installer",
       "SchemaStore.nvim",
     },
     requires = {
+      "williamboman/mason.nvim",
+      "williamboman/mason-lspconfig.nvim",
       "jose-elias-alvarez/nvim-lsp-ts-utils",
       "jose-elias-alvarez/null-ls.nvim",
-      "williamboman/nvim-lsp-installer",
       "b0o/SchemaStore.nvim",
       "folke/lua-dev.nvim",
     },
+  })
+
+  use({
+    "glepnir/lspsaga.nvim",
+    event = "BufReadPre",
+    branch = "main",
+    config = [[require("config.lsp-saga")]],
   })
 
   -- Completion
@@ -281,7 +279,7 @@ require("packer").startup(function()
     cmd = { "Telescope" },
     module = "telescope",
     config = [[require('config.telescope')]],
-    keys = { "<C-p>", "<C-q>", "<C-y>", "\\", "<C-g>", "<C-x>" }, -- \\ messes up with textobj-quote
+    keys = { "<C-p>", "<C-q>", "<C-y>", "\\", "<C-g>", "<C-x>" },
     requires = {
       "nvim-lua/plenary.nvim",
       { "nvim-telescope/telescope-fzf-native.nvim", run = "make" },
