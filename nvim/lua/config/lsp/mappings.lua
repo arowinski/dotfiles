@@ -11,16 +11,16 @@ function M.setup()
   bmap("gt", vim.lsp.buf.references)
   bmap("<leader>p", vim.lsp.buf.formatting)
 
-  bmap("<C-a>", require("lspsaga.codeaction").code_action)
-  bmap("gh", require("lspsaga.finder").lsp_finder)
-  bmap("gd", require("lspsaga.definition").preview_definition)
-  bmap("gs", require("lspsaga.signaturehelp").signature_help)
-  bmap("K", require("lspsaga.hover").render_hover_doc)
-  util.inoremap("<C-f>", require("lspsaga.signaturehelp").signature_help)
+  bmap("<C-a>", "<CMD>Lspsaga code_action<CR>")
+  bmap("gh", "<CMD>Lspsaga lsp_finder<CR>")
+  bmap("gd", "<CMD>Lspsaga preview_definition<CR>")
+  bmap("gs", "<CMD>Lspsaga signature_help<CR>")
+  bmap("K", "<CMD>Lspsaga hover_doc<CR>")
+  util.inoremap("<C-s>", "<CMD>Lspsaga signature_help<CR>")
 
-  bmap("[r", require("lspsaga.diagnostic").goto_prev)
-  bmap("]r", require("lspsaga.diagnostic").goto_next)
-  bmap("<leader>d", require("lspsaga.diagnostic").show_line_diagnostics)
+  bmap("[r", "<CMD>Lspsaga diagnostic_jump_prev<CR>")
+  bmap("]r", "<CMD>Lspsaga diagnostic_jump_next<CR>")
+  bmap("<leader>d", "<CMD>Lspsaga show_line_diagnostics<CR>")
 end
 
 return M
