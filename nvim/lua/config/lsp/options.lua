@@ -1,6 +1,5 @@
-local on_attach = function(client, _)
+local on_attach = function(_, _)
   require("config.lsp.mappings").setup()
-  require("config.lsp.highlight").setup(client)
 end
 
 local capabilities = vim.lsp.protocol.make_client_capabilities()

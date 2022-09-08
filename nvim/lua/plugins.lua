@@ -185,8 +185,12 @@ require("packer").startup(function()
     event = "CursorHold",
     module = "illuminate",
     config = function()
-      vim.g.Illuminate_highlightUnderCursor = 0
-      vim.g.Illuminate_delay = 200
+      require("illuminate").configure({
+        providers = { "lsp", "treesitter", "regex" },
+        delay = 200,
+        filetypes_denylist = { "dirvish", "fugitive" },
+        under_cursor = false,
+      })
     end,
   })
 
