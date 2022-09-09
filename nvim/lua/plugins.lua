@@ -321,4 +321,11 @@ require("packer").startup(function()
     "pangloss/vim-javascript",
     requires = { "leafgarland/typescript-vim", "peitalin/vim-jsx-typescript" },
   })
+
+  use({
+    "ldelossa/buffertag",
+    config = function()
+      require("buffertag").setup({ border = "none", limit_width = false })
+    end,
+  })
 end)
