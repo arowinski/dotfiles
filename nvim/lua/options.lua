@@ -25,8 +25,7 @@ vim.wo.signcolumn = "yes"
 
 --Set colorscheme
 vim.o.termguicolors = true
-vim.g.tokyonight_style = "night"
-vim.cmd([[colorscheme tokyonight]])
+vim.cmd([[colorscheme tokyonight-night]])
 
 -- Put new windows below or right
 vim.opt.splitbelow = true
