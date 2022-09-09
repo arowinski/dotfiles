@@ -316,16 +316,13 @@ require("packer").startup(function()
   -- GraphQL syntax
   use({ "jparise/vim-graphql" })
 
-  -- Better javascript/typescript highlight
-  use({
-    "pangloss/vim-javascript",
-    requires = { "leafgarland/typescript-vim", "peitalin/vim-jsx-typescript" },
-  })
-
+  -- File name in top-right corner
   use({
     "ldelossa/buffertag",
     config = function()
       require("buffertag").setup({ border = "none", limit_width = false })
     end,
   })
+
+  use({ "stevearc/dressing.nvim" })
 end)
