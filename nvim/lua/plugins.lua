@@ -167,7 +167,7 @@ require("packer").startup(function()
 
   -- Color higlighter
   use({
-    "norcalli/nvim-colorizer.lua",
+    "NvChad/nvim-colorizer.lua",
     event = "BufReadPre",
     config = [[require('colorizer').setup()]],
   })
