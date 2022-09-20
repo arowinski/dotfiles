@@ -5,7 +5,8 @@ local function prequire(...)
   if status then
     return lib
   end
-  return nil
+
+  error("Upsi luasnip failed")
 end
 
 local luasnip = prequire("luasnip")
@@ -17,7 +18,7 @@ util.noremap({ "i", "v" }, "<F2>1", function()
   elseif luasnip.expand_or_locally_jumpable() then
     luasnip.expand_or_jump()
   else
-    util.info("No snippet under curson")
+    util.info("No snippet under cursor")
   end
 end)
 util.noremap({ "i", "v" }, "<F2>2", function()
@@ -41,8 +42,11 @@ luasnip.config.set_config({
   updateevents = "TextChanged,TextChangedI",
 })
 
-require("luasnip/loaders/from_vscode").lazy_load({
-  paths = { "~/.config/nvim/snippets/" },
-})
+luasnip.add_snippets("ruby", require("snip.ruby"))
 
-luasnip.add_snippets('ruby', require('snip.ruby'))
+-- Must be valid JSON without comma on end
+local vs_snippets = require("luasnip/loaders/from_vscode")
+-- load local snippets
+vs_snippets.lazy_load({ paths = { "~/.config/nvim/snippets/" } })
+-- Load friendly snippets
+vs_snippets.lazy_load()
