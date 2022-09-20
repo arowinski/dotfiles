@@ -1,0 +1,9 @@
+{
+  "require": {
+    "prefix": "requ",
+    "body": [
+      "require(\"util\")$0"
+    ],
+    "description": "Require util module"
+  }
+}

@@ -5,6 +5,10 @@
       {
         "language": "ruby",
         "path": "./ruby.json"
+      },
+      {
+        "language": "lua",
+        "path": "./lua.json"
       }
     ]
   }
