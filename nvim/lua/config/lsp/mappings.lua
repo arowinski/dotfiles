@@ -13,7 +13,7 @@ function M.setup()
 
   bmap("<C-a>", "<CMD>Lspsaga code_action<CR>")
   bmap("gh", "<CMD>Lspsaga lsp_finder<CR>")
-  bmap("gd", "<CMD>Lspsaga preview_definition<CR>")
+  bmap("gd", "<CMD>Lspsaga peek_definition<CR>")
   bmap("gs", "<CMD>Lspsaga signature_help<CR>")
   bmap("K", "<CMD>Lspsaga hover_doc<CR>")
   util.inoremap("<C-s>", "<CMD>Lspsaga signature_help<CR>")
