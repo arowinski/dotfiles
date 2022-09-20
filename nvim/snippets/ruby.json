@@ -42,15 +42,15 @@
 
   "describe": {
     "prefix": ["desc"],
-    "body": ["describe '$1' do\n\t${0:$TM_SELECTED_TEXT}\nend"]
+    "body": ["describe \"$1\" do\n\t${0:$TM_SELECTED_TEXT}\nend"]
   },
   "context": {
     "prefix": ["cont"],
-    "body": ["context '$1' do\n\t${0:$TM_SELECTED_TEXT}\nend"]
+    "body": ["context \"$1\" do\n\t${0:$TM_SELECTED_TEXT}\nend"]
   },
   "it": {
     "prefix": ["it"],
-    "body": ["it '$1' do\n\t${0:$TM_SELECTED_TEXT}\nend"]
+    "body": ["it \"$1\" do\n\t${0:$TM_SELECTED_TEXT}\nend"]
   },
   "is expected": {
     "prefix": ["iiexp"],
