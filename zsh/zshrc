@@ -20,3 +20,5 @@ done
 . /opt/homebrew/opt/asdf/libexec/asdf.sh
 eval "$(asdf exec direnv hook zsh)"
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+[[ -f $HOME/.zsh_local ]] && source $HOME/.zsh_local
