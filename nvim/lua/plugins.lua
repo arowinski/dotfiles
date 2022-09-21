@@ -9,13 +9,6 @@ if vim.fn.empty(vim.fn.glob(install_path)) > 0 then
   )
 end
 
-vim.cmd([[
-  augroup Packer
-    autocmd!
-    autocmd BufWritePost init.lua PackerCompile
-  augroup end
-]])
-
 local use = require("packer").use
 require("packer").startup(function()
   -- "wants" keyword loads plugin before used one
