@@ -45,8 +45,8 @@ luasnip.config.set_config({
 luasnip.add_snippets("ruby", require("snip.ruby"))
 
 -- Must be valid JSON without comma on end
-local vs_snippets = require("luasnip/loaders/from_vscode")
--- load local snippets
-vs_snippets.lazy_load({ paths = { "~/.config/nvim/snippets/" } })
--- Load friendly snippets
-vs_snippets.lazy_load()
+require("luasnip/loaders/from_vscode").lazy_load({
+  paths = { "~/.config/nvim/snippets/" },
+})
+---@diagnostic disable-next-line: different-requires
+require("luasnip.loaders.from_vscode").lazy_load()
