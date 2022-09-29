@@ -12,7 +12,9 @@ local has_words_before = function()
       == nil
 end
 
--- TODO: work on snippets jump expand to not colide with completion
+local cmp_autopairs = require("nvim-autopairs.completion.cmp")
+cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
+
 cmp.setup({
   sources = {
     { name = "luasnip" },
