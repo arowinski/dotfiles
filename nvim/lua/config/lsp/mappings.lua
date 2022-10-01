@@ -9,7 +9,7 @@ end
 function M.setup()
   bmap("gD", vim.lsp.buf.declaration)
   bmap("gt", vim.lsp.buf.references)
-  bmap("<leader>p", vim.lsp.buf.formatting)
+  bmap("<leader>p", vim.lsp.buf.format)
 
   bmap("<C-a>", "<CMD>Lspsaga code_action<CR>")
   bmap("gh", "<CMD>Lspsaga lsp_finder<CR>")

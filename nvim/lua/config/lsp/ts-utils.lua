@@ -3,8 +3,8 @@ local M = {}
 function M.setup(client)
   local ts_utils = require("nvim-lsp-ts-utils")
 
-  client.resolved_capabilities.document_formatting = false
-  client.resolved_capabilities.document_range_formatting = false
+  client.server_capabilities.document_formatting = false
+  client.server_capabilities.document_range_formatting = false
 
   ts_utils.setup({
     import_all_scan_buffers = 100,
