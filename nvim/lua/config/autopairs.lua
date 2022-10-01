@@ -1,7 +1,7 @@
 local npairs = require("nvim-autopairs")
 
 npairs.setup({
-  chaeck_ts = true,
+  check_ts = true,
   fast_wrap = {
     map = "<C-w>",
     chars = { "{", "[", "(", '"', "'", "`" },
