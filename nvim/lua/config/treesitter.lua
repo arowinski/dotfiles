@@ -15,7 +15,7 @@ require("nvim-treesitter.configs").setup({
     "yaml",
   },
   indent = { enable = false },
-  highlight = { enable = true, additional_vim_regex_highlighting = false },
+  highlight = { enable = true, additional_vim_regex_highlighting = true },
   rainbow = { enable = true, extended_mode = true, max_file_lines = 1000 },
   matchup = { enable = true },
   textobjects = {
