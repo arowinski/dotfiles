@@ -2,6 +2,7 @@ require("nvim-treesitter.configs").setup({
   ensure_installed = {
     "bash",
     "css",
+    "elixir",
     "go",
     "html",
     "http",
@@ -9,7 +10,6 @@ require("nvim-treesitter.configs").setup({
     "json",
     "lua",
     "ruby",
-    "tsx",
     "typescript",
     "vim",
     "yaml",
