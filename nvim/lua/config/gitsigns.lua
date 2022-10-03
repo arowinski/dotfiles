@@ -42,16 +42,25 @@ require("gitsigns").setup({
     local gs = package.loaded.gitsigns
 
     -- Navigation
-    nnoremap(
-      "]h",
-      "&diff ? ']c' : '<cmd>Gitsigns next_hunk<CR>'",
-      { expr = true }
-    )
-    nnoremap(
-      "[h",
-      "&diff ? ']c' : '<cmd>Gitsigns prev_hunk<CR>'",
-      { expr = true }
-    )
+    nnoremap("]h", function()
+      if vim.wo.diff then
+        return "]c"
+      end
+      vim.schedule(function()
+        gs.next_hunk()
+      end)
+      return "<Ignore>"
+    end, { expr = true })
+
+    nnoremap("[h", function()
+      if vim.wo.diff then
+        return "[c"
+      end
+      vim.schedule(function()
+        gs.prev_hunk()
+      end)
+      return "<Ignore>"
+    end, { expr = true })
 
     -- Actions
     nnoremap("<leader>hs", gs.stage_hunk)
