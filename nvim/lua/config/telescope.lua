@@ -43,6 +43,7 @@ require("telescope").load_extension("fzf")
 
 local builtin = require("telescope.builtin")
 local nmap = require("util").nmap
+local vmap = require("util").vmap
 
 nmap("<C-p>", builtin.find_files)
 nmap("<C-y>", builtin.registers)
@@ -51,3 +52,23 @@ nmap("<C-q>", builtin.buffers)
 nmap("<leader>gs", builtin.git_stash)
 nmap("<C-g>", builtin.git_commits)
 nmap("<C-x>", builtin.command_history)
+nmap("<C-\\>", require("config.telescope.grep_in_dir").grep_in_directory)
+
+nmap("<C-b>", function()
+  builtin.git_branches({
+    attach_mappings = function(_, map)
+      map("i", "<c-d>", actions.git_delete_branch)
+      return true
+    end,
+  })
+end)
+
+nmap("<leader>\\", function()
+  builtin.grep_string({ default_text = vim.fn.expand("<cword>") })
+end)
+
+vmap("<leader>\\", function()
+  builtin.grep_string({
+    default_text = require("util.selection").get_visual_selection(),
+  })
+end)

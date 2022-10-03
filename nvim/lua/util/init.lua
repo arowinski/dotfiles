@@ -3,6 +3,7 @@ local M = {
   dir = require("util.dir"),
   table = require("util.table"),
   spinner = require("util.spinner"),
+  selection = require("util.selection")
 }
 
 function _G.put(...)
@@ -33,6 +34,10 @@ function M.nmap(key, cmd, opts)
 end
 
 function M.xmap(key, cmd, opts)
+  return map("x", key, cmd, opts)
+end
+
+function M.vmap(key, cmd, opts)
   return map("x", key, cmd, opts)
 end
 
