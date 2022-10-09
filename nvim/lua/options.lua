@@ -121,13 +121,15 @@ util.nmap("[Q", ":cfirst<CR>")
 -- copy to system clipboard
 util.nmap("<Leader>y", '"+y')
 
-vim.keymap.set("n", "<Esc>", function()
+vim.keymap.set("n", "<M-q>", function()
+  print(vim.api.nvim_list_wins())
   for _, win in ipairs(vim.api.nvim_list_wins()) do
-    local config = vim.api.nvim_win_get_config(win)
+    if vim.api.nvim_win_is_valid(win) then
+      local config = vim.api.nvim_win_get_config(win)
 
-    if config.relative ~= "" then
-      vim.api.nvim_win_close(win, false)
-      print("Closing window", win)
+      if config.relative ~= "" then
+        vim.api.nvim_win_close(win, false)
+      end
     end
   end
 end)
