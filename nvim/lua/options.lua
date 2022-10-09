@@ -122,7 +122,6 @@ util.nmap("[Q", ":cfirst<CR>")
 util.nmap("<Leader>y", '"+y')
 
 vim.keymap.set("n", "<M-q>", function()
-  print(vim.api.nvim_list_wins())
   for _, win in ipairs(vim.api.nvim_list_wins()) do
     if vim.api.nvim_win_is_valid(win) then
       local config = vim.api.nvim_win_get_config(win)
