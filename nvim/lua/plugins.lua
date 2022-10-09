@@ -162,7 +162,11 @@ require("packer").startup(function()
   use({
     "NvChad/nvim-colorizer.lua",
     event = "BufReadPre",
-    config = [[require('colorizer').setup()]],
+    config = function()
+      require("colorizer").setup({
+        user_default_options = { tailwind = "lsp" },
+      })
+    end,
   })
 
   -- Better notifications
