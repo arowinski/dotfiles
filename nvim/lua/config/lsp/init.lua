@@ -20,6 +20,7 @@ require("config.lsp.null-ls").setup(lsp, options)
 require("config.lsp.solargraph").setup(lsp, options)
 require("config.lsp.eslint").setup(lsp, options)
 require("config.lsp.sumneko").setup(lsp, options)
+require("config.lsp.typescript").setup(lsp, options)
 
 local function setup(server, extension)
   lsp[server].setup(vim.tbl_extend("force", options, extension or {}))
@@ -32,9 +33,3 @@ setup(
 setup("tailwindcss", { root_dir = lsp.util.root_pattern("tailwind.config.js") })
 setup("html")
 setup("yamlls")
-setup("tsserver", {
-  on_attach = function(client, bufnr)
-    options.on_attach(client, bufnr)
-    require("config.lsp.ts-utils").setup(client)
-  end,
-})

@@ -84,7 +84,6 @@ require("packer").startup(function()
     config = [[require("config.lsp")]],
     wants = {
       "cmp-nvim-lsp",
-      "nvim-lsp-ts-utils",
       "null-ls.nvim",
       "lua-dev.nvim",
       "SchemaStore.nvim",
@@ -92,10 +91,10 @@ require("packer").startup(function()
     requires = {
       "williamboman/mason.nvim",
       "williamboman/mason-lspconfig.nvim",
-      "jose-elias-alvarez/nvim-lsp-ts-utils",
       "jose-elias-alvarez/null-ls.nvim",
       "b0o/SchemaStore.nvim",
       "folke/lua-dev.nvim",
+      "jose-elias-alvarez/typescript.nvim",
     },
   })
 
@@ -321,5 +320,6 @@ require("packer").startup(function()
     end,
   })
 
+  -- Better UI
   use({ "stevearc/dressing.nvim" })
 end)
