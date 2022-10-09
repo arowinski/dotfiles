@@ -27,6 +27,8 @@ require("nvim-treesitter.configs").setup({
         ["if"] = "@function.inner",
         ["ac"] = "@class.outer",
         ["ic"] = "@class.inner",
+        ["ar"] = "@block.outer",
+        ["ir"] = "@block.inner",
       },
     },
   },
