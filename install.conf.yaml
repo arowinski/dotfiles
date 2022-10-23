@@ -7,6 +7,7 @@
 - clean: ["~", "~/.config"]
 
 - link:
+    ~/.asdfrc: asdfrc
     ~/.Brewfile: Brewfile
     ~/.bin: bin
     ~/.config/karabiner: karabiner
