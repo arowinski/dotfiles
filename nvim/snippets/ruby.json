@@ -63,5 +63,13 @@
   "var = described_class": {
     "prefix": ["dcc"],
     "body": ["${1:var} = described_class$0"]
+  },
+  "action->change": {
+    "prefix": ["ac"],
+    "body": ["action = -> { $1 }\n\nexpect(&action).to change($2)$0"]
+  },
+  "expect().to change": {
+    "prefix": ["expc"],
+    "body": ["expect(&action).to change($1)$0"]
   }
 }
