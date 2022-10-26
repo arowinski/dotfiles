@@ -52,7 +52,6 @@ nmap("<C-q>", builtin.buffers)
 nmap("<leader>gs", builtin.git_stash)
 nmap("<C-g>", builtin.git_commits)
 nmap("<C-x>", builtin.command_history)
-nmap("<C-\\>", require("config.telescope.grep_in_dir").grep_in_directory)
 
 nmap("<C-b>", function()
   builtin.git_branches({
@@ -72,3 +71,6 @@ vmap("<leader>\\", function()
     default_text = require("util.selection").get_visual_selection(),
   })
 end)
+
+require("telescope").load_extension("dir")
+nmap("<C-\\>", "<cmd>Telescope dir live_grep<CR>")

@@ -282,6 +282,7 @@ require("packer").startup(function()
     keys = { "<C-p>", "<C-q>", "<C-y>", "\\", "<C-g>", "<C-x>" },
     requires = {
       "nvim-lua/plenary.nvim",
+      "princejoogie/dir-telescope.nvim",
       { "nvim-telescope/telescope-fzf-native.nvim", run = "make" },
     },
     wants = { "trouble.nvim" },
