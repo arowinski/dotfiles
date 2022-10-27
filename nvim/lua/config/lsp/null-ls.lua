@@ -19,6 +19,7 @@ function M.setup(_, options)
       }),
       nls.builtins.diagnostics.yamllint,
       nls.builtins.formatting.shfmt,
+      nls.builtins.diagnostics.vale
     },
     on_attach = options.on_attach,
   })
