@@ -11,7 +11,7 @@ end
 
 local luasnip = prequire("luasnip")
 
--- Remaped with karabiner-elements, <C-S-[ljk]>
+-- Remapped with karabiner-elements, <C-S-[ljk]>
 util.noremap({ "i", "v" }, "<F2>1", function()
   if luasnip.choice_active() then
     luasnip.change_choice(1)

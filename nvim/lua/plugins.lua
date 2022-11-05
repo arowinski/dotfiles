@@ -298,7 +298,7 @@ require("packer").startup(function()
   -- Measuring startup time for given file
   use({ "tweekmonster/startuptime.vim", cmd = "StartupTime" })
 
-  -- Blank line identation
+  -- Blank line indentation
   use({ "lukas-reineke/indent-blankline.nvim" })
 
   -- Git conflict markers and mappings for quick resolving
