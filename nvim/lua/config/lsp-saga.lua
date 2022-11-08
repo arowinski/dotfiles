@@ -9,16 +9,18 @@ require("lspsaga").init_lsp_saga({
     virtual_text = true,
   },
   code_action_keys = {
-    quit = "<ESC>",
+    quit = { "<ESC>", "q" },
     exec = "<CR>",
   },
   finder_action_keys = {
     open = "o",
     vsplit = "s",
     split = "i",
-    tabe = "t",
     quit = "<ESC>",
     scroll_down = "<C-f>",
     scroll_up = "<C-b>",
+  },
+  symbol_in_winbar = {
+    in_custom = true,
   },
 })

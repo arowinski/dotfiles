@@ -1,35 +1,16 @@
-local util = require("util")
+local lsp_progress = require("config.lualine.lsp_progress")
+local lsp_symbol = require("config.lualine.lsp_symbol")
 
-local function lsp_progress(_, is_active)
-  if not is_active then
-    return
-  end
-
-  local messages = vim.lsp.util.get_progress_messages()
-  if #messages == 0 then
-    return ""
-  end
-
-  local status = {}
-  for _, msg in pairs(messages) do
-    local title = ""
-    if msg.title then
-      title = msg.title
-    end
-    table.insert(status, (msg.percentage or 0) .. "%% " .. title)
-  end
-
-  return table.concat(status, "  ") .. " " .. util.spinner()
-end
-
-vim.cmd("au User LspProgressUpdate let &ro = &ro")
+local filename_with_icon = require("lualine.components.filename"):extend()
+filename_with_icon.apply_icon = require("lualine.components.filetype").apply_icon
+filename_with_icon.icon_hl_cache = {}
 
 require("lualine").setup({
   options = {
     icons_enabled = true,
     theme = "auto",
-    component_separators = { left = "", right = "" },
-    section_separators = { left = "", right = "" },
+    component_separators = { left = "|", right = "|" },
+    section_separators = { left = "", right = "" },
     disabled_filetypes = {},
     always_divide_middle = true,
     globalstatus = true,
@@ -40,7 +21,6 @@ require("lualine").setup({
     lualine_c = {
       {
         "diagnostics",
-        separator = "|",
         symbols = {
           error = "✗ ",
           warn = " ",
@@ -51,21 +31,51 @@ require("lualine").setup({
       {
         "filename",
         path = 1,
-        symbols = { modified = "  ", readonly = "" },
+        symbols = { modified = "", readonly = "" },
+        color = function()
+          if vim.bo["modified"] == true then
+            return { fg = "#d99f0d" }
+          end
+        end,
       },
     },
-    lualine_x = { lsp_progress, "encoding", "fileformat", "filetype" },
+    lualine_x = {
+      {
+        lsp_progress,
+        icon = "",
+        color = { fg = "#d99f0d", gui = "bold" },
+      },
+      "encoding",
+      "fileformat",
+      "filetype",
+    },
     lualine_y = { "progress" },
     lualine_z = { "location" },
   },
-  inactive_sections = {
-    lualine_a = {},
-    lualine_b = {},
-    lualine_c = { "filename" },
-    lualine_x = { "location" },
-    lualine_y = {},
-    lualine_z = {},
+  winbar = {
+    lualine_c = {
+      {
+        filename_with_icon,
+        file_status = true,
+        newfile_status = false,
+        path = 1,
+        colored = true,
+        separator = "",
+        padding = 0,
+      },
+      lsp_symbol,
+    },
   },
-  tabline = {},
+  inactive_winbar = {
+    lualine_c = {
+      {
+        filename_with_icon,
+        file_status = true,
+        newfile_status = false,
+        path = 1,
+        colored = true,
+      },
+    },
+  },
   extensions = {},
 })
