@@ -9,7 +9,7 @@ require("lspsaga").init_lsp_saga({
     virtual_text = true,
   },
   code_action_keys = {
-    quit = { "<ESC>", "q" },
+    quit = "<ESC>",
     exec = "<CR>",
   },
   finder_action_keys = {
