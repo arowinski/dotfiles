@@ -313,14 +313,6 @@ require("packer").startup(function()
   -- GraphQL syntax
   use({ "jparise/vim-graphql" })
 
-  -- File name in top-right corner
-  use({
-    "ldelossa/buffertag",
-    config = function()
-      require("buffertag").setup({ border = "none", limit_width = false })
-    end,
-  })
-
   -- Better UI
   use({ "stevearc/dressing.nvim" })
 end)
