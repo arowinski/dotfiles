@@ -9,7 +9,8 @@ npairs.setup({
     end_key = "w",
     keys = "qertyuiopzxcvbnmasdfghjkl",
     check_comma = true,
-    hightlight = "Search",
+    highlight = "Search",
+    highlight_grey = "Comment",
   },
 })
 
