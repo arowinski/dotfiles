@@ -1,6 +1,1 @@
-.netrwhist
-vim/autoload/plug.vim
-vim/bundle
-vim/plugged
-vim/sessions
-packer_compiled.lua
+nvim/plugin/packer_compiled.lua
