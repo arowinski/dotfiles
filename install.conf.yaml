@@ -18,7 +18,7 @@
     ~/.pryrc: ruby/pryrc
     ~/.psqlrc: psql/psqlrc
     ~/.rgignore: rgignore
-    ~/.rspec: rspec/rspec
+    ~/.rspec: ruby/rspec
     ~/.tmux.conf: tmux/tmux.conf
     ~/.vale.ini: vale.ini
     ~/.zlogin: zsh/zlogin
