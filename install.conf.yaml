@@ -15,7 +15,7 @@
     ~/.config/solargraph: solargraph
     ~/.ctags: ctags
     ~/.gitconfig: git/gitconfig
-    ~/.pryrc: pry/pryrc
+    ~/.pryrc: ruby/pryrc
     ~/.psqlrc: psql/psqlrc
     ~/.rgignore: rgignore
     ~/.rspec: rspec/rspec
