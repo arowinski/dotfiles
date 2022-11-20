@@ -9,3 +9,6 @@ alias egrep="egrep --color=auto"
 
 # vim
 alias v="nvim"
+
+# yarn
+alias y="yarn"
