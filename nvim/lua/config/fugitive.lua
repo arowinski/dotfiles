@@ -2,7 +2,7 @@ local nnoremap = require("util").nnoremap
 
 nnoremap("g<space>", ":G<CR>")
 nnoremap("<leader>gl", ":0Gclog -n1000<CR>")
-nnoremap("<leader>gl", ":0Gclog<CR>")
+nnoremap("<leader>gL", ":0Gclog<CR>")
 
 vim.cmd([[
   autocmd Filetype gitcommit setlocal spell textwidth=72
