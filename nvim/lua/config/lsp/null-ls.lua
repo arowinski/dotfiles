@@ -19,7 +19,8 @@ function M.setup(_, options)
       }),
       nls.builtins.diagnostics.yamllint,
       nls.builtins.formatting.shfmt,
-      nls.builtins.diagnostics.vale
+      nls.builtins.diagnostics.codespell,
+      nls.builtins.formatting.codespell,
     },
     on_attach = options.on_attach,
   })
