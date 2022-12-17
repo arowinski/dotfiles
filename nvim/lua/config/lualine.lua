@@ -1,4 +1,4 @@
-local lsp_progress = require("config.lualine.lsp_progress")
+local lsp_progress = require("util.lsp")
 local lsp_symbol = require("config.lualine.lsp_symbol")
 
 local filename_with_icon = require("lualine.components.filename"):extend()
@@ -41,9 +41,20 @@ require("lualine").setup({
     },
     lualine_x = {
       {
-        lsp_progress,
-        icon = "",
-        color = { fg = "#d99f0d", gui = "bold" },
+        function()
+          if lsp_progress.is_attached() then
+            return "[LSP]"
+          else
+            return ""
+          end
+        end,
+        color = function()
+          if lsp_progress.is_ready() then
+            return { fg = "#9ece6a", gui = "bold" }
+          else
+            return { fg = "#d99f0d", gui = "bold" }
+          end
+        end
       },
       "encoding",
       "fileformat",

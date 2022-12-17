@@ -2,7 +2,6 @@ local M = {
   string = require("util.string"),
   dir = require("util.dir"),
   table = require("util.table"),
-  spinner = require("util.spinner"),
   selection = require("util.selection")
 }
 

@@ -9,6 +9,9 @@ require("mason-lspconfig").setup({
     "tsserver",
   },
 })
+require("fidget").setup({
+   text = { spinner = "dots" }
+})
 
 require("config.lsp.diagnostics").setup()
 require("config.lsp.handlers").setup()

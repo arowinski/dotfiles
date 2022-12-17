@@ -94,6 +94,7 @@ require("packer").startup(function(use)
       "b0o/SchemaStore.nvim",
       "folke/lua-dev.nvim",
       "jose-elias-alvarez/typescript.nvim",
+      "j-hui/fidget.nvim",
     },
   })
 
