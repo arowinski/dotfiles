@@ -9,8 +9,7 @@ if vim.fn.empty(vim.fn.glob(install_path)) > 0 then
   )
 end
 
-local use = require("packer").use
-require("packer").startup(function()
+require("packer").startup(function(use)
   -- "wants" keyword loads plugin before used one
   use("wbthomason/packer.nvim")
 
