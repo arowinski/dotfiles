@@ -6,6 +6,7 @@ function M.setup(_, options)
   nls.setup({
     sources = {
       nls.builtins.formatting.prettierd,
+      nls.builtins.diagnostics.stylelint,
       nls.builtins.formatting.stylelint,
       nls.builtins.diagnostics.write_good.with({
         filetypes = { "gitcommit" },
