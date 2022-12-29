@@ -299,11 +299,12 @@ require("packer").startup(function(use)
   use({ "tweekmonster/startuptime.vim", cmd = "StartupTime" })
 
   -- Blank line indentation
-  use({ "lukas-reineke/indent-blankline.nvim" })
+  use({ "lukas-reineke/indent-blankline.nvim", event = "BufReadPre" })
 
   -- Git conflict markers and mappings for quick resolving
   use({
     "rhysd/conflict-marker.vim",
+    event = "BufReadPost",
     config = [[require("config.conflict-marker")]],
   })
 
@@ -311,8 +312,8 @@ require("packer").startup(function(use)
   use({ "andymass/vim-matchup" })
 
   -- GraphQL syntax
-  use({ "jparise/vim-graphql" })
+  use({ "jparise/vim-graphql", cmd = "BufReadPre" })
 
   -- Better UI
-  use({ "stevearc/dressing.nvim" })
+  use({ "stevearc/dressing.nvim", cmd = "VimEnter" })
 end)
