@@ -23,6 +23,10 @@
     "prefix": ["def"],
     "body": ["def ${1:name}(${2:args})\n\t$0\nend"]
   },
+  "class_call_delegation": {
+    "prefix": ["ccall"],
+    "body": ["def self.call(...) = new(...).call"]
+  },
   "def_call": {
     "prefix": ["defc"],
     "body": ["def call(${1:args})\n\t$0\nend"]
