@@ -35,7 +35,7 @@
 [user]
   name = arowinski
   email = arowinski02@gmail.com
-[include]
-  path = ~/.gitconfig.local
 [interactive]
 	diffFilter = diff-so-fancy --patch
+[includeIf "gitdir:/Users/adamrowinski/Work/"]
+  path = ~/.gitconfig.work
