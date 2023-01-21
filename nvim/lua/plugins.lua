@@ -71,7 +71,7 @@ require("packer").startup(function(use)
     requires = {
       "nvim-treesitter/nvim-treesitter-textobjects",
       "RRethy/nvim-treesitter-endwise",
-      "p00f/nvim-ts-rainbow",
+      "mrjones2014/nvim-ts-rainbow",
       "windwp/nvim-ts-autotag",
     },
   })
