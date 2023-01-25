@@ -1,8 +1,8 @@
 local lsp_progress = require("util.lsp")
-local lsp_symbol = require("config.lualine.lsp_symbol")
 
 local filename_with_icon = require("lualine.components.filename"):extend()
-filename_with_icon.apply_icon = require("lualine.components.filetype").apply_icon
+filename_with_icon.apply_icon =
+  require("lualine.components.filetype").apply_icon
 filename_with_icon.icon_hl_cache = {}
 
 require("lualine").setup({
@@ -54,7 +54,7 @@ require("lualine").setup({
           else
             return { fg = "#d99f0d", gui = "bold" }
           end
-        end
+        end,
       },
       "encoding",
       "fileformat",
@@ -74,7 +74,15 @@ require("lualine").setup({
         separator = "",
         padding = 0,
       },
-      lsp_symbol,
+      function()
+        local value = require("lspsaga.symbolwinbar"):get_winbar()
+
+        if value then
+          return value
+        else
+          return ""
+        end
+      end,
     },
   },
   inactive_winbar = {

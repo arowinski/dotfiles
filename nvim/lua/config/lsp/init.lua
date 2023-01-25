@@ -10,7 +10,7 @@ require("mason-lspconfig").setup({
   },
 })
 require("fidget").setup({
-   text = { spinner = "dots" }
+  text = { spinner = "dots" },
 })
 
 require("config.lsp.diagnostics").setup()
