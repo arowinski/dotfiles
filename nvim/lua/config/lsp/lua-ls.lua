@@ -5,7 +5,7 @@ function M.setup(lsp, options)
   table.insert(runtime_path, "lua/?.lua")
   table.insert(runtime_path, "lua/?/init.lua")
 
-  lsp.sumneko_lua.setup(vim.tbl_extend("force", options, {
+  lsp.lua_ls.setup(vim.tbl_extend("force", options, {
     settings = {
       Lua = {
         diagnostics = {
