@@ -55,9 +55,8 @@ require("lualine").setup({
             return { fg = "#d99f0d", gui = "bold" }
           end
         end,
+        separator = "",
       },
-      "encoding",
-      "fileformat",
       "filetype",
     },
     lualine_y = { "progress" },
