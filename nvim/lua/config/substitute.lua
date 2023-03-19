@@ -2,7 +2,16 @@ local util = require("util")
 
 local substitute = require("substitute")
 local range = require("substitute.range")
-substitute.setup({})
+substitute.setup({
+  on_substitute = function(event)
+    require("yanky").init_ring(
+      "p",
+      event.register,
+      event.count,
+      event.vmode:match("[vV�]")
+    )
+  end,
+})
 
 util.nnoremap("gr", substitute.operator)
 util.nmap("M", range.word)

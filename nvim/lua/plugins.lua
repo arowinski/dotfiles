@@ -316,4 +316,6 @@ require("packer").startup(function(use)
 
   -- Better UI
   use({ "stevearc/dressing.nvim", cmd = "VimEnter" })
+
+  use({ "gbprod/yanky.nvim", config = [[require("config.yanky")]] })
 end)
