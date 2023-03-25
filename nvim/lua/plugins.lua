@@ -151,7 +151,6 @@ require("packer").startup(function(use)
       "kana/vim-textobj-line",
       "kana/vim-textobj-entire",
       "gaving/vim-textobj-argument",
-      "rhysd/vim-textobj-ruby",
       "beloglazov/vim-textobj-quotes",
       "rhysd/vim-textobj-anyblock",
     },
