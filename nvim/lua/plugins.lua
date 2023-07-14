@@ -251,12 +251,11 @@ require("packer").startup(function(use)
   use({ "tpope/vim-eunuch", cmd = { "Delete", "Move", "Rename", "Remove" } })
   -- Subvert, coercion and abbreviation
   use({ "tpope/tpope-vim-abolish" })
-  use({ "AndrewRadev/splitjoin.vim", keys = { "gJ", "gS" } })
+
   use({
-    "FooSoft/vim-argwrap",
-    config = function()
-      require("util").nnoremap("<leader>aa", ":ArgWrap<CR>")
-    end,
+    "Wansmer/treesj",
+    requires = { "nvim-treesitter" },
+    config = [[require("config.treesj")]],
   })
 
   -- Finder
