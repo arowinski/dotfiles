@@ -198,19 +198,6 @@ require("packer").startup(function(use)
     config = [[require("todo-comments").setup({})]],
   })
 
-  -- Git diffs in visual form
-  use({
-    "sindrets/diffview.nvim",
-    cmd = {
-      "DiffviewOpen",
-      "DiffviewClose",
-      "DiffviewToggleFiles",
-      "DiffviewFocusFiles",
-    },
-    module = "diffview",
-    config = [[require("diffview").setup({})]],
-  })
-
   use({
     "kylechui/nvim-surround",
     event = "VimEnter",
