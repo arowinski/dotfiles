@@ -24,6 +24,7 @@
   ff = only
 [push]
   default = current
+	autoSetupRemote = true
 [fetch]
   prune = true
 [rebase]
