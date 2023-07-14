@@ -26,6 +26,7 @@ M.icons = {
   Event = " ",
   Operator = " ",
   TypeParameter = " ",
+  Copilot = "",
 }
 
 function M.cmp_format()
