@@ -14,7 +14,9 @@ substitute.setup({
 })
 
 util.nnoremap("gr", substitute.operator)
-util.nmap("M", range.word)
+util.nmap("M", function()
+  range.operator({ subject = { motion = "iw" } })
+end)
 util.noremap({ "n", "x" }, "m", function()
   range.operator({ prefix = "S" })
 end)
