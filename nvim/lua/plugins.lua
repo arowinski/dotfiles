@@ -304,4 +304,6 @@ require("packer").startup(function(use)
   use({ "stevearc/dressing.nvim", cmd = "VimEnter" })
 
   use({ "gbprod/yanky.nvim", config = [[require("config.yanky")]] })
+
+  use({ "elihunter173/dirbuf.nvim", event = "BufReadPre" })
 end)
