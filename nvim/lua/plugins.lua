@@ -75,6 +75,7 @@ require("packer").startup(function(use)
       "windwp/nvim-ts-autotag",
     },
   })
+  use({ "nvim-treesitter/playground", cmd = "TSPlaygroundToggle" })
 
   -- LSP
   use({
