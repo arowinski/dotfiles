@@ -8,7 +8,6 @@ exclude:
   - .bundle/**/*
 require: []
 domains: []
-reporters:
-  - rubocop
+reporters: []
 require_paths: []
 max_files: 10000

@@ -21,6 +21,7 @@ local options = require("config.lsp.options")
 
 require("config.lsp.null-ls").setup(lsp, options)
 require("config.lsp.solargraph").setup(lsp, options)
+require("config.lsp.rubocop").setup(lsp, options)
 require("config.lsp.eslint").setup(lsp, options)
 require("config.lsp.lua-ls").setup(lsp, options)
 require("config.lsp.typescript").setup(lsp, options)
