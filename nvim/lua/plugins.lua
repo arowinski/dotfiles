@@ -1,41 +1,34 @@
--- Install packer
-
-local install_path = vim.fn.stdpath("data")
-  .. "/site/pack/packer/start/packer.nvim"
-
-if vim.fn.empty(vim.fn.glob(install_path)) > 0 then
-  vim.fn.execute(
-    "!git clone https://github.com/wbthomason/packer.nvim " .. install_path
-  )
-end
-
-require("packer").startup(function(use)
-  -- "wants" keyword loads plugin before used one
-  use("wbthomason/packer.nvim")
-
-  -- Theme
-  use("folke/tokyonight.nvim")
-  use({
+return {
+  {
+    "folke/tokyonight.nvim",
+    lazy = false,
+    priority = 1000,
+    config = function()
+      vim.cmd([[colorscheme tokyonight-night]])
+    end,
+  },
+  {
     "kyazdani42/nvim-web-devicons",
-    module = "nvim-web-devicons",
     config = function()
       require("nvim-web-devicons").setup({ default = true })
     end,
-  })
-  use({
+  },
+  {
     "nvim-lualine/lualine.nvim",
     event = "VimEnter",
-    config = [[require('config.lualine')]],
-    requires = { "kyazdani42/nvim-web-devicons" },
-  })
-
-  -- TMUX: integration
-  use({
+    config = function()
+      require("config.lualine")
+    end,
+    dependencies = { "kyazdani42/nvim-web-devicons" },
+  },
+  {
     "aserowy/tmux.nvim",
     keys = { "<C-j>", "<C-k>", "<C-h>", "<C-l>" },
-    config = [[require('config.tmux')]],
-  })
-  use({
+    config = function()
+      require("config.tmux")
+    end,
+  },
+  {
     "christoomey/vim-tmux-runner",
     keys = { "<c-f>", "<leader>ve", "<leader>vd", "<leader>vv" },
     cmd = {
@@ -44,51 +37,48 @@ require("packer").startup(function(use)
       "VtrSendCommand",
       "VtrAtachtoPane",
     },
-    config = [[require("config.vtr")]],
-  })
-
-  -- Git integration
-  use({
+    config = function()
+      require("config.vtr")
+    end,
+  },
+  {
     "tpope/vim-fugitive",
     cmd = { "Git", "G" },
     keys = { "g<space>", "<leader>gl" },
-    config = [[require('config.fugitive')]],
-  })
-  use({
+    config = function()
+      require("config.fugitive")
+    end,
+  },
+  {
     "lewis6991/gitsigns.nvim",
     event = "BufReadPre",
-    requires = { "nvim-lua/plenary.nvim" },
-    config = [[require("config.gitsigns")]],
-  })
-
-  -- Highlight, edit, and navigate code using a fast incremental parsing library
-  use({
+    dependencies = { "nvim-lua/plenary.nvim" },
+    config = function()
+      require("config.gitsigns")
+    end,
+  },
+  {
     "nvim-treesitter/nvim-treesitter",
-    opt = true,
-    run = ":TSUpdate",
-    event = "BufRead",
-    config = [[require('config.treesitter')]],
-    requires = {
+    version = false,
+    build = ":TSUpdate",
+    event = { "BufReadPost", "BufNewFile" },
+    config = function()
+      require("config.treesitter")
+    end,
+    dependencies = {
       "nvim-treesitter/nvim-treesitter-textobjects",
       "RRethy/nvim-treesitter-endwise",
       "mrjones2014/nvim-ts-rainbow",
       "windwp/nvim-ts-autotag",
     },
-  })
-  use({ "nvim-treesitter/playground", cmd = "TSPlaygroundToggle" })
-
-  -- LSP
-  use({
+  },
+  {
     "neovim/nvim-lspconfig",
     event = "BufReadPre",
-    config = [[require("config.lsp")]],
-    wants = {
-      "cmp-nvim-lsp",
-      "null-ls.nvim",
-      "lua-dev.nvim",
-      "SchemaStore.nvim",
-    },
-    requires = {
+    config = function()
+      require("config.lsp")
+    end,
+    dependencies = {
       "williamboman/mason.nvim",
       "williamboman/mason-lspconfig.nvim",
       "jose-elias-alvarez/null-ls.nvim",
@@ -96,24 +86,24 @@ require("packer").startup(function(use)
       "folke/lua-dev.nvim",
       "jose-elias-alvarez/typescript.nvim",
       "j-hui/fidget.nvim",
+      "hrsh7th/cmp-nvim-lsp",
     },
-  })
-
-  use({
+  },
+  {
     "glepnir/lspsaga.nvim",
     event = "BufReadPre",
     branch = "main",
-    config = [[require("config.lsp-saga")]],
-  })
-
-  -- Completion
-  use({
+    config = function()
+      require("config.lsp-saga")
+    end,
+  },
+  {
     "hrsh7th/nvim-cmp",
     event = "UIEnter",
-    opt = true,
-    config = [[require('config.cmp')]],
-    wants = { "LuaSnip" },
-    requires = {
+    config = function()
+      require("config.cmp")
+    end,
+    dependencies = {
       "hrsh7th/cmp-buffer",
       "hrsh7th/cmp-path",
       "hrsh7th/cmp-nvim-lua",
@@ -121,44 +111,61 @@ require("packer").startup(function(use)
       {
         module = "nvim-autopairs",
         "windwp/nvim-autopairs",
-        config = [[require("config.autopairs")]],
+        config = function()
+          require("config.autopairs")
+        end,
       },
+      "L3MON4D3/LuaSnip",
       "saadparwaiz1/cmp_luasnip",
+      "ray-x/cmp-treesitter",
     },
-  })
-
-  use({
+  },
+  {
+    "zbirenbaum/copilot.lua",
+    cmd = "Copilot",
+    event = "InsertEnter",
+    config = function()
+      require("copilot").setup({
+        suggestion = { enabled = false },
+        panel = { enabled = false },
+      })
+    end,
+  },
+  {
+    "zbirenbaum/copilot-cmp",
+    dependencies = { "copilot.lua" },
+    config = function()
+      require("copilot_cmp").setup()
+    end,
+  },
+  {
     "L3MON4D3/LuaSnip",
     config = function()
       require("config.snip")
     end,
-    after = "nvim-cmp",
-    requires = { { "rafamadriz/friendly-snippets" } },
-  })
-
-  -- Delete buffer preserving windows
-  use({ "famiu/bufdelete.nvim", cmd = { "Bdelete" } })
-
-  -- Substitute with motions
-  -- TODO: Replace with treesitter
-  use({
+    dependencies = {
+      "rafamadriz/friendly-snippets",
+      "hrsh7th/nvim-cmp",
+    },
+  },
+  { "famiu/bufdelete.nvim", cmd = { "Bdelete" } },
+  {
     "gbprod/substitute.nvim",
     event = "CursorMoved",
-    config = [[require("config.substitute")]],
-    requires = {
+    config = function()
+      require("config.substitute")
+    end,
+    dependencies = {
       "kana/vim-operator-user",
       "rhysd/vim-operator-surround",
       "kana/vim-textobj-user",
       "kana/vim-textobj-line",
       "kana/vim-textobj-entire",
-      "gaving/vim-textobj-argument",
       "beloglazov/vim-textobj-quotes",
       "rhysd/vim-textobj-anyblock",
     },
-  })
-
-  -- Color higlighter
-  use({
+  },
+  {
     "NvChad/nvim-colorizer.lua",
     event = "BufReadPre",
     config = function()
@@ -166,20 +173,17 @@ require("packer").startup(function(use)
         user_default_options = { tailwind = "lsp" },
       })
     end,
-  })
-
-  -- Better notifications
-  use({
+  },
+  {
     "rcarriga/nvim-notify",
     event = "VimEnter",
-    config = [[vim.notify = require("notify")]],
-  })
-
-  -- Highlight same words
-  use({
+    config = function()
+      vim.notify = require("notify")
+    end,
+  },
+  {
     "RRethy/vim-illuminate",
     event = "CursorHold",
-    module = "illuminate",
     config = function()
       require("illuminate").configure({
         providers = { "lsp", "treesitter", "regex" },
@@ -188,37 +192,34 @@ require("packer").startup(function(use)
         under_cursor = false,
       })
     end,
-  })
-
-  -- Fancy TODO
-  use({
+  },
+  {
     "folke/todo-comments.nvim",
-    requires = "nvim-lua/plenary.nvim",
+    dependencies = { "nvim-lua/plenary.nvim" },
     cmd = { "TodoTelescope" },
     event = "BufReadPost",
-    config = [[require("todo-comments").setup({})]],
-  })
-
-  use({
+    config = function()
+      require("todo-comments").setup({})
+    end,
+  },
+  {
     "kylechui/nvim-surround",
     event = "VimEnter",
-    config = [[require("config.surround")]],
-  })
-
-  use({
+    config = function()
+      require("config.surround")
+    end,
+  },
+  {
     "numToStr/Comment.nvim",
     keys = { "gc", "gcc", "gb", "gbc" },
-    config = [[require("Comment").setup({})]],
-    requires = {
-      {
-        "JoosepAlviste/nvim-ts-context-commentstring",
-        module = "ts_context_commentstring",
-      },
+    config = function()
+      require("Comment").setup({})
+    end,
+    dependencies = {
+      "JoosepAlviste/nvim-ts-context-commentstring",
     },
-  })
-
-  -- Goto character
-  use({
+  },
+  {
     "ggandor/lightspeed.nvim",
     keys = { "s", "S", "f", "F", "t", "T" },
     config = function()
@@ -226,76 +227,78 @@ require("packer").startup(function(use)
         repeat_ft_with_target_char = true,
       })
     end,
-  })
-
-  -- Test runner
-  use({
+  },
+  {
     "vim-test/vim-test",
     cmd = { "TestNearest", "TestFile", "TestSuite", "TestLast" },
     keys = { "<leader>tt", "<leader>tf", "<Leader>ts", "<Leader>tl" },
-    config = [[require("config.test")]],
-    wants = { "vim-tmux-runner" },
-  })
-
-  use({
+    config = function()
+      require("config.test")
+    end,
+    dependencies = { "christoomey/vim-tmux-runner" },
+  },
+  {
     "tpope/vim-projectionist",
-    opt = true,
     event = "VimEnter",
-    config = [[require("config.projectionist")]],
-    -- TODO: lazy load vim-rails
-    requires = { "tpope/vim-rails" },
-  })
-
-  use({ "tpope/vim-bundler", cmd = { "Bopen" } })
-  use({ "tpope/vim-repeat" })
-  -- Vim sugar for the UNIX shell commands that need it the most.
-  use({ "tpope/vim-eunuch", cmd = { "Delete", "Move", "Rename", "Remove" } })
-  -- Subvert, coercion and abbreviation
-  use({ "tpope/tpope-vim-abolish" })
-
-  use({
+    config = function()
+      require("config.projectionist")
+    end,
+    dependencies = { "tpope/vim-rails" },
+  },
+  { "tpope/vim-bundler", cmd = { "Bopen" } },
+  { "tpope/vim-repeat" },
+  { "tpope/vim-eunuch", cmd = { "Delete", "Move", "Rename", "Remove" } },
+  { "tpope/tpope-vim-abolish" },
+  {
     "Wansmer/treesj",
-    requires = { "nvim-treesitter" },
-    config = [[require("config.treesj")]],
-  })
-
-  -- Finder
-  use({
+    dependencies = { "nvim-treesitter" },
+    config = function()
+      require("config.treesj")
+    end,
+  },
+  {
     "nvim-telescope/telescope.nvim",
     cmd = { "Telescope" },
-    module = "telescope",
-    config = [[require('config.telescope')]],
+    config = function()
+      require("config.telescope")
+    end,
     keys = { "<C-p>", "<C-q>", "<C-y>", "\\", "<C-g>", "<C-x>" },
-    requires = {
+    dependencies = {
       "nvim-lua/plenary.nvim",
       "princejoogie/dir-telescope.nvim",
-      { "nvim-telescope/telescope-fzf-native.nvim", run = "make" },
+      { "debugloop/telescope-undo.nvim" },
+      { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
     },
-  })
-
-  -- Measuring startup time for given file
-  use({ "tweekmonster/startuptime.vim", cmd = "StartupTime" })
-
-  -- Blank line indentation
-  use({ "lukas-reineke/indent-blankline.nvim", event = "BufReadPre" })
-
-  -- Git conflict markers and mappings for quick resolving
-  use({
+  },
+  { "tweekmonster/startuptime.vim", cmd = "StartupTime" },
+  { "lukas-reineke/indent-blankline.nvim", event = "BufReadPre" },
+  {
     "rhysd/conflict-marker.vim",
     event = "BufReadPost",
-    config = [[require("config.conflict-marker")]],
-  })
-
-  -- Replacement for matchit, more features
-  use({ "andymass/vim-matchup" })
-
-  -- GraphQL syntax
-  use({ "jparise/vim-graphql", cmd = "BufReadPre" })
-
-  -- Better UI
-  use({ "stevearc/dressing.nvim", cmd = "VimEnter" })
-
-  use({ "gbprod/yanky.nvim", config = [[require("config.yanky")]] })
-
-  use({ "elihunter173/dirbuf.nvim", event = "BufReadPre" })
-end)
+    config = function()
+      require("config.conflict-marker")
+    end,
+  },
+  { "andymass/vim-matchup" },
+  { "jparise/vim-graphql", cmd = "BufReadPre" },
+  { "stevearc/dressing.nvim", cmd = "VimEnter" },
+  {
+    "gbprod/yanky.nvim",
+    config = function()
+      require("config.yanky")
+    end,
+  },
+  { "elihunter173/dirbuf.nvim", event = "BufReadPre" },
+  {
+    "axkirillov/hbac.nvim",
+    config = function()
+      require("hbac").setup({
+        autoclose = true, -- set autoclose to false if you want to close manually
+        threshold = 15,
+        close_command = function(bufnr)
+          vim.api.nvim_buf_delete(bufnr, {})
+        end,
+      })
+    end,
+  },
+}
