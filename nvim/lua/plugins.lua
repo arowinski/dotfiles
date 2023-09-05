@@ -271,14 +271,6 @@ require("packer").startup(function(use)
       "princejoogie/dir-telescope.nvim",
       { "nvim-telescope/telescope-fzf-native.nvim", run = "make" },
     },
-    wants = { "trouble.nvim" },
-  })
-
-  use({
-    "folke/trouble.nvim",
-    event = "BufReadPre",
-    cmd = { "TroubleToggle", "Trouble" },
-    config = [[require("config.trouble")]],
   })
 
   -- Measuring startup time for given file
