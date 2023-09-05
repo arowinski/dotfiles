@@ -12,7 +12,7 @@ function M.setup()
   bmap("n", "<leader>p", vim.lsp.buf.format)
 
   bmap({ "n", "v" }, "<C-a>", "<CMD>Lspsaga code_action<CR>")
-  bmap("n", "gh", "<CMD>Lspsaga lsp_finder<CR>")
+  bmap("n", "gh", "<CMD>Lspsaga finder def+ref<CR>")
   bmap("n", "gd", "<CMD>Lspsaga peek_definition<CR>")
   bmap("n", "K", "<CMD>Lspsaga hover_doc<CR>")
   bmap("n", "gs", vim.lsp.buf.signature_help)
