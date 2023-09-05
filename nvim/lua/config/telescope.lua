@@ -1,15 +1,18 @@
 local actions = require("telescope.actions")
-local trouble = require("trouble.providers.telescope")
 
 require("telescope").setup({
   defaults = {
+    vimgrep_arguments = {
+      "rg",
+      "--vimgrep",
+      "--smart-case",
+      "--max-filesize=500000",
+    },
     mappings = {
       i = {
         ["<C-j>"] = actions.move_selection_next,
         ["<C-k>"] = actions.move_selection_previous,
         ["<ESC>"] = actions.close,
-        ["<M-t>"] = trouble.open_with_trouble,
-        ["<C-t>"] = trouble.open_selected_with_trouble,
         ["<M-q>"] = actions.send_to_qflist + actions.open_qflist,
         ["<C-q>"] = actions.send_selected_to_qflist + actions.open_qflist,
       },
@@ -27,16 +30,6 @@ require("telescope").setup({
       override_file_sorter = true,
     },
   },
-  vimgrep_arguments = {
-    "rg",
-    "--color=never",
-    "--no-heading",
-    "--with-filename",
-    "--line-number",
-    "--column",
-    "--smart-case",
-    "-u",
-  },
 })
 
 require("telescope").load_extension("fzf")
@@ -52,6 +45,7 @@ nmap("<C-q>", builtin.buffers)
 nmap("<leader>gs", builtin.git_stash)
 nmap("<C-g>", builtin.git_commits)
 nmap("<C-x>", builtin.command_history)
+nmap("<leader>sr", builtin.resume)
 
 nmap("<C-b>", function()
   builtin.git_branches({
