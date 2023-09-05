@@ -11,7 +11,6 @@ function M.setup(lsp, options)
         diagnostics = {
           enable = true,
           globals = { "vim" },
-          neededFileStatus = { ["codestyle-check"] = "Any" },
           workspaceDelay = -1,
         },
         format = {
@@ -19,7 +18,7 @@ function M.setup(lsp, options)
           defaultConfig = {
             indent_style = "space",
             indent_size = "2",
-            max_line_length = "80",
+            max_line_length = "100",
           },
         },
 
