@@ -22,26 +22,6 @@ return {
     dependencies = { "kyazdani42/nvim-web-devicons" },
   },
   {
-    "aserowy/tmux.nvim",
-    keys = { "<C-j>", "<C-k>", "<C-h>", "<C-l>" },
-    config = function()
-      require("config.tmux")
-    end,
-  },
-  {
-    "christoomey/vim-tmux-runner",
-    keys = { "<c-f>", "<leader>ve", "<leader>vd", "<leader>vv" },
-    cmd = {
-      "VtrSendLinesToRunner",
-      "VtrSendFile",
-      "VtrSendCommand",
-      "VtrAtachtoPane",
-    },
-    config = function()
-      require("config.vtr")
-    end,
-  },
-  {
     "tpope/vim-fugitive",
     cmd = { "Git", "G" },
     keys = { "g<space>", "<leader>gl" },
