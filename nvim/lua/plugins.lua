@@ -38,21 +38,6 @@ return {
     end,
   },
   {
-    "nvim-treesitter/nvim-treesitter",
-    version = false,
-    build = ":TSUpdate",
-    event = { "BufReadPost", "BufNewFile" },
-    config = function()
-      require("config.treesitter")
-    end,
-    dependencies = {
-      "nvim-treesitter/nvim-treesitter-textobjects",
-      "RRethy/nvim-treesitter-endwise",
-      "mrjones2014/nvim-ts-rainbow",
-      "windwp/nvim-ts-autotag",
-    },
-  },
-  {
     "neovim/nvim-lspconfig",
     event = "BufReadPre",
     config = function()
