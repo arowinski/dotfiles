@@ -1,27 +1,5 @@
 return {
   {
-    "folke/tokyonight.nvim",
-    lazy = false,
-    priority = 1000,
-    config = function()
-      vim.cmd([[colorscheme tokyonight-night]])
-    end,
-  },
-  {
-    "kyazdani42/nvim-web-devicons",
-    config = function()
-      require("nvim-web-devicons").setup({ default = true })
-    end,
-  },
-  {
-    "nvim-lualine/lualine.nvim",
-    event = "VimEnter",
-    config = function()
-      require("config.lualine")
-    end,
-    dependencies = { "kyazdani42/nvim-web-devicons" },
-  },
-  {
     "tpope/vim-fugitive",
     cmd = { "Git", "G" },
     keys = { "g<space>", "<leader>gl" },
@@ -194,8 +172,6 @@ return {
       { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
     },
   },
-  { "tweekmonster/startuptime.vim", cmd = "StartupTime" },
-  { "lukas-reineke/indent-blankline.nvim", event = "BufReadPre" },
   {
     "rhysd/conflict-marker.vim",
     event = "BufReadPost",
@@ -205,7 +181,6 @@ return {
   },
   { "andymass/vim-matchup" },
   { "jparise/vim-graphql", cmd = "BufReadPre" },
-  { "stevearc/dressing.nvim", cmd = "VimEnter" },
   {
     "gbprod/yanky.nvim",
     config = function()
