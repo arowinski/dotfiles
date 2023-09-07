@@ -63,47 +63,6 @@ return {
     end,
   },
   {
-    "hrsh7th/nvim-cmp",
-    event = "UIEnter",
-    config = function()
-      require("config.cmp")
-    end,
-    dependencies = {
-      "hrsh7th/cmp-buffer",
-      "hrsh7th/cmp-path",
-      "hrsh7th/cmp-nvim-lua",
-      "hrsh7th/cmp-nvim-lsp",
-      {
-        module = "nvim-autopairs",
-        "windwp/nvim-autopairs",
-        config = function()
-          require("config.autopairs")
-        end,
-      },
-      "L3MON4D3/LuaSnip",
-      "saadparwaiz1/cmp_luasnip",
-      "ray-x/cmp-treesitter",
-    },
-  },
-  {
-    "zbirenbaum/copilot.lua",
-    cmd = "Copilot",
-    event = "InsertEnter",
-    config = function()
-      require("copilot").setup({
-        suggestion = { enabled = false },
-        panel = { enabled = false },
-      })
-    end,
-  },
-  {
-    "zbirenbaum/copilot-cmp",
-    dependencies = { "copilot.lua" },
-    config = function()
-      require("copilot_cmp").setup()
-    end,
-  },
-  {
     "L3MON4D3/LuaSnip",
     config = function()
       require("config.snip")
