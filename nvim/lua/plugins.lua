@@ -1,21 +1,5 @@
 return {
   {
-    "tpope/vim-fugitive",
-    cmd = { "Git", "G" },
-    keys = { "g<space>", "<leader>gl" },
-    config = function()
-      require("config.fugitive")
-    end,
-  },
-  {
-    "lewis6991/gitsigns.nvim",
-    event = "BufReadPre",
-    dependencies = { "nvim-lua/plenary.nvim" },
-    config = function()
-      require("config.gitsigns")
-    end,
-  },
-  {
     "neovim/nvim-lspconfig",
     event = "BufReadPre",
     config = function()
@@ -172,14 +156,6 @@ return {
       { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
     },
   },
-  {
-    "rhysd/conflict-marker.vim",
-    event = "BufReadPost",
-    config = function()
-      require("config.conflict-marker")
-    end,
-  },
-  { "andymass/vim-matchup" },
   { "jparise/vim-graphql", cmd = "BufReadPre" },
   {
     "gbprod/yanky.nvim",
