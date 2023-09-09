@@ -94,7 +94,6 @@ vim.cmd([[ autocmd VimResized * :wincmd = ]])
 
 util.nnoremap("<leader>w", ":w<CR>")
 util.nnoremap("<leader>q", ":q<CR>")
-util.nnoremap("<C-c>", ":Bdelete<CR>")
 util.nnoremap("<C-e>", ":e<CR>")
 util.nnoremap("<space><space>", "<C-^>")
 

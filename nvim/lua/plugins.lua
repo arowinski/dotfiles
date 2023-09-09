@@ -34,7 +34,6 @@ return {
       "hrsh7th/nvim-cmp",
     },
   },
-  { "famiu/bufdelete.nvim", cmd = { "Bdelete" } },
   {
     "gbprod/substitute.nvim",
     event = "CursorMoved",
@@ -132,9 +131,6 @@ return {
     dependencies = { "tpope/vim-rails" },
   },
   { "tpope/vim-bundler", cmd = { "Bopen" } },
-  { "tpope/vim-repeat" },
-  { "tpope/vim-eunuch", cmd = { "Delete", "Move", "Rename", "Remove" } },
-  { "tpope/tpope-vim-abolish" },
   {
     "Wansmer/treesj",
     dependencies = { "nvim-treesitter" },
@@ -161,19 +157,6 @@ return {
     "gbprod/yanky.nvim",
     config = function()
       require("config.yanky")
-    end,
-  },
-  { "elihunter173/dirbuf.nvim", event = "BufReadPre" },
-  {
-    "axkirillov/hbac.nvim",
-    config = function()
-      require("hbac").setup({
-        autoclose = true, -- set autoclose to false if you want to close manually
-        threshold = 15,
-        close_command = function(bufnr)
-          vim.api.nvim_buf_delete(bufnr, {})
-        end,
-      })
     end,
   },
 }
