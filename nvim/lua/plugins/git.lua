@@ -74,7 +74,7 @@ return {
         col = 1,
       },
       on_attach = function()
-        local nnoremap = require("util").nnoremap
+        local map = require("util").map
         local gs = package.loaded.gitsigns
         local wk = require("which-key")
 
@@ -96,7 +96,7 @@ return {
           },
         }, { prefix = "<leader>" })
 
-        nnoremap("]h", function()
+        map("n", "]h", function()
           if vim.wo.diff then
             return "]c"
           end
@@ -106,7 +106,7 @@ return {
           return "<Ignore>"
         end, { expr = true })
 
-        nnoremap("[h", function()
+        map("n", "[h", function()
           if vim.wo.diff then
             return "[c"
           end

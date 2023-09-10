@@ -1,8 +1,9 @@
-local util = require("util")
-util.nmap("<C-h>", "<NOP>", { buffer = true })
-util.nmap("<C-j>", "<NOP>", { buffer = true })
-util.nmap("<C-k>", "<NOP>", { buffer = true })
-util.nmap("<C-l>", "<NOP>", { buffer = true })
+local map = require("util").map
+
+map("n", "<C-h>", "<NOP>", { buffer = true })
+map("n", "<C-j>", "<NOP>", { buffer = true })
+map("n", "<C-k>", "<NOP>", { buffer = true })
+map("n", "<C-l>", "<NOP>", { buffer = true })
 
 local augroup = vim.api.nvim_create_augroup("AU_LSPSAGA", { clear = true })
 

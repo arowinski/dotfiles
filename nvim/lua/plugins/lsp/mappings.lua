@@ -3,7 +3,7 @@ local util = require("util")
 local M = {}
 
 local bmap = function(mode, keys, action)
-  util.noremap(mode, keys, action, { buffer = true })
+  util.map(mode, keys, action, { buffer = true })
 end
 
 function M.setup()

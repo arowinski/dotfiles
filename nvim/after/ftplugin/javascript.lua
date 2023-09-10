@@ -1,4 +1,4 @@
-local nnoremap = require("util").nnoremap
+local map = require("util").map
 
-nnoremap("<leader>bp", "odebugger<ESC>", { buffer = true })
-nnoremap("<leader>br", ":g/debugger/d<CR>", { buffer = true })
+map("n", "<leader>bp", "odebugger<ESC>", { buffer = true })
+map("n", "<leader>br", ":g/debugger/d<CR>", { buffer = true })

@@ -53,8 +53,8 @@ vim.opt.pumblend = 10 -- Popup blend
 vim.opt.pumheight = 10
 
 --Remap for dealing with word wrap
-util.nnoremap("k", "v:count == 0 ? 'gk' : 'k'", { expr = true })
-util.nnoremap("j", "v:count == 0 ? 'gj' : 'j'", { expr = true })
+util.map("n", "k", "v:count == 0 ? 'gk' : 'k'", { expr = true })
+util.map("n", "j", "v:count == 0 ? 'gj' : 'j'", { expr = true })
 
 -- Highlight on yank
 vim.cmd([[
@@ -92,33 +92,33 @@ vim.opt.lazyredraw = true
 -- auto-resize panes
 vim.cmd([[ autocmd VimResized * :wincmd = ]])
 
-util.nnoremap("<leader>w", ":w<CR>")
-util.nnoremap("<leader>q", ":q<CR>")
-util.nnoremap("<C-e>", ":e<CR>")
-util.nnoremap("<space><space>", "<C-^>")
+util.map("n", "<leader>w", ":w<CR>")
+util.map("n", "<leader>q", ":q<CR>")
+util.map("n", "<C-e>", ":e<CR>")
+util.map("n", "<space><space>", "<C-^>")
 
 -- convenience mappings
-util.nnoremap("H", "^")
-util.nnoremap("L", "$")
-util.nnoremap("0", "^")
-util.nnoremap("^", "0")
+util.map("n", "H", "^")
+util.map("n", "L", "$")
+util.map("n", "0", "^")
+util.map("n", "^", "0")
 
-util.nnoremap("Q", "<NOP>")
+util.map("n", "Q", "<NOP>")
 
 -- shell like jump mappings
-util.inoremap("<C-e>", "<END>")
-util.inoremap("<C-a>", "<C-o>^")
-util.inoremap("<C-b>", "<LEFT>")
-util.inoremap("<C-f>", "<RIGHT>")
+util.map("i", "<C-e>", "<END>")
+util.map("i", "<C-a>", "<C-o>^")
+util.map("i", "<C-b>", "<LEFT>")
+util.map("i", "<C-f>", "<RIGHT>")
 
 -- quickfix
-util.nmap("]q", ":cnext<CR>")
-util.nmap("[q", ":cprev<CR>")
-util.nmap("]Q", ":clast<CR>")
-util.nmap("[Q", ":cfirst<CR>")
+util.map("n", "]q", ":cnext<CR>")
+util.map("n", "[q", ":cprev<CR>")
+util.map("n", "]Q", ":clast<CR>")
+util.map("n", "[Q", ":cfirst<CR>")
 
 -- copy to system clipboard
-util.nmap("<Leader>y", '"+y')
+util.map("n", "<Leader>y", '"+y')
 
 vim.keymap.set("n", "<M-q>", function()
   for _, win in ipairs(vim.api.nvim_list_wins()) do

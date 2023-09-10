@@ -1,7 +1,7 @@
-local nnoremap = require("util").nnoremap
+local map = require("util").map
 
-nnoremap("<leader>bp", "orequire 'pry'; binding.pry<ESC>", { buffer = true })
-nnoremap("<leader>br", ":g/binding.pry/d<CR>", { buffer = true })
+map("n", "<leader>bp", "orequire 'pry'; binding.pry<ESC>", { buffer = true })
+map("n", "<leader>br", ":g/binding.pry/d<CR>", { buffer = true })
 
 function _G.load_rails_projections()
   if vim.fn.exists("g:rails_projections") then

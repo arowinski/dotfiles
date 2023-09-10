@@ -16,46 +16,6 @@ function _G.put(...)
   return ...
 end
 
-local map = function(mode, key, cmd, opts, defaults)
-  opts = vim.tbl_deep_extend(
-    "force",
-    { silent = true },
-    defaults or {},
-    opts or {}
-  )
-
-  return vim.keymap.set(mode, key, cmd, opts)
-end
-
--- TODO: revisit, maybe simplify mapping to always provide mode
-function M.nmap(key, cmd, opts)
-  return map("n", key, cmd, opts)
-end
-
-function M.xmap(key, cmd, opts)
-  return map("x", key, cmd, opts)
-end
-
-function M.vmap(key, cmd, opts)
-  return map("x", key, cmd, opts)
-end
-
-function M.imap(key, cmd, opts)
-  return map("i", key, cmd, opts)
-end
-
-function M.nnoremap(key, cmd, opts)
-  return map("n", key, cmd, opts, { noremap = true })
-end
-
-function M.inoremap(key, cmd, opts)
-  return map("i", key, cmd, opts, { noremap = true })
-end
-
-function M.noremap(mode, key, cmd, opts)
-  return map(mode, key, cmd, opts, { noremap = true })
-end
-
 function M.t(str)
   return vim.api.nvim_replace_termcodes(str, true, true, true)
 end
@@ -74,6 +34,21 @@ end
 
 function M.info(msg, name)
   vim.notify(msg, vim.log.levels.INFO, { title = name })
+end
+
+local lmap = function(mode, key, cmd, opts, defaults)
+  opts = vim.tbl_deep_extend(
+    "force",
+    { silent = true },
+    defaults or {},
+    opts or {}
+  )
+
+  return vim.keymap.set(mode, key, cmd, opts)
+end
+
+M.map = function(mode, key, cmd, opts)
+  return lmap(mode, key, cmd, opts, { noremap = true })
 end
 
 return M
