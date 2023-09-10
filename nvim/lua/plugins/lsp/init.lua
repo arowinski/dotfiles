@@ -12,7 +12,12 @@ return {
       "b0o/SchemaStore.nvim",
       "folke/lua-dev.nvim",
       "jose-elias-alvarez/typescript.nvim",
-      "j-hui/fidget.nvim",
+      {
+        "j-hui/fidget.nvim",
+        tag = "legacy",
+        event = "LspAttach",
+        opts = { text = { spinner = "dots" } },
+      },
       "hrsh7th/cmp-nvim-lsp",
     },
   },
