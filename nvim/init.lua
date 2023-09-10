@@ -1,11 +1,9 @@
 require("config.core")
-require("builtins")
-require("util")
-require("options")
-
-vim.defer_fn(function()
-  require("plugins")
-end, 0)
+require("config.builtins")
+require("config.options")
+require("config.lazy")
+require("config.mappings")
+require("config.aucommands")
 
 -- TODO: make it generic
 vim.g["ruby_path"] = vim.fn.expand("~/.asdf/shims/ruby")
