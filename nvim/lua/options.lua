@@ -47,10 +47,6 @@ vim.opt.wrap = false
 vim.opt.pumblend = 10 -- Popup blend
 vim.opt.pumheight = 10
 
---Remap for dealing with word wrap
-util.map("n", "k", "v:count == 0 ? 'gk' : 'k'", { expr = true })
-util.map("n", "j", "v:count == 0 ? 'gj' : 'j'", { expr = true })
-
 -- set line options
 vim.wo.relativenumber = true
 vim.wo.number = true
@@ -58,48 +54,3 @@ vim.wo.cursorline = true
 
 -- don't redraw window on running macros
 vim.opt.lazyredraw = true
-
-util.map("n", "<leader>w", ":w<CR>")
-util.map("n", "<leader>q", ":q<CR>")
-util.map("n", "<C-e>", ":e<CR>")
-util.map("n", "<space><space>", "<C-^>")
-
--- convenience mappings
-util.map("n", "H", "^")
-util.map("n", "L", "$")
-util.map("n", "0", "^")
-util.map("n", "^", "0")
-
-util.map("n", "Q", "<NOP>")
-
--- shell like jump mappings
-util.map("i", "<C-e>", "<END>")
-util.map("i", "<C-a>", "<C-o>^")
-util.map("i", "<C-b>", "<LEFT>")
-util.map("i", "<C-f>", "<RIGHT>")
-
--- quickfix
-util.map("n", "]q", ":cnext<CR>")
-util.map("n", "[q", ":cprev<CR>")
-util.map("n", "]Q", ":clast<CR>")
-util.map("n", "[Q", ":cfirst<CR>")
-
--- copy to system clipboard
-util.map("n", "<Leader>y", '"+y')
-
-vim.keymap.set("n", "<M-q>", function()
-  for _, win in ipairs(vim.api.nvim_list_wins()) do
-    if vim.api.nvim_win_is_valid(win) then
-      local config = vim.api.nvim_win_get_config(win)
-
-      if config.relative ~= "" then
-        vim.api.nvim_win_close(win, false)
-      end
-    end
-  end
-end)
-
-vim.cmd([[
-  cnoremap <C-a> <Home>
-  cnoremap <C-e> <END>
-]])
