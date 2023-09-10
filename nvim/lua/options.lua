@@ -56,41 +56,13 @@ vim.opt.pumheight = 10
 util.map("n", "k", "v:count == 0 ? 'gk' : 'k'", { expr = true })
 util.map("n", "j", "v:count == 0 ? 'gj' : 'j'", { expr = true })
 
--- Highlight on yank
-vim.cmd([[
-  augroup YankHighlight
-    autocmd!
-    autocmd TextYankPost * silent! lua vim.highlight.on_yank()
-  augroup end
-]])
-
 -- set line options
 vim.wo.relativenumber = true
 vim.wo.number = true
 vim.wo.cursorline = true
 
--- highlight columns above 80
-vim.cmd([[
-  highlight ColorColumn ctermbg=236 guibg=#212121
-  let &colorcolumn=join(range(81,500),",")
-]])
-
--- toggle columns highlight on focus
-vim.cmd([[
-  augroup BgHighlight
-    autocmd!
-    autocmd WinEnter * let &colorcolumn=join(range(81,999),",")
-    autocmd WinLeave * set colorcolumn=0
-    autocmd WinEnter * set cul
-    autocmd WinLeave * set nocul
-  augroup END
-]])
-
 -- don't redraw window on running macros
 vim.opt.lazyredraw = true
-
--- auto-resize panes
-vim.cmd([[ autocmd VimResized * :wincmd = ]])
 
 util.map("n", "<leader>w", ":w<CR>")
 util.map("n", "<leader>q", ":q<CR>")
@@ -136,11 +108,3 @@ vim.cmd([[
   cnoremap <C-a> <Home>
   cnoremap <C-e> <END>
 ]])
-
--- go to last loc when opening a buffer
-vim.cmd([[
-  autocmd BufReadPost * if &ft =~ 'gitcommit' && line("'\"") > 1 && line("'\"") <= line("$") | execute "normal! g`\"" | endif
-]])
-
--- create directories on file save
-vim.cmd([[ autocmd BufWritePre * lua require("util.dir").create_on_save() ]])
