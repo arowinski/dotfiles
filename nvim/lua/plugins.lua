@@ -95,16 +95,6 @@ return {
     end,
   },
   {
-    "numToStr/Comment.nvim",
-    keys = { "gc", "gcc", "gb", "gbc" },
-    config = function()
-      require("Comment").setup({})
-    end,
-    dependencies = {
-      "JoosepAlviste/nvim-ts-context-commentstring",
-    },
-  },
-  {
     "ggandor/lightspeed.nvim",
     keys = { "s", "S", "f", "F", "t", "T" },
     config = function()
@@ -130,7 +120,6 @@ return {
     end,
     dependencies = { "tpope/vim-rails" },
   },
-  { "tpope/vim-bundler", cmd = { "Bopen" } },
   {
     "Wansmer/treesj",
     dependencies = { "nvim-treesitter" },
@@ -152,7 +141,6 @@ return {
       { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
     },
   },
-  { "jparise/vim-graphql", cmd = "BufReadPre" },
   {
     "gbprod/yanky.nvim",
     config = function()

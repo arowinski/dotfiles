@@ -8,6 +8,7 @@ return {
       "nvim-treesitter/nvim-treesitter-textobjects",
       "windwp/nvim-ts-autotag",
       "RRethy/nvim-treesitter-endwise",
+      "JoosepAlviste/nvim-ts-context-commentstring",
     },
     opts = {
       ensure_installed = {
@@ -25,6 +26,7 @@ return {
         "c",
         "ruby",
         "sql",
+        "tsx",
         "typescript",
         "yaml",
       },
@@ -48,6 +50,10 @@ return {
             ["ia"] = "@parameter.inner",
           },
         },
+      },
+      context_commentstring = {
+        enable = true,
+        enable_autocmd = false,
       },
     },
     config = function(_, opts)
