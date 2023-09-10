@@ -31,11 +31,6 @@ vim.cmd([[colorscheme tokyonight-night]])
 vim.opt.splitbelow = true
 vim.opt.splitright = true
 
---Remap space as leader key
-vim.keymap.set("", "<Space>", "<Nop>", { noremap = true, silent = true })
-vim.g.mapleader = " "
-vim.g.maplocalleader = " "
-
 -- disable swapfiles and backup
 vim.o.swapfile = false
 vim.o.backup = false

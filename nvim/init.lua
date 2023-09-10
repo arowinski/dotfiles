@@ -1,3 +1,4 @@
+require("config.core")
 require("builtins")
 require("util")
 require("options")
