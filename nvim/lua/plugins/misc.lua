@@ -28,4 +28,27 @@ return {
   { "tpope/vim-eunuch", cmd = { "Delete", "Move", "Rename", "Remove" } },
   { "tpope/tpope-vim-abolish", event = "VeryLazy" },
   { "elihunter173/dirbuf.nvim", event = "BufReadPre" },
+  {
+    "NvChad/nvim-colorizer.lua",
+    event = "VeryLazy",
+    opts = {
+      user_default_options = { tailwind = "lsp" },
+    }
+  },
+  {
+    "RRethy/vim-illuminate",
+    event = "CursorHold",
+    config = function()
+      require("illuminate").configure({
+        providers = { "lsp", "treesitter", "regex" },
+        delay = 200,
+        filetypes_denylist = { "fugitive" },
+        under_cursor = false,
+      })
+    end,
+  },
+  {
+    "folke/todo-comments.nvim",
+    dependencies = { "nvim-lua/plenary.nvim" },
+  },
 }

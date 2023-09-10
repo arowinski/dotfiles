@@ -15,4 +15,75 @@ return {
       "JoosepAlviste/nvim-ts-context-commentstring",
     },
   },
+  {
+    "gbprod/yanky.nvim",
+    config = function()
+      require("yanky").setup({})
+
+      vim.keymap.set({ "n", "x" }, "p", "<Plug>(YankyPutAfter)")
+      vim.keymap.set({ "n", "x" }, "P", "<Plug>(YankyPutBefore)")
+
+      vim.keymap.set("n", "<M-j>", "<Plug>(YankyCycleForward)")
+      vim.keymap.set("n", "<M-k>", "<Plug>(YankyCycleBackward)")
+    end,
+  },
+  {
+    "kylechui/nvim-surround",
+    version = "*",
+    dependencies = {
+      "nvim-treesitter/nvim-treesitter",
+      "nvim-treesitter/nvim-treesitter-textobjects",
+    },
+    event = "VeryLazy",
+  },
+  {
+    "Wansmer/treesj",
+    dependencies = { "nvim-treesitter/nvim-treesitter" },
+    opts = { use_default_keymaps = false, max_join_length = 150 },
+    keys = {
+      { "gJ", "<cmd>TSJJoin<CR>", desc = "Join block" },
+      { "gS", "<cmd>TSJSplit<CR>", desc = "Split block" },
+      { "gG", "<cmd>TSJToggle<CR>", desc = "Toggle block" },
+    },
+  },
+  {
+    "vim-test/vim-test",
+    dependencies = { "christoomey/vim-tmux-runner" },
+    keys = {
+      { "<leader>tt", "<CMD>TestNearest<CR>", desc = "Run nearest test" },
+      { "<leader>tf", "<CMD>TestFile<CR>", desc = "Run test file" },
+      { "<Leader>tl", "<CMD>TestLast<CR>", desc = "Run last test" },
+    },
+    init = function()
+      vim.g["test#strategy"] = "vtr"
+    end,
+  },
+  {
+    "ggandor/leap.nvim",
+    event = "VeryLazy",
+    config = function()
+      require("leap").add_default_mappings()
+    end,
+  },
+  {
+    "tpope/vim-projectionist",
+    lazy = false,
+    dependencies = { "tpope/vim-rails" },
+    keys = {
+      { "<leader>av", ":AOV<CR>", "Open alternate in vsplit" },
+      { "<leader>rv", ":ROV<CR>", "Open related in vsplit" },
+    },
+    config = function()
+      vim.cmd(
+        "source "
+          .. vim.fn.expand("~/.config/nvim/vimscript/plugins/projections.vim")
+      )
+
+      vim.cmd([[
+        autocmd User ProjectionistDetect :call projections#set_projections(&filetype)
+        command! ROV silent only|RV
+        command! AOV silent only|AV
+      ]])
+    end,
+  },
 }

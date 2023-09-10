@@ -118,4 +118,11 @@ return {
     end,
   },
   { "lukas-reineke/indent-blankline.nvim", event = "BufReadPre" },
+  {
+    "rcarriga/nvim-notify",
+    event = "VimEnter",
+    config = function()
+      vim.notify = require("notify")
+    end,
+  },
 }
