@@ -35,6 +35,9 @@ return {
       "nvim-treesitter/nvim-treesitter-textobjects",
     },
     event = "VeryLazy",
+    config = function()
+      require("nvim-surround").setup()
+    end,
   },
   {
     "Wansmer/treesj",
@@ -62,7 +65,8 @@ return {
     "ggandor/leap.nvim",
     event = "VeryLazy",
     config = function()
-      require("leap").add_default_mappings()
+     vim.keymap.set({'n', 'x', 'o'}, 's', '<Plug>(leap-forward-to)')
+     vim.keymap.set({'n', 'x', 'o'}, 'S', '<Plug>(leap-backward-to)')
     end,
   },
   {
