@@ -45,13 +45,29 @@ return {
     vim.g["textobj#anyblock#blocks"] = { "(", "{", "[", "<" }
   end,
   dependencies = {
-    "kana/vim-operator-user",
-    "rhysd/vim-operator-surround",
-    "kana/vim-textobj-user",
-    "kana/vim-textobj-line",
-    "kana/vim-textobj-entire",
-    "beloglazov/vim-textobj-quotes",
-    "rhysd/vim-textobj-anyblock",
+    {
+      "chrisgrieser/nvim-various-textobjs",
+      keys = {
+        {
+          "ae",
+          "<cmd>lua require('various-textobjs').entireBuffer()<CR>",
+          desc = "Entire buffer",
+          mode = { "o", "x" },
+        },
+        {
+          "is",
+          "<cmd>lua require('various-textobjs').subword('inner')<CR>",
+          desc = "Inner subword",
+          mode = { "o", "x" },
+        },
+        {
+          "as",
+          "<cmd>lua require('various-textobjs').subword('outer')<CR>",
+          desc = "Outer subword",
+          mode = { "o", "x" },
+        },
+      },
+    },
     "gbprod/yanky.nvim",
   },
 }
