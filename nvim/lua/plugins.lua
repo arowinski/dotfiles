@@ -25,16 +25,6 @@ return {
     end,
   },
   {
-    "L3MON4D3/LuaSnip",
-    config = function()
-      require("config.snip")
-    end,
-    dependencies = {
-      "rafamadriz/friendly-snippets",
-      "hrsh7th/nvim-cmp",
-    },
-  },
-  {
     "nvim-telescope/telescope.nvim",
     cmd = { "Telescope" },
     config = function()
