@@ -24,18 +24,4 @@ return {
       require("config.lsp-saga")
     end,
   },
-  {
-    "nvim-telescope/telescope.nvim",
-    cmd = { "Telescope" },
-    config = function()
-      require("config.telescope")
-    end,
-    keys = { "<C-p>", "<C-q>", "<C-y>", "\\", "<C-g>", "<C-x>" },
-    dependencies = {
-      "nvim-lua/plenary.nvim",
-      "princejoogie/dir-telescope.nvim",
-      { "debugloop/telescope-undo.nvim" },
-      { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
-    },
-  },
 }
