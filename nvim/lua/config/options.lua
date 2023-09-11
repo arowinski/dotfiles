@@ -31,3 +31,12 @@ vim.o.updatetime = 250
 --Case insensitive searching UNLESS /C or capital in search
 vim.o.ignorecase = true
 vim.o.smartcase = true
+
+--Set indentation to 2 spaces always
+vim.o.shiftwidth = 2
+vim.o.tabstop = 2
+vim.o.softtabstop = 2
+vim.o.expandtab = true
+
+--Set highlight on search
+vim.o.hlsearch = false
