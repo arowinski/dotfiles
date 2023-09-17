@@ -16,14 +16,6 @@ function _G.put(...)
   return ...
 end
 
-function M.t(str)
-  return vim.api.nvim_replace_termcodes(str, true, true, true)
-end
-
-function M.feed_keys(key, mode)
-  vim.api.nvim_feedkeys(M.t(key), mode, true)
-end
-
 function M.warn(msg, name)
   vim.notify(msg, vim.log.levels.WARN, { title = name })
 end
