@@ -41,8 +41,6 @@ return {
         },
       },
     })
-
-    vim.g["textobj#anyblock#blocks"] = { "(", "{", "[", "<" }
   end,
   dependencies = {
     {
