@@ -64,6 +64,18 @@ return {
           desc = "Outer subword",
           mode = { "o", "x" },
         },
+        {
+          "il",
+          "<cmd>lua require('various-textobjs').lineCharacterwise('inner')<CR>",
+          desc = "Outer subword",
+          mode = { "o", "x" },
+        },
+        {
+          "al",
+          "<cmd>lua require('various-textobjs').lineCharacterwise('outer')<CR>",
+          desc = "Outer subword",
+          mode = { "o", "x" },
+        },
       },
     },
     "gbprod/yanky.nvim",
