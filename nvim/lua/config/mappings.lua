@@ -8,6 +8,7 @@ wk.register({
 })
 
 local map = require("util").map
+map("n", "<C-e>", ":e<CR>")
 
 -- convenience mappings
 map("n", "H", "^")
