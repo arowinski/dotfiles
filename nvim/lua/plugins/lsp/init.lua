@@ -3,11 +3,29 @@ return {
     "neovim/nvim-lspconfig",
     event = { "BufReadPre", "BufNewFile" },
     config = function()
+      require("plugins.lsp.diagnostics").setup()
       require("plugins.lsp.config")
     end,
     dependencies = {
-      "williamboman/mason.nvim",
-      "williamboman/mason-lspconfig.nvim",
+      {
+        "williamboman/mason.nvim",
+        config = function()
+          require("mason").setup()
+        end,
+      },
+      {
+        "williamboman/mason-lspconfig.nvim",
+        opts = {
+          ensure_installed = {
+            "lua_ls",
+            "jsonls",
+            "yamlls",
+            "html",
+            "tailwindcss",
+            "tsserver",
+          },
+        },
+      },
       "jose-elias-alvarez/null-ls.nvim",
       "b0o/SchemaStore.nvim",
       "folke/lua-dev.nvim",
@@ -21,6 +39,7 @@ return {
       "hrsh7th/cmp-nvim-lsp",
     },
   },
+  {},
   {
     "nvimdev/lspsaga.nvim",
     branch = "main",

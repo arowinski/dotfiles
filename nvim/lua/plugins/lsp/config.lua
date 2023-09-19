@@ -1,18 +1,3 @@
-require("mason").setup()
-require("mason-lspconfig").setup({
-  ensure_installed = {
-    "lua_ls",
-    "jsonls",
-    "yamlls",
-    "html",
-    "tailwindcss",
-    "tsserver",
-  },
-})
-
-require("plugins.lsp.diagnostics").setup()
-require("plugins.lsp.handlers").setup()
-
 local lsp = require("lspconfig")
 local options = require("plugins.lsp.options")
 
