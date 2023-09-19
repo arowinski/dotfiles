@@ -28,7 +28,11 @@ for config in $HOME/.zsh/configs/*; do
 done
 
 . /opt/homebrew/opt/asdf/libexec/asdf.sh
-eval "$(asdf exec direnv hook zsh)"
+source "${XDG_CONFIG_HOME:-$HOME/.config}/asdf-direnv/zshrc"
+export DIRENV_LOG_FORMAT=
+
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 [[ -f $HOME/.zsh_local ]] && source $HOME/.zsh_local
+
+[[ $commands[kubectl] ]] && source <(kubectl completion zsh)
