@@ -26,7 +26,7 @@ return {
           },
         },
       },
-      "jose-elias-alvarez/null-ls.nvim",
+      "nvimtools/none-ls.nvim",
       "b0o/SchemaStore.nvim",
       "folke/lua-dev.nvim",
       "jose-elias-alvarez/typescript.nvim",
