@@ -59,6 +59,7 @@ return {
     },
     init = function()
       vim.g["test#strategy"] = "vtr"
+      vim.g["test#javascript#jest#executable"] = "yarn test"
     end,
   },
   {
