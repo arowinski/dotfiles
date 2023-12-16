@@ -29,7 +29,7 @@ return {
       "nvimtools/none-ls.nvim",
       "b0o/SchemaStore.nvim",
       "folke/lua-dev.nvim",
-      "jose-elias-alvarez/typescript.nvim",
+      "pmizio/typescript-tools.nvim",
       {
         "j-hui/fidget.nvim",
         tag = "legacy",
