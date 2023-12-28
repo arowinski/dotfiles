@@ -18,7 +18,7 @@ return {
     event = "VeryLazy",
     opts = {
       autoclose = true, -- set autoclose to false if you want to close manually
-      threshold = 15,
+      threshold = 20,
       close_command = function(bufnr)
         vim.api.nvim_buf_delete(bufnr, {})
       end,
