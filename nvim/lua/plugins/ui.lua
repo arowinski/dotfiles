@@ -119,10 +119,33 @@ return {
   },
   { "lukas-reineke/indent-blankline.nvim", event = "BufReadPre" },
   {
-    "rcarriga/nvim-notify",
-    event = "VimEnter",
-    config = function()
-      vim.notify = require("notify")
-    end,
+    "j-hui/fidget.nvim",
+    event = "LspAttach",
+    keys = {
+      {
+        "<leader>nc",
+        "<cmd>Fidget clear<CR>",
+        desc = "Clear notifications",
+      },
+    },
+    opts = {
+      notification = {
+        override_vim_notify = true,
+        view = {
+          stack_upwards = false,
+        },
+        window = {
+          normal_hl = "BufferCurrent",
+          border = "none",
+          winblend = 100,
+          max_width = 0,
+          max_height = 0,
+          x_padding = 1,
+          y_padding = -1,
+          align = "top",
+          relative = "win",
+        },
+      },
+    },
   },
 }

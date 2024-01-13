@@ -30,12 +30,6 @@ return {
       "b0o/SchemaStore.nvim",
       "folke/lua-dev.nvim",
       "pmizio/typescript-tools.nvim",
-      {
-        "j-hui/fidget.nvim",
-        tag = "legacy",
-        event = "LspAttach",
-        opts = { text = { spinner = "dots" } },
-      },
       "hrsh7th/cmp-nvim-lsp",
     },
   },
