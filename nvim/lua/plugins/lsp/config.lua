@@ -3,7 +3,6 @@ local options = require("plugins.lsp.options")
 
 require("plugins.lsp.null-ls").setup(lsp, options)
 require("plugins.lsp.solargraph").setup(lsp, options)
-require("plugins.lsp.eslint").setup(lsp, options)
 require("plugins.lsp.lua-ls").setup(lsp, options)
 require("plugins.lsp.typescript").setup(lsp, options)
 
@@ -19,3 +18,4 @@ setup("tailwindcss", { root_dir = lsp.util.root_pattern("tailwind.config.js") })
 setup("html")
 setup("yamlls")
 setup("rubocop")
+setup("eslint")
