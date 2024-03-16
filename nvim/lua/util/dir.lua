@@ -23,7 +23,7 @@ function M.project_root(file_pattern)
     marker = vim.fn.finddir(".git/..", ".;")
   end
 
-  if string.len(marker) > 0 then
+  if marker and string.len(marker) > 0 then
     return marker
   else
     require("util").warn("Couldn't find project root, using cwd")
