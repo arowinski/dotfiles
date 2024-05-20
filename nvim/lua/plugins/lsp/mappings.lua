@@ -17,8 +17,8 @@ function M.setup()
   bmap("n", "K", "<CMD>Lspsaga hover_doc<CR>")
   bmap("n", "gs", vim.lsp.buf.signature_help)
 
-  bmap("n", "[r", vim.diagnostic.goto_prev)
-  bmap("n", "]r", vim.diagnostic.goto_next)
+  bmap("n", "[r", "<CMD>Lspsaga diagnostic_jump_prev<CR>")
+  bmap("n", "]r", "<CMD>Lspsaga diagnostic_jump_next<CR>")
   bmap("n", "<leader>d", "<CMD>Lspsaga show_line_diagnostics<CR>")
 end
 
