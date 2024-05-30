@@ -30,6 +30,7 @@ return {
       "b0o/SchemaStore.nvim",
       "folke/lua-dev.nvim",
       "pmizio/typescript-tools.nvim",
+      "dmmulroy/ts-error-translator.nvim",
       "hrsh7th/cmp-nvim-lsp",
     },
   },
