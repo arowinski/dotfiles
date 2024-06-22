@@ -54,16 +54,6 @@ return {
           filesize_limit = 0.1, -- MB
           highlight_limit = 0.05,
         },
-        vimgrep_arguments = {
-          "rg",
-          "--color=never",
-          "--no-heading",
-          "--with-filename",
-          "--line-number",
-          "--column",
-          "--smart-case",
-          "--max-filesize=500000",
-        },
         mappings = {
           i = {
             ["<C-j>"] = actions.move_selection_next,
@@ -71,13 +61,8 @@ return {
             ["<ESC>"] = actions.close,
             ["<M-q>"] = actions.send_to_qflist + actions.open_qflist,
             ["<C-q>"] = actions.send_selected_to_qflist + actions.open_qflist,
+            ["<C-c>"] = actions.delete_buffer + actions.move_to_top,
           },
-        },
-      },
-      pickers = {
-        find_files = {
-          hidden = true,
-          find_command = { "rg", "--files", "--iglob", "!.git", "--hidden" },
         },
       },
       extensions = {
@@ -91,8 +76,8 @@ return {
           auto_quoting = true,
           mappings = {
             i = {
-              ["<C-m>"] = lga_actions.quote_prompt(),
-              ["<C-i>"] = lga_actions.quote_prompt({ postfix = " --iglob " }),
+              ["<C-g>"] = lga_actions.quote_prompt(),
+              ["<C-x>"] = lga_actions.quote_prompt({ postfix = " --iglob " }),
             },
           },
         },
