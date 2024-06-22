@@ -50,6 +50,10 @@ return {
 
     return {
       defaults = {
+        preview = {
+          filesize_limit = 0.1, -- MB
+          highlight_limit = 0.05,
+        },
         vimgrep_arguments = {
           "rg",
           "--color=never",
