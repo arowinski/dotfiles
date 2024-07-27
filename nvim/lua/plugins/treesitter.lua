@@ -16,6 +16,7 @@ return {
         "css",
         "elixir",
         "graphql",
+        "heex",
         "html",
         "http",
         "javascript",
