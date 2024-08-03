@@ -1,10 +1,8 @@
 local wk = require("which-key")
 
-wk.register({
-  q = { "<cmd>q<CR>", "Close split" },
-  w = { "<cmd>w<CR>", "Write buffer" },
-}, {
-  prefix = "<leader>",
+wk.add({
+	{ "<leader>q", "<cmd>q<CR>", desc = "Close split" },
+	{ "<leader>w", "<cmd>w<CR>", desc = "Write buffer" },
 })
 
 local map = require("util").map
@@ -37,15 +35,15 @@ map("n", "k", "v:count == 0 ? 'gk' : 'k'", { expr = true })
 map("n", "j", "v:count == 0 ? 'gj' : 'j'", { expr = true })
 
 map("n", "<M-q>", function()
-  for _, win in ipairs(vim.api.nvim_list_wins()) do
-    if vim.api.nvim_win_is_valid(win) then
-      local config = vim.api.nvim_win_get_config(win)
+	for _, win in ipairs(vim.api.nvim_list_wins()) do
+		if vim.api.nvim_win_is_valid(win) then
+			local config = vim.api.nvim_win_get_config(win)
 
-      if config.relative ~= "" then
-        vim.api.nvim_win_close(win, false)
-      end
-    end
-  end
+			if config.relative ~= "" then
+				vim.api.nvim_win_close(win, false)
+			end
+		end
+	end
 end)
 
 map("c", "<C-a>", "<Home>", { noremap = true, silent = false })
