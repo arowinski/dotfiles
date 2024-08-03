@@ -30,8 +30,8 @@ return {
 		dependencies = { "nvim-lua/plenary.nvim" },
 		keys = {
 			{ "<leader>hs", "<CMD>Gitsigns stage_hunk<CR>", desc = "Stage hunk" },
-			{ "<leader>hu", "<CMD>Gitsigns reset_hunk<CR>", desc = "Reset hunk" },
-			{ "<leader>hU", "<CMD>Gitsigns undo_stage_hunk<CR>", desc = "Undo staged hunk" },
+			{ "<leader>hr", "<CMD>Gitsigns reset_hunk<CR>", desc = "Reset hunk" },
+			{ "<leader>hu", "<CMD>Gitsigns undo_stage_hunk<CR>", desc = "Undo staged hunk" },
 			{ "<leader>hp", "<CMD>Gitsigns preview_hunk<CR>", desc = "Preview hunk" },
 			{ "<leader>hd", "<CMD>Gitsigns diffthis<CR>", desc = "Open diff split" },
 			{ "<leader>gw", "<CMD>Gitsigns stage_buffer<CR>", desc = "Stage buffer" },
