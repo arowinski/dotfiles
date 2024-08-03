@@ -1,6 +1,4 @@
-local wk = require("which-key")
-
-wk.add({
+require("which-key").add({
 	{ "<leader>q", "<cmd>q<CR>", desc = "Close split" },
 	{ "<leader>w", "<cmd>w<CR>", desc = "Write buffer" },
 })
