@@ -1,7 +1,6 @@
 local lsp = require("lspconfig")
 local options = require("plugins.lsp.options")
 
-require("plugins.lsp.null-ls").setup(lsp, options)
 require("plugins.lsp.lua-ls").setup(lsp, options)
 require("plugins.lsp.typescript").setup(lsp, options)
 
