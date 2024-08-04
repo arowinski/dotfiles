@@ -20,10 +20,6 @@
     ~/.rgignore: rgignore
     ~/.rspec: ruby/rspec
     ~/.tmux.conf: tmux/tmux.conf
-    ~/.vale.ini: vale.ini
     ~/.zlogin: zsh/zlogin
     ~/.zsh: zsh
     ~/.zshrc: zsh/zshrc
-
-- shell:
-    - vale sync
