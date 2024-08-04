@@ -14,7 +14,6 @@ alias gres="git reset --soft HEAD^"
 
 alias gl="git log --pretty=format:\"%C(yellow)%h %C(magenta)%ad%Cred%d %Creset%s%Cblue [%an]\" --decorate --date=short -20"
 alias glf="git log --pretty=format:\"%C(yellow)%h %C(magenta)%ad%Cred%d %Creset%s%Cblue [%an]\" --decorate --date=short"
-alias glt='gl --graph --all'
 alias glg='git log -E -i --grep'
 alias gls='git log -S'
 
@@ -37,8 +36,6 @@ alias grb="git rebase"
 alias gcon='git continue'
 alias gabort='git abort'
 alias gcl="git clean -fi"
-
-alias gbcl="git-branch-clean"
 
 compdef g=git
 g() {
