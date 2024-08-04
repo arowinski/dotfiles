@@ -7,7 +7,7 @@ return {
         function()
           require("conform").format()
         end,
-        "Format the current buffer",
+        desc = "Format the current buffer",
       },
     },
     opts = {
