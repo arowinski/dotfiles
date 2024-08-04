@@ -23,6 +23,7 @@ return {
 						"html",
 						"tailwindcss",
 						"tsserver",
+						"typos_lsp",
 					},
 				},
 			},
