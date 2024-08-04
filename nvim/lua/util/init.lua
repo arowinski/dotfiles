@@ -2,7 +2,6 @@ local M = {
   string = require("util.string"),
   dir = require("util.dir"),
   table = require("util.table"),
-  selection = require("util.selection")
 }
 
 function _G.put(...)
@@ -16,31 +15,22 @@ function _G.put(...)
   return ...
 end
 
-function M.warn(msg, name)
-  vim.notify(msg, vim.log.levels.WARN, { title = name })
+function M.get_selection()
+  return vim.fn.getregion(
+    vim.fn.getpos("."),
+    vim.fn.getpos("v"),
+    { mode = vim.fn.mode() }
+  )
 end
 
-function M.error(msg, name)
-  vim.notify(msg, vim.log.levels.ERROR, { title = name })
-end
-
-function M.info(msg, name)
-  vim.notify(msg, vim.log.levels.INFO, { title = name })
-end
-
-local lmap = function(mode, key, cmd, opts, defaults)
-  opts = vim.tbl_deep_extend(
+function M.map(mode, key, cmd, opts)
+  local lopts = vim.tbl_deep_extend(
     "force",
-    { silent = true },
-    defaults or {},
+    { silent = true, noremap = true },
     opts or {}
   )
 
-  return vim.keymap.set(mode, key, cmd, opts)
-end
-
-M.map = function(mode, key, cmd, opts)
-  return lmap(mode, key, cmd, opts, { noremap = true })
+  return vim.keymap.set(mode, key, cmd, lopts)
 end
 
 return M

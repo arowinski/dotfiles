@@ -24,5 +24,9 @@ require("util").map("n", "gl", function()
     "+",
     repo_url .. "/-/blob/" .. sha .. "/" .. fpath .. "#L" .. row
   )
-  util.info("URL copied to clipboard", "Gitlab")
+  vim.notify(
+    "URL copied to clipboard",
+    vim.log.levels.INFO,
+    { name = "Gitlab" }
+  )
 end)

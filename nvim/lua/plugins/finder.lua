@@ -28,7 +28,7 @@ return {
         "<leader>fw",
         function()
           builtin.grep_string({
-            default_text = require("util.selection").get_visual_selection(),
+            default_text = table.concat(require("util").get_selection()),
           })
         end,
         mode = "v",

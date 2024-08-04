@@ -5,7 +5,7 @@ local M = {}
 local function file_relative_path()
   return util.string.replace(
     vim.fn.expand("%:p:r"),
-    util.dir.project_root("Gemfile") .. "/",
+    vim.fs.root(vim.fn.expand("%"), "Gemfile") .. "/",
     ""
   )
 end

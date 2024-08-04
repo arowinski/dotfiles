@@ -57,7 +57,7 @@ local init_readers = function()
     end
   end
 
-  require("util").info("No initializer defined")
+  vim.notify("No initializer defined")
   return ""
 end
 

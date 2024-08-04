@@ -19,21 +19,21 @@ return {
       elseif luasnip.expand_or_locally_jumpable() then
         luasnip.expand_or_jump()
       else
-        util.info("No snippet under cursor")
+        vim.notify("No snippet under cursor")
       end
     end)
     util.map({ "i", "v" }, "<F2>2", function()
       if luasnip.jumpable(1) then
         luasnip.jump(1)
       else
-        util.info("Snippet: can't jump forward")
+        vim.notify("Snippet: can't jump forward")
       end
     end)
     util.map({ "i", "v" }, "<F2>3", function()
       if luasnip.jumpable(-1) then
         luasnip.jump(-1)
       else
-        util.info("Snippet: can't jump back")
+        vim.notify("Snippet: can't jump back")
       end
     end)
 
