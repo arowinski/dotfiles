@@ -119,33 +119,42 @@ return {
   },
   { "lukas-reineke/indent-blankline.nvim", event = "BufReadPre" },
   {
-    "j-hui/fidget.nvim",
-    event = "LspAttach",
-    keys = {
-      {
-        "<leader>nc",
-        "<cmd>Fidget clear<CR>",
-        desc = "Clear notifications",
-      },
-    },
+    "folke/noice.nvim",
+    event = "VeryLazy",
     opts = {
-      notification = {
-        override_vim_notify = true,
-        view = {
-          stack_upwards = false,
+      views = {
+        cmdline_popup = {
+          position = {
+            row = "25%",
+            col = "50%",
+          },
         },
-        window = {
-          normal_hl = "BufferCurrent",
-          border = "none",
-          winblend = 100,
-          max_width = 0,
-          max_height = 0,
-          x_padding = 1,
-          y_padding = -1,
-          align = "top",
-          relative = "win",
+        popupmenu = {
+          relative = "editor",
+          border = {
+            style = "rounded",
+            padding = { 0, 1 },
+          },
+          win_options = {
+            winhighlight = {
+              Normal = "Normal",
+              FloatBorder = "DiagnosticInfo",
+            },
+          },
+        },
+      },
+      routes = {
+        {
+          filter = {
+            any = {
+              { event = "msg_show", find = "written" },
+              { event = "msg_show", find = "AutoSave" },
+            },
+          },
+          opts = { skip = true },
         },
       },
     },
+    dependencies = { "MunifTanjim/nui.nvim" },
   },
 }
