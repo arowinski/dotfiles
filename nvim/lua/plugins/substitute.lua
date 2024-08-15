@@ -57,13 +57,13 @@ return {
 				{
 					"il",
 					"<cmd>lua require('various-textobjs').lineCharacterwise('inner')<CR>",
-					desc = "Outer subword",
+					desc = "Inner line",
 					mode = { "o", "x" },
 				},
 				{
 					"al",
 					"<cmd>lua require('various-textobjs').lineCharacterwise('outer')<CR>",
-					desc = "Outer subword",
+					desc = "Outer line",
 					mode = { "o", "x" },
 				},
 			},
