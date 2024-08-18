@@ -1,11 +1,10 @@
 local protocol = "https://"
-local util = require("util")
 
 require("util").map("n", "gl", function()
   local remote = vim.fn.system("git remote get-url origin")
 
-  if vim.fn.empty(remote) == 1 then
-    util.warn("Not a git repo", "Gitlab")
+  if string.find(remote, "fatal: not a git repository") == 1 then
+    vim.notify("Not a git repo", vim.log.levels.WARN, { title = "Gitlab" })
     return
   end
 
@@ -16,7 +15,7 @@ require("util").map("n", "gl", function()
   local row, _ = unpack(vim.api.nvim_win_get_cursor(0))
 
   if vim.fn.empty(fpath) == 1 then
-    util.warn("Please open a file", "Gitlab")
+    vim.notify("Please open a file", vim.log.levels.WARN, { title = "Gitlab" })
     return
   end
 
@@ -27,6 +26,6 @@ require("util").map("n", "gl", function()
   vim.notify(
     "URL copied to clipboard",
     vim.log.levels.INFO,
-    { name = "Gitlab" }
+    { title = "Gitlab" }
   )
 end)
