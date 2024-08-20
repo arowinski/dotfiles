@@ -66,6 +66,18 @@ return {
 					desc = "Outer line",
 					mode = { "o", "x" },
 				},
+				{
+					"iq",
+					"<cmd>lua require('various-textobjs').anyQuote('inner')<CR>",
+					desc = "Inner quote",
+					mode = { "o", "x" },
+				},
+				{
+					"aq",
+					"<cmd>lua require('various-textobjs').anyQuote('outer')<CR>",
+					desc = "Outer quote",
+					mode = { "o", "x" },
+				},
 			},
 		},
 		"gbprod/yanky.nvim",

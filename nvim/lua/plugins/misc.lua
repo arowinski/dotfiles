@@ -51,46 +51,5 @@ return {
     "folke/todo-comments.nvim",
     dependencies = { "nvim-lua/plenary.nvim" },
   },
-  {
-    "echasnovski/mini.ai",
-    version = "*",
-    event = "VeryLazy",
-    dependencies = { "nvim-treesitter-textobjects" },
-    opts = function()
-      local ai = require("mini.ai")
-      return {
-        n_lines = 500,
-        mappings = {
-          -- Main textobject prefixes
-          around = "a",
-          inside = "i",
-
-          -- Next/last variants
-          around_next = "",
-          inside_next = "",
-          around_last = "",
-          inside_last = "",
-
-          -- Move cursor to corresponding edge of `a` textobject
-          goto_left = "g[",
-          goto_right = "g]",
-        },
-        custom_textobjects = {
-          o = ai.gen_spec.treesitter({
-            a = { "@block.outer", "@conditional.outer", "@loop.outer" },
-            i = { "@block.inner", "@conditional.inner", "@loop.inner" },
-          }, {}),
-          f = ai.gen_spec.treesitter(
-            { a = "@function.outer", i = "@function.inner" },
-            {}
-          ),
-          c = ai.gen_spec.treesitter(
-            { a = "@class.outer", i = "@class.inner" },
-            {}
-          ),
-        },
-      }
-    end,
-  },
   { "Pocco81/auto-save.nvim", event = "BufReadPre" },
 }

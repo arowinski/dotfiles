@@ -1,6 +1,5 @@
 return {
 	{ "tpope/vim-bundler", cmd = "Bopen" },
-	{ "jparise/vim-graphql", cmd = "BufReadPre" },
 	{
 		"numToStr/Comment.nvim",
 		keys = { "gc", "gcc", "gb", "gbc" },
