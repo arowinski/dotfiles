@@ -35,18 +35,6 @@ return {
     },
   },
   {
-    "RRethy/vim-illuminate",
-    event = "CursorHold",
-    config = function()
-      require("illuminate").configure({
-        providers = { "lsp", "treesitter", "regex" },
-        delay = 200,
-        filetypes_denylist = { "fugitive" },
-        under_cursor = false,
-      })
-    end,
-  },
-  {
     "folke/todo-comments.nvim",
     dependencies = { "nvim-lua/plenary.nvim" },
   },
