@@ -22,7 +22,7 @@ return {
 						"yamlls",
 						"html",
 						"tailwindcss",
-						"tsserver",
+						"ts_ls",
 						"typos_lsp",
 					},
 				},
