@@ -39,4 +39,15 @@ return {
     dependencies = { "nvim-lua/plenary.nvim" },
   },
   { "Pocco81/auto-save.nvim", event = "BufReadPre" },
+  {
+    "stevearc/quicker.nvim",
+    event = "FileType qf",
+    opts = {
+      highlight = {
+        treesitter = true,
+        lsp = false,
+        load_buffers = false,
+      },
+    },
+  },
 }
