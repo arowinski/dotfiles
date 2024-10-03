@@ -34,8 +34,6 @@ done
 source "${XDG_CONFIG_HOME:-$HOME/.config}/asdf-direnv/zshrc"
 export DIRENV_LOG_FORMAT=
 
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-
 [[ -f $HOME/.zsh_local ]] && source $HOME/.zsh_local
 
 [[ $commands[kubectl] ]] && source <(kubectl completion zsh)

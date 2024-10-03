@@ -1,9 +1,9 @@
 #!/bin/sh
 
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+source <(fzf --zsh)
 
 export FZF_DEFAULT_COMMAND='rg --hidden --files -g ""'
-export FZF_DEFAULT_OPTS='--bind ctrl-space:abort'
+export FZF_DEFAULT_OPTS='--bind ctrl-space:abort --layout=reverse'
 
 alias fzf="
   fzf \
