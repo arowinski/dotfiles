@@ -38,7 +38,24 @@ return {
     "folke/todo-comments.nvim",
     dependencies = { "nvim-lua/plenary.nvim" },
   },
-  { "Pocco81/auto-save.nvim", event = "BufReadPre" },
+  {
+    "Pocco81/auto-save.nvim",
+    event = "BufReadPre",
+    opts = {
+      condition = function(buf)
+        local fn = vim.fn
+        local utils = require("auto-save.utils.data")
+
+        if
+          fn.getbufvar(buf, "&modifiable") == 1
+          and utils.not_in(fn.getbufvar(buf, "&filetype"), { "dirbuf" })
+        then
+          return true
+        end
+        return false
+      end,
+    },
+  },
   {
     "stevearc/quicker.nvim",
     event = "FileType qf",
