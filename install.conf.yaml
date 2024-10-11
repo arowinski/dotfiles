@@ -13,13 +13,12 @@
     ~/.config/karabiner: karabiner
     ~/.config/nvim: nvim
     ~/.config/solargraph: solargraph
-    ~/.ctags: ctags
     ~/.gitconfig: git/gitconfig
     ~/.pryrc: ruby/pryrc
     ~/.psqlrc: psql/psqlrc
     ~/.rgignore: rgignore
     ~/.rspec: ruby/rspec
-    ~/.tmux.conf: tmux/tmux.conf
+    ~/.config/tmux/tmux.conf: tmux/tmux.conf
     ~/.zlogin: zsh/zlogin
     ~/.zsh: zsh
     ~/.zshrc: zsh/zshrc
