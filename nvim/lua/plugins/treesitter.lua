@@ -22,6 +22,7 @@ return {
         "javascript",
         "json",
         "lua",
+        "regex",
         "markdown",
         "markdown_inline",
         "c",
