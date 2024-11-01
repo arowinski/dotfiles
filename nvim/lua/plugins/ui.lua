@@ -8,7 +8,7 @@ return {
     end,
   },
   {
-    "kyazdani42/nvim-web-devicons",
+    "nvim-tree/nvim-web-devicons",
     lazy = true,
     opts = { default = true },
   },
