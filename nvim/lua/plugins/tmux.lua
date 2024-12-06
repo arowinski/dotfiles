@@ -12,7 +12,7 @@ return {
     keys = {
       {
         "<leader>vs",
-        ":VtrSendLinesToRunner<CR>",
+        "<CMD>VtrSendLinesToRunner<CR>",
         mode = { "n", "v" },
         desc = "Send lines to runner",
         silent = true,
