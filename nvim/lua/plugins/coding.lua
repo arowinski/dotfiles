@@ -87,7 +87,7 @@ return {
 	},
 	{
 		"CopilotC-Nvim/CopilotChat.nvim",
-		branch = "canary",
+		branch = "main",
 		event = "VeryLazy",
 		dependencies = {
 			{ "zbirenbaum/copilot.lua" },
@@ -106,17 +106,29 @@ return {
 				desc = "Ask copilot",
 				mode = { "n", "v" },
 			},
+			{
+				"<leader>co",
+        "<CMD>CopilotChatOpen<CR>",
+				desc = "Ask copilot",
+				mode = { "n", "v" },
+			},
 		},
 		opts = {
 			selection = function(source)
 				local select = require("CopilotChat.select")
 
-				return select.visual(source) or select.buffer(source)
+        return select.visual(source) or select.buffer(source)
 			end,
 			prompts = {},
 			window = {
 				layout = "horizontal",
 			},
+      mappings = {
+        reset = {
+          normal ='<C-r>',
+          insert = '<C-r>'
+        },
+      },
 		},
 	},
 }
