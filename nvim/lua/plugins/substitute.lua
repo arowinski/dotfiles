@@ -17,7 +17,7 @@ return {
 			{
 				"M",
 				function()
-					range.operator({ subject = { motion = "iw" } })
+					range.operator({ subject = { motion = "iw" }, complete_word = true })
 				end,
 				desc = "Replace word",
 			},
