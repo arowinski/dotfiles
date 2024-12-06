@@ -23,6 +23,7 @@ return {
         desc = "Send CTRL-D to runner",
       },
       { "<leader>va", attach_to_pane, desc = "Attach to panel" },
+      { "<leader>vr", "<CMD>VtrSendFile<CR>", desc = "Send file" },
     },
     cmd = {
       "VtrSendLinesToRunner",
