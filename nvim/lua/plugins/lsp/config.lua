@@ -12,7 +12,7 @@ setup(
   "jsonls",
   { settings = { json = { schemas = require("schemastore").json.schemas() } } }
 )
-setup("tailwindcss", { root_dir = lsp.util.root_pattern("tailwind.config.js") })
+setup("tailwindcss")
 setup("html")
 setup("yamlls")
 setup("rubocop")
