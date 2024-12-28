@@ -48,7 +48,7 @@ return {
 
         if
           fn.getbufvar(buf, "&modifiable") == 1
-          and utils.not_in(fn.getbufvar(buf, "&filetype"), { "dirbuf" })
+          and utils.not_in(fn.getbufvar(buf, "&filetype"), { "dirbuf", "qf" })
         then
           return true
         end
