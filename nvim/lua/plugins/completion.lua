@@ -1,147 +1,133 @@
-local has_words_before = function()
-  local line, col = unpack(vim.api.nvim_win_get_cursor(0))
-
-  return col ~= 0
-    and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]
-        :sub(col, col)
-        :match("%s")
-      == nil
-end
-
 return {
-  {
-    "hrsh7th/nvim-cmp",
-    event = "BufReadPre",
-    dependencies = {
-      "hrsh7th/cmp-buffer",
-      "hrsh7th/cmp-path",
-      "hrsh7th/cmp-nvim-lua",
-      "hrsh7th/cmp-nvim-lsp",
-      "saadparwaiz1/cmp_luasnip",
-      "windwp/nvim-autopairs",
-      {
-        "zbirenbaum/copilot-cmp",
-        dependencies = {
-          {
-            "zbirenbaum/copilot.lua",
-            cmd = "Copilot",
-            build = ":Copilot auth",
-            opts = {
-              suggestion = { enabled = false },
-              panel = { enabled = false },
-            },
+  "saghen/blink.cmp",
+  lazy = false,
+  dependencies = {
+    "rafamadriz/friendly-snippets",
+    {
+      "giuxtaposition/blink-cmp-copilot",
+      dependencies = {
+        {
+          "zbirenbaum/copilot.lua",
+          cmd = "Copilot",
+          build = ":Copilot auth",
+          opts = {
+            suggestion = { enabled = false },
+            panel = { enabled = false },
           },
         },
-        config = function(_, opts)
-          local copilot_cmp = require("copilot_cmp")
-          copilot_cmp.setup(opts)
-          -- attach cmp source whenever copilot attaches
-          -- fixes lazy-loading issues with the copilot cmp source
-          require("util.lsp").on_attach(function(client)
-            if client.name == "copilot" then
-              copilot_cmp._on_insert_enter({})
-            end
-          end)
-        end,
       },
     },
-    opts = function()
-      local cmp = require("cmp")
+  },
+  version = "v0.*",
+  opts = {
+    keymap = {
+      ["<C-k>"] = { "select_prev", "fallback" },
+      ["<C-j>"] = { "select_next", "fallback" },
+      ["<C-l>"] = { "select_and_accept", "show" },
+      ["<C-d>"] = { "show_documentation", "hide_documentation" },
+      ["<C-b>"] = { "scroll_documentation_up", "fallback" },
+      ["<C-f>"] = { "scroll_documentation_down", "fallback" },
+      ["<C-q>"] = { "hide", "fallback" },
+      -- ["<F13>2"] = { "snippet_forward", "fallback" },
+      -- ["<F13>3"] = { "snippet_backward" },
+    },
 
-      return {
-        sources = cmp.config.sources({
-          { name = "luasnip" },
-          { name = "copilot" },
-          { name = "nvim_lua" },
-          { name = "nvim_lsp" },
-          { name = "path" },
-          { name = "buffer", keyword_length = 3 },
-          { name = "treesitter", priority = 7 },
-        }),
-        mapping = {
-          ["<C-d>"] = cmp.mapping(function(fallback)
-            if cmp.visible({ select = false }) then
-              cmp.scroll_docs(-4)
-            else
-              fallback()
-            end
-          end),
-          ["<C-f>"] = cmp.mapping(function(fallback)
-            if cmp.visible({ select = false }) then
-              cmp.scroll_docs(4)
-            else
-              fallback()
-            end
-          end),
-          ["<C-q>"] = cmp.mapping.close(),
-          ["<c-l>"] = cmp.mapping(function(fallback)
-            if cmp.visible({ select = true }) then
-              cmp.confirm({ select = true })
-            elseif has_words_before() then
-              cmp.complete()
-            else
-              fallback()
-            end
-          end, { "i", "s" }),
-          ["<C-j>"] = cmp.mapping(function()
-            if cmp.visible() then
-              cmp.select_next_item()
-            elseif has_words_before() then
-              cmp.complete()
-            end
-          end, { "i", "s" }),
-          ["<C-k>"] = cmp.mapping(function()
-            if cmp.visible() then
-              cmp.select_prev_item()
-            elseif has_words_before() then
-              cmp.complete()
-            end
-          end, { "i", "s" }),
+    appearance = {
+      use_nvim_cmp_as_default = true,
+      nerd_font_variant = "mono",
+      kind_icons = {
+        Text = "󰉿",
+        Method = "󰆧",
+        Function = "󰊕",
+        Constructor = "",
+        Field = "󰜢",
+        Variable = "󰀫",
+        Class = "󰠱",
+        Interface = "",
+        Module = "",
+        Property = "󰜢",
+        Unit = "󰑭",
+        Value = "󰎠",
+        Enum = "",
+        Keyword = "󰌋",
+        Snippet = "",
+        Color = "󰏘",
+        File = "󰈙",
+        Reference = "󰈇",
+        Folder = "󰉋",
+        EnumMember = "",
+        Constant = "󰏿",
+        Struct = "󰙅",
+        Event = "",
+        Operator = "󰆕",
+        TypeParameter = "",
+        Copilot = "",
+      },
+    },
+    completion = {
+      list = { selection = "auto_insert" },
+      documentation = {
+        auto_show = true,
+        auto_show_delay_ms = 300,
+        window = {
+          border = "padded",
         },
-        sorting = {
-          comparators = {
-            cmp.config.compare.offset,
-            cmp.config.compare.exact,
-            cmp.config.compare.score,
-            function(entry1, entry2)
-              local _, entry1_under = entry1.completion_item.label:find("^_+")
-              local _, entry2_under = entry2.completion_item.label:find("^_+")
-              entry1_under = entry1_under or 0
-              entry2_under = entry2_under or 0
-              if entry1_under > entry2_under then
-                return false
-              elseif entry1_under < entry2_under then
-                return true
-              end
-            end,
-            cmp.config.compare.kind,
-            cmp.config.compare.sort_text,
-            cmp.config.compare.length,
-            cmp.config.compare.order,
+      },
+      menu = {
+        border = "none",
+        draw = {
+          treesitter = { "lsp" },
+          padding = 1,
+          columns = {
+            { "kind_icon" },
+            { "label", "label_description", gap = 1 },
           },
         },
-        formatting = {
-          format = require("plugins.lsp.kind").cmp_format(),
-        },
-        experimental = { ghost_text = true },
-        snippet = {
-          expand = function(args)
-            require("luasnip").lsp_expand(args.body)
+      },
+      ghost_text = {
+        enabled = true,
+      },
+    },
+
+    snippets = {
+      expand = function(snippet)
+        require("luasnip").lsp_expand(snippet)
+      end,
+      active = function(filter)
+        if filter and filter.direction then
+          return require("luasnip").jumpable(filter.direction)
+        end
+        return require("luasnip").in_snippet()
+      end,
+      jump = function(direction)
+        require("luasnip").jump(direction)
+      end,
+    },
+
+    sources = {
+      default = { "lsp", "path", "snippets", "buffer", "copilot" },
+      providers = {
+        copilot = {
+          name = "copilot",
+          module = "blink-cmp-copilot",
+          score_offset = 5,
+          async = true,
+          transform_items = function(_, items)
+            local CompletionItemKind =
+              require("blink.cmp.types").CompletionItemKind
+            local kind_idx = #CompletionItemKind + 1
+            CompletionItemKind[kind_idx] = "Copilot"
+
+            for _, item in ipairs(items) do
+              item.kind = kind_idx
+            end
+            return items
           end,
         },
-        window = {
-          completion = cmp.config.window.bordered(),
-          documentation = cmp.config.window.bordered(),
-        },
-      }
-    end,
-    config = function(_, opts)
-      local cmp = require("cmp")
-      cmp.event:on(
-        "confirm_done",
-        require("nvim-autopairs.completion.cmp").on_confirm_done()
-      )
-      cmp.setup(opts)
-    end,
+      },
+      cmdline = {}, -- disable cmdline completion
+    },
+    -- fuzzy = { sorts = { "sort_text", "score" } },
   },
+  opts_extend = { "sources.default" },
 }

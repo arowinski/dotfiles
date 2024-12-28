@@ -31,10 +31,9 @@ return {
 			"folke/lua-dev.nvim",
 			"pmizio/typescript-tools.nvim",
 			"dmmulroy/ts-error-translator.nvim",
-			"hrsh7th/cmp-nvim-lsp",
+      'saghen/blink.cmp',
 		},
 	},
-	{},
 	{
 		"nvimdev/lspsaga.nvim",
 		branch = "main",
