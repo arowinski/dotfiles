@@ -8,18 +8,8 @@ function M.setup(lsp, options)
   lsp.lua_ls.setup(vim.tbl_extend("force", options, {
     settings = {
       Lua = {
-        diagnostics = {
-          enable = true,
-          globals = { "vim" },
-          workspaceDelay = -1,
-        },
         format = {
           enable = false,
-          defaultConfig = {
-            indent_style = "space",
-            indent_size = "2",
-            max_line_length = "100",
-          },
         },
 
         runtime = { version = "LuaJIT", path = runtime_path },

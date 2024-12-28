@@ -124,6 +124,11 @@ return {
             return items
           end,
         },
+        lazydev = {
+          name = "LazyDev",
+          module = "lazydev.integrations.blink",
+          score_offset = 100,
+        },
       },
       cmdline = {}, -- disable cmdline completion
     },
