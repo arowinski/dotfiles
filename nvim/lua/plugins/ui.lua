@@ -1,10 +1,24 @@
 return {
   {
-    "folke/tokyonight.nvim",
+    "rebelot/kanagawa.nvim",
     lazy = false,
     priority = 1000,
-    config = function()
-      vim.cmd([[colorscheme tokyonight-night]])
+    opts = {
+      theme = "wave",
+      overrides = function(colors)
+        return {
+          BlinkCmpKindCopilot = { fg = colors.palette.springGreen },
+          BlinkCmpKindSnippet = { fg = colors.palette.boatYellow1 },
+          BlinkCmpDoc = { bg = colors.palette.waveBlue1 },
+          BlinkCmpDocBorder = { bg = colors.palette.waveBlue1 },
+          BlinkCmpDocSeparator = { bg = colors.palette.waveBlue1 },
+        }
+      end,
+    },
+    config = function(_, opts)
+      require("kanagawa").setup(opts)
+
+      vim.cmd("colorscheme kanagawa")
     end,
   },
   {
