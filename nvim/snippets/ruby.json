@@ -41,7 +41,7 @@
   },
   "require_relative": {
     "prefix": ["reqr"],
-    "body": ["require_relativ \"$0\""]
+    "body": ["require_relative \"$0\""]
   },
 
   "describe": {
