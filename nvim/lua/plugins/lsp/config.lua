@@ -7,17 +7,14 @@ local function setup(server, extension)
   lsp[server].setup(vim.tbl_extend("force", options, extension or {}))
 end
 
-setup(
-  "jsonls",
-  { settings = { json = { schemas = require("schemastore").json.schemas() } } }
-)
+setup("jsonls", { settings = { json = { schemas = require("schemastore").json.schemas() } } })
 setup("tailwindcss")
 setup("html")
 setup("yamlls")
 setup("rubocop")
 setup("eslint")
 setup("elixirls")
-setup("solargraph")
+setup("ruby_lsp")
 setup("typos_lsp")
 
 require("ts-error-translator").setup()
