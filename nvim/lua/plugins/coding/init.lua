@@ -79,7 +79,7 @@ return {
       vim.api.nvim_create_autocmd("User", {
         pattern = "ProjectionistDetect",
         callback = function()
-          require("plugins.coding.projectionist").set_projections(vim.bo.filetype)
+          require("plugins.coding.projectionist").append_projections(vim.bo.filetype)
         end,
       })
 

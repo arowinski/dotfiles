@@ -11,7 +11,7 @@ function M.load_projections(name)
   return vim.fn["projectionist#json_parse"](json)
 end
 
-function M.set_projections(name)
+function M.append_projections(name)
   local types = vim.split(name, "%.")
   for _, type in ipairs(types) do
     if exists(type) then
