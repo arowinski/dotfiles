@@ -12,6 +12,7 @@ return {
           BlinkCmpDoc = { bg = colors.palette.waveBlue1 },
           BlinkCmpDocBorder = { bg = colors.palette.waveBlue1 },
           BlinkCmpDocSeparator = { bg = colors.palette.waveBlue1 },
+          BlinkCmpGhostText = { fg = colors.palette.dragonAsh },
         }
       end,
     },
