@@ -11,3 +11,14 @@ vim.api.nvim_create_autocmd("User", {
     end
   end,
 })
+
+vim.api.nvim_create_autocmd("BufNewFile", {
+  pattern = "*.rb",
+  callback = function()
+    local const = require("ft.ruby").infer_const()
+
+    require("ft.ruby.lsp").find_const(const, function()
+      vim.b.const = const
+    end)
+  end
+})

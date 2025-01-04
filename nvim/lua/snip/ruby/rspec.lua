@@ -1,5 +1,5 @@
 local luasnip = require("luasnip")
-local infer_const = require("snip.ruby.util").infer_const
+local Ruby = require("ft.ruby")
 
 local snippet = luasnip.snippet
 local text_node = luasnip.text_node
@@ -19,7 +19,7 @@ return {
 					{}
 				end
 			]],
-      { function_node(infer_const, nil), insert_node(0) }
+      { function_node(Ruby.infer_const, nil), insert_node(0) }
     )
   ),
   snippet(
