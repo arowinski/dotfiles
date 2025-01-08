@@ -12,7 +12,9 @@ function M.replace(str, what, with)
   -- escape replacement
   with = string.gsub(with, "[%%]", "%%%%")
 
-  return string.gsub(str, what, with)
+  local result = string.gsub(str, what, with)
+
+  return result
 end
 
 return M

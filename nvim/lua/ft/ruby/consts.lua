@@ -9,11 +9,15 @@ local function infer_const_parts()
 
   if parts[1] == "spec" then
     parts = vim.tbl_map(function(e)
-      return string.gsub(e, "_spec", "")
+      local value = string.gsub(e, "_spec", "")
+
+      return value
     end, parts)
   end
 
-  table.remove(parts, 1)
+  if vim.tbl_contains({ "lib", "app", "spec" }, parts[1]) then
+    table.remove(parts, 1)
+  end
 
   if vim.tbl_contains(Rails.app_dirs(), parts[1]) then
     table.remove(parts, 1)
