@@ -3,8 +3,7 @@ local M = {}
 local function request(query, callback)
   local client = vim.lsp.get_clients({ name = "ruby_lsp" })[1]
 
-  if client == nil then
-    print("No Ruby LSP client found")
+  if not client then
     return
   end
 

@@ -26,6 +26,10 @@ end
 -- @return If `parts` is true, returns the inferred constant parts as a table.
 --         If `parts` is false or nil, returns the inferred constant as a string.
 function M.infer(parts)
+  if not Project.root() then
+    return nil
+  end
+
   local v = parts or false
 
   if vim.b.const then
