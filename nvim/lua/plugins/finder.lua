@@ -1,94 +1,74 @@
 return {
-  "nvim-telescope/telescope.nvim",
-  dependencies = {
-    "nvim-lua/plenary.nvim",
-    { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
-    {
-      "nvim-telescope/telescope-live-grep-args.nvim",
-      version = "^1.0.0",
-    },
+  "ibhagwan/fzf-lua",
+  keys = {
+    { "<leader>fr", "<CMD>FzfLua resume<CR>", desc = "Resume finder" },
+    { "<leader>ff", "<CMD>FzfLua files<CR>", desc = "Files" },
+    { "<leader>fb", "<CMD>FzfLua buffers sort_mru=true sort_lastused=true<CR>", desc = "Buffers" },
+    { "<leader>fe", "<CMD>FzfLua live_grep_glob<CR>", desc = "Grep" },
+    { "<leader>fc", "<CMD>FzfLua command_history<CR>", desc = "Command history" },
+    { "<leader>fw", "<CMD>FzfLua grep_cword<CR>", desc = "Find word" },
+    { "<leader>fy", "<CMD>FzfLua grep_visual<CR>", desc = "Find selection", mode = "v" },
+    { "<leader>gs", "<CMD>FzfLua git_stash<CR>", desc = "Git stashes" },
+    { "<leader>gb", "<CMD>FzfLua git_branches<CR>", desc = "Git branches" },
   },
-  cmd = { "Telescope" },
-  keys = function()
-    local builtin = require("telescope.builtin")
+  opts = {},
+  config = function()
+    local fzf = require("fzf-lua")
+    local actions = fzf.actions
 
-    return {
-      { "<leader>ff", builtin.find_files, desc = "Find files" },
-      { "<leader>fb", builtin.buffers, desc = "List buffers" },
-      { "<leader>fr", builtin.resume, desc = "Resume finder" },
-      { "<leader>fc", builtin.command_history, desc = "List command history" },
-      {
-        "<leader>fe",
-        function()
-          require("telescope").extensions.live_grep_args.live_grep_args()
-        end,
-        desc = "Live search",
-      },
-      {
-        "<leader>fw",
-        function()
-          builtin.grep_string({
-            default_text = table.concat(require("util").get_selection()),
-          })
-        end,
-        mode = "v",
-        desc = "Find selection",
-      },
-      {
-        "<leader>fw",
-        function()
-          builtin.grep_string({ default_text = vim.fn.expand("<cword>") })
-        end,
-        desc = "Find word under cursor",
-      },
-      { "<leader>fy", builtin.registers, desc = "List registers" },
-    }
-  end,
-  opts = function()
-    local actions = require("telescope.actions")
-    local lga_actions = require("telescope-live-grep-args.actions")
-
-    return {
-      defaults = {
-        preview = {
-          filesize_limit = 0.1, -- MB
-          highlight_limit = 0.05,
+    require("fzf-lua").setup({
+      "border-fused",
+      fzf_opts = { ["--layout"] = "default", ["--cycle"] = true },
+      -- winopts = { preview = { delay = 50 } },
+      keymap = {
+        builtin = {
+          true,
+          ["<C-d>"] = "preview-page-down",
+          ["<C-u>"] = "preview-page-up",
         },
-        mappings = {
-          i = {
-            ["<C-j>"] = actions.move_selection_next,
-            ["<C-k>"] = actions.move_selection_previous,
-            ["<ESC>"] = actions.close,
-            ["<M-q>"] = actions.send_to_qflist + actions.open_qflist,
-            ["<C-q>"] = actions.send_selected_to_qflist + actions.open_qflist,
-            ["<C-c>"] = actions.delete_buffer + actions.move_to_top,
-          },
-        },
-      },
-      extensions = {
         fzf = {
-          fuzzy = true,
-          override_generic_sorter = true,
-          override_file_sorter = true,
-          case_mode = "smart_case",
-        },
-        live_grep_args = {
-          auto_quoting = true,
-          mappings = {
-            i = {
-              ["<C-g>"] = lga_actions.quote_prompt(),
-              ["<C-x>"] = lga_actions.quote_prompt({ postfix = " --iglob " }),
-            },
-          },
+          true,
+          ["ctrl-d"] = "preview-page-down",
+          ["ctrl-u"] = "preview-page-up",
         },
       },
-    }
-  end,
-  config = function(_, options)
-    local telescope = require("telescope")
-
-    telescope.setup(options)
-    telescope.load_extension("fzf")
-    telescope.load_extension("live_grep_args")
+      actions = {
+        files = {
+          ["enter"] = actions.file_edit_or_qf,
+          ["ctrl-q"] = actions.file_sel_to_qf,
+          ["alt-q"] = { fn = actions.file_edit_or_qf, prefix = "select-all+" },
+        },
+      },
+      grep = {
+        rg_glob_fn = function(query)
+          local regex, flags = query:match("^(.-)%s%-%-(.*)$")
+          -- If no separator is detected will return the original query
+          return (regex or query), flags
+        end,
+      },
+      buffers = {
+        keymap = { builtin = { ["<C-d>"] = false } },
+        actions = { ["ctrl-x"] = false, ["ctrl-d"] = { actions.buf_del, actions.resume } },
+      },
+      files = {
+        prompt = "❯ ",
+        cwd_prompt = false,
+      },
+      git = {
+        branches = {
+          cmd = "git branch",
+        },
+      },
+      previewers = {
+        builtin = {
+          syntax_limit_b = -102400, -- 100KB limit on highlighting files
+        },
+      },
+      defaults = {
+        git_icons = false,
+        file_icons = false,
+        color_icons = false,
+      },
+    })
   end,
 }
