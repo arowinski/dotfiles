@@ -7,7 +7,6 @@ return {
       theme = "wave",
       overrides = function(colors)
         return {
-          BlinkCmpKindCopilot = { fg = colors.palette.springGreen },
           BlinkCmpKindSnippet = { fg = colors.palette.boatYellow1 },
           BlinkCmpDoc = { bg = colors.palette.waveBlue1 },
           BlinkCmpDocBorder = { bg = colors.palette.waveBlue1 },
