@@ -23,9 +23,7 @@ return {
     npairs.setup(options)
 
     npairs.add_rules({
-      Rule("|", "|", "ruby")
-        :with_pair(cond.before_text("do "))
-        :with_pair(cond.is_end_line()),
+      Rule("|", "|", "ruby"):with_pair(cond.before_text("do ")):with_pair(cond.is_end_line()),
 
       Rule("|", "|", "ruby"):with_pair(cond.before_regex("{%s?", 2)),
 

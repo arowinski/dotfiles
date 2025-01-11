@@ -29,5 +29,4 @@ function M.find_const(query, callback)
   end)
 end
 
-
 return M

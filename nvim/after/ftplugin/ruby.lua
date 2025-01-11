@@ -20,5 +20,5 @@ vim.api.nvim_create_autocmd("BufNewFile", {
     require("ft.ruby.lsp").find_const(const, function()
       vim.b.const = const
     end)
-  end
+  end,
 })

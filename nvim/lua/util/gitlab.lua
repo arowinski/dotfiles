@@ -19,13 +19,6 @@ require("util").map("n", "gl", function()
     return
   end
 
-  vim.fn.setreg(
-    "+",
-    repo_url .. "/-/blob/" .. sha .. "/" .. fpath .. "#L" .. row
-  )
-  vim.notify(
-    "URL copied to clipboard",
-    vim.log.levels.INFO,
-    { title = "Gitlab" }
-  )
+  vim.fn.setreg("+", repo_url .. "/-/blob/" .. sha .. "/" .. fpath .. "#L" .. row)
+  vim.notify("URL copied to clipboard", vim.log.levels.INFO, { title = "Gitlab" })
 end)

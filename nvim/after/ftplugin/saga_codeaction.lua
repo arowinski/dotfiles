@@ -13,5 +13,5 @@ vim.api.nvim_create_autocmd("BufLeave", {
   callback = function()
     require("lspsaga.codeaction"):close_action_window()
     return true --- Delete autocmd
-  end
+  end,
 })

@@ -35,8 +35,7 @@ return {
       local lsp_progress = require("util.lsp")
 
       local filename_with_icon = require("lualine.components.filename"):extend()
-      filename_with_icon.apply_icon =
-        require("lualine.components.filetype").apply_icon
+      filename_with_icon.apply_icon = require("lualine.components.filetype").apply_icon
       filename_with_icon.icon_hl_cache = {}
 
       return {
