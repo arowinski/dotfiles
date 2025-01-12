@@ -19,8 +19,6 @@ return {
         lua = { "stylua" },
         javascript = { "prettierd", "prettier", stop_after_first = true },
         sh = { "shfmt" },
-        ["*"] = { "typos" },
-        ruby = { "typos", lsp_format = "first" },
       },
       formatters = {
         stylua = {
