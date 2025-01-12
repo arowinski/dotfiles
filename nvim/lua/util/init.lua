@@ -25,4 +25,11 @@ function M.map(mode, key, cmd, opts)
   return vim.keymap.set(mode, key, cmd, lopts)
 end
 
+function M.is_visual_mode(m)
+  return type(m) == "string" and string.upper(m) == "V"
+    or string.upper(m) == "CTRL-V"
+    or string.upper(m) == "<C-V>"
+    or m == "\22"
+end
+
 return M

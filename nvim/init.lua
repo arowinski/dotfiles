@@ -6,7 +6,7 @@ require("config.mappings")
 require("config.aucommands")
 require("config.commands")
 
-require("util.gitlab")
+require("util.git")
 
 -- TODO: make it generic
 vim.g["ruby_path"] = vim.fn.expand("~/.asdf/shims/ruby")
