@@ -28,8 +28,6 @@ return {
       ["<C-b>"] = { "scroll_documentation_up", "fallback" },
       ["<C-f>"] = { "scroll_documentation_down", "fallback" },
       ["<C-q>"] = { "hide", "fallback" },
-      ["<F13>2"] = { "snippet_forward" },
-      ["<F13>3"] = { "snippet_backward" },
     },
     appearance = {
       kind_icons = {
