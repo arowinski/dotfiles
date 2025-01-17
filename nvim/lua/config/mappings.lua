@@ -23,7 +23,7 @@ map("n", "]Q", ":clast<CR>")
 map("n", "[Q", ":cfirst<CR>")
 
 -- copy to system clipboard
-map("n", "<Leader>y", '"+y')
+map({ "n", "v" }, "<Leader>y", '"+y')
 
 -- previous buffer
 map("n", "<space><space>", "<C-^>")
