@@ -17,7 +17,7 @@ return {
     local actions = fzf.actions
 
     require("fzf-lua").setup({
-      "border-fused",
+      { "border-fused", "hide" },
       fzf_opts = { ["--layout"] = "default", ["--cycle"] = true },
       -- winopts = { preview = { delay = 50 } },
       keymap = {
