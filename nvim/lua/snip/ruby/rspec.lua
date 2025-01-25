@@ -19,7 +19,9 @@ return {
 					{}
 				end
 			]],
-      { function_node(Ruby.infer_const, nil), insert_node(0) }
+      { function_node(function()
+        return Ruby.infer_const()
+      end, nil), insert_node(0) }
     )
   ),
   snippet(
