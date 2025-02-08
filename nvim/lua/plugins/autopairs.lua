@@ -27,7 +27,7 @@ return {
 
       Rule("|", "|", "ruby"):with_pair(cond.before_regex("{%s?", 2)),
 
-      Rule("=", "", { "-javascriptreact", "-typescriptreact" })
+      Rule("=", "", { "-javascriptreact", "-typescriptreact", "-eruby" })
         :with_pair(cond.not_inside_quote())
         :with_pair(function(opts)
           local last_char = opts.line:sub(opts.col - 1, opts.col - 1)
