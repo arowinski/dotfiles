@@ -110,12 +110,8 @@ return {
         desc = "Ask copilot",
         mode = { "n", "v" },
       },
-      {
-        "<leader>co",
-        "<CMD>CopilotChatOpen<CR>",
-        desc = "Ask copilot",
-        mode = { "n", "v" },
-      },
+      { "<leader>co", "<CMD>CopilotChatOpen<CR>", desc = "Ask copilot", mode = { "n", "v" } },
+      { "<leader>cs", "<CMD>CopilotChatStop<CR>", desc = "Stop copilot" },
     },
     opts = {
       selection = function(source)
