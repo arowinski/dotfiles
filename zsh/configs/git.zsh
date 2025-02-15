@@ -35,7 +35,7 @@ alias grb="git rebase"
 
 alias gcon='git continue'
 alias gabort='git abort'
-alias gcl="git clean -fi"
+alias gcl="git clean -fi ."
 
 compdef g=git
 g() {
