@@ -19,6 +19,7 @@ return {
         lua = { "stylua" },
         javascript = { "prettierd", "prettier", stop_after_first = true },
         sh = { "shfmt" },
+        eruby = { "erb_format" },
       },
       formatters = {
         stylua = {
@@ -27,6 +28,9 @@ return {
             "--indent-width=2",
             "--column-width=100",
           },
+        },
+        erb_format = {
+          append_args = { "--print-width", "120" },
         },
       },
     },
