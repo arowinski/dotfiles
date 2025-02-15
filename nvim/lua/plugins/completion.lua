@@ -108,8 +108,8 @@ return {
           score_offset = 100,
         },
       },
-      cmdline = {}, -- disable cmdline completion
     },
+    cmdline = { sources = {} },
   },
   opts_extend = { "sources.default" },
 }
