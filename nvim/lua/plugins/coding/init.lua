@@ -112,6 +112,7 @@ return {
       },
       { "<leader>co", "<CMD>CopilotChatOpen<CR>", desc = "Ask copilot", mode = { "n", "v" } },
       { "<leader>cs", "<CMD>CopilotChatStop<CR>", desc = "Stop copilot" },
+      { "<leader>cm", "<CMD>CopilotChatModel<CR>", desc = "Change copilot model" },
     },
     opts = {
       selection = function(source)
