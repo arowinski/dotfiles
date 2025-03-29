@@ -18,7 +18,7 @@ return {
       },
     },
   },
-  version = "v0.*",
+  version = "v1.*",
   opts = {
     keymap = {
       ["<C-k>"] = { "select_prev", "fallback" },
