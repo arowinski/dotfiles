@@ -1,38 +1,11 @@
 return {
   {
-    "neovim/nvim-lspconfig",
-    event = { "BufReadPre", "BufNewFile" },
+    "williamboman/mason.nvim",
     config = function()
-      require("plugins.lsp.diagnostics").setup()
-      require("plugins.lsp.config")
+      require("mason").setup()
     end,
-    dependencies = {
-      {
-        "williamboman/mason.nvim",
-        config = function()
-          require("mason").setup()
-        end,
-      },
-      {
-        "williamboman/mason-lspconfig.nvim",
-        opts = {
-          ensure_installed = {
-            "lua_ls",
-            "jsonls",
-            "yamlls",
-            "html",
-            "tailwindcss",
-            "ts_ls",
-            "typos_lsp",
-          },
-        },
-      },
-      "b0o/SchemaStore.nvim",
-      "pmizio/typescript-tools.nvim",
-      "dmmulroy/ts-error-translator.nvim",
-      "saghen/blink.cmp",
-    },
   },
+  "b0o/SchemaStore.nvim",
   {
     "nvimdev/lspsaga.nvim",
     branch = "main",
@@ -70,11 +43,7 @@ return {
       },
     },
   },
-  {
-    "zeioth/garbage-day.nvim",
-    dependencies = "neovim/nvim-lspconfig",
-    event = "VeryLazy",
-  },
+  { "zeioth/garbage-day.nvim", event = "VeryLazy" },
   {
     "folke/lazydev.nvim",
     ft = "lua",
