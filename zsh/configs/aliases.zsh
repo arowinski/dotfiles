@@ -10,3 +10,4 @@ alias egrep="egrep --color=auto"
 alias v="nvim"
 alias y="yarn"
 alias k=kubectl
+alias dc='f() { docker exec -it $1 sh; }; f'
