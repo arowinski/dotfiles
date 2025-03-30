@@ -38,10 +38,10 @@ local formatted_const_name = function(_, _, _, object_type)
   end, names)
 
   return snippet_node(nil, {
-    text_node(tbl.merge(def_top, { "" })),
+    text_node(vim.list_extend(def_top, { "" })),
     text_node(string.rep("\t", #names)),
     insert_node(1),
-    text_node(tbl.merge({ "" }, def_bottom)),
+    text_node(vim.list_extend({ "" }, def_bottom)),
   })
 end
 

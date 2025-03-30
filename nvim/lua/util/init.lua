@@ -14,10 +14,6 @@ function _G.put(...)
   return ...
 end
 
-function M.get_selection()
-  return vim.fn.getregion(vim.fn.getpos("."), vim.fn.getpos("v"), { mode = vim.fn.mode() })
-end
-
 function M.map(mode, key, cmd, opts)
   local lopts = vim.tbl_deep_extend("force", { silent = true, noremap = true }, opts or {})
 
