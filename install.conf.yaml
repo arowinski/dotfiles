@@ -12,7 +12,6 @@
     ~/.bin: bin
     ~/.config/karabiner: karabiner
     ~/.config/nvim: nvim
-    ~/.config/solargraph: solargraph
     ~/.gitconfig: git/gitconfig
     ~/.pryrc: ruby/pryrc
     ~/.psqlrc: psql/psqlrc
