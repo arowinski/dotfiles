@@ -17,6 +17,7 @@ map("n", "<leader>d", "<CMD>Lspsaga show_line_diagnostics<CR>")
 -- Remove default mappings
 vim.keymap.del("n", "grr")
 vim.keymap.del("n", "gri")
+vim.keymap.del("n", "gra")
 
 -- Set icons and colors for diagnostics
 for type, icon in pairs({ Error = "✗ ", Warn = " ", Hint = " ", Info = " " }) do
