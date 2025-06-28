@@ -19,7 +19,17 @@ return {
     require("fzf-lua").setup({
       { "border-fused", "hide" },
       fzf_opts = { ["--layout"] = "default", ["--cycle"] = true },
-      winopts = { preview = { delay = 50 } },
+      winopts = {
+        preview = { delay = 50 },
+        on_create = function()
+          vim.keymap.set(
+            "t",
+            "<C-r>",
+            [['<C-\><C-N>"'.nr2char(getchar()).'pi']],
+            { expr = true, buffer = true }
+          )
+        end,
+      },
       keymap = {
         builtin = {
           true,
