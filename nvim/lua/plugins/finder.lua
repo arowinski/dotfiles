@@ -19,7 +19,7 @@ return {
     require("fzf-lua").setup({
       { "border-fused", "hide" },
       fzf_opts = { ["--layout"] = "default", ["--cycle"] = true },
-      -- winopts = { preview = { delay = 50 } },
+      winopts = { preview = { delay = 50 } },
       keymap = {
         builtin = {
           true,
@@ -61,7 +61,7 @@ return {
       },
       previewers = {
         builtin = {
-          syntax_limit_b = -102400, -- 100KB limit on highlighting files
+          syntax_limit_b = 102400,
         },
       },
       defaults = {
