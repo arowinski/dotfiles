@@ -1,6 +1,3 @@
-tap 'homebrew/bundle'
-tap 'homebrew/services'
-
 brew 'asdf'
 brew 'diff-so-fancy'
 brew 'fzf'
