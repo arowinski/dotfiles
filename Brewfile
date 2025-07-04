@@ -1,5 +1,6 @@
 brew 'asdf'
 brew 'diff-so-fancy'
+brew 'fd'
 brew 'fzf'
 brew 'git'
 brew 'libyaml'
