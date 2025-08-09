@@ -89,47 +89,44 @@ return {
       ]])
     end,
   },
+
   {
-    "CopilotC-Nvim/CopilotChat.nvim",
-    branch = "main",
-    event = "VeryLazy",
-    dependencies = {
-      { "zbirenbaum/copilot.lua" },
-      { "nvim-lua/plenary.nvim" },
+    "olimorris/codecompanion.nvim",
+    opts = {
+      strategies = {
+        inline = {
+          keymaps = {
+            accept_change = {
+              modes = { n = "ga" },
+              description = "Accept the suggested change",
+            },
+            reject_change = {
+              modes = { n = "gr" },
+              opts = { nowait = true },
+              description = "Reject the suggested change",
+            },
+          },
+        },
+      },
     },
     keys = {
       {
-        "<leader>cc",
-        function()
-          local input = vim.fn.input("Ask copilot: ")
-
-          if input ~= "" then
-            require("CopilotChat").ask(input)
-          end
-        end,
-        desc = "Ask copilot",
+        "<leader>ca",
+        "<cmd>CodeCompanionActions<cr>",
         mode = { "n", "v" },
+        desc = "CodeCompanion Actions",
       },
-      { "<leader>co", "<CMD>CopilotChatOpen<CR>", desc = "Ask copilot", mode = { "n", "v" } },
-      { "<leader>cs", "<CMD>CopilotChatStop<CR>", desc = "Stop copilot" },
-      { "<leader>cm", "<CMD>CopilotChatModel<CR>", desc = "Change copilot model" },
+      {
+        "<leader>co",
+        "<cmd>CodeCompanionChat Toggle<cr>",
+        mode = { "n", "v" },
+        desc = "Toggle CodeCompanion Chat",
+      },
+      { "ga", "<cmd>CodeCompanionChat Add<cr>", mode = "v", desc = "Add to CodeCompanion Chat" },
     },
-    opts = {
-      selection = function(source)
-        local select = require("CopilotChat.select")
-
-        return select.visual(source) or select.buffer(source)
-      end,
-      prompts = {},
-      window = {
-        layout = "horizontal",
-      },
-      mappings = {
-        reset = {
-          normal = "<C-r>",
-          insert = "<C-r>",
-        },
-      },
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      "nvim-treesitter/nvim-treesitter",
     },
   },
 }
