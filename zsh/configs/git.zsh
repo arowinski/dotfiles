@@ -36,6 +36,8 @@ alias grb="git rebase"
 alias gcon='git continue'
 alias gabort='git abort'
 alias gcl="git clean -fi ."
+alias gwa="git worktree add"
+alias gwr="git worktree remove"
 
 compdef g=git
 g() {
