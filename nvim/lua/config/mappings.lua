@@ -1,7 +1,14 @@
 require("which-key").add({
   { "<leader>q", "<cmd>q<CR>", desc = "Close split" },
   { "<leader>w", "<cmd>w<CR>", desc = "Write buffer" },
-})
+  {
+    "<leader>cf",
+    function()
+      vim.fn.setreg('"', vim.fn.expand("%"))
+    end,
+    desc = "Copy filepath to clipboard",
+  }
+ })
 
 local map = require("util").map
 map("n", "<C-e>", ":e<CR>")
