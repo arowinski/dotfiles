@@ -78,6 +78,18 @@ return {
           desc = "Outer quote",
           mode = { "o", "x" },
         },
+        {
+          "ib",
+          "<cmd>lua require('various-textobjs').anyBracket('inner')<CR>",
+          desc = "Inner bracket",
+          mode = { "o", "x" },
+        },
+        {
+          "ab",
+          "<cmd>lua require('various-textobjs').anyBracket('outer')<CR>",
+          desc = "Outer bracket",
+          mode = { "o", "x" },
+        },
       },
     },
     "gbprod/yanky.nvim",
