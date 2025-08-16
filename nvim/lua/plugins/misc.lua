@@ -25,7 +25,7 @@ return {
     },
   },
   { "tpope/vim-eunuch", cmd = { "Delete", "Move", "Rename", "Remove" } },
-  { "tpope/tpope-vim-abolish", event = "VeryLazy" },
+  { "tpope/vim-abolish", event = "VeryLazy" },
   { "elihunter173/dirbuf.nvim", event = "BufReadPre" },
   {
     "NvChad/nvim-colorizer.lua",
