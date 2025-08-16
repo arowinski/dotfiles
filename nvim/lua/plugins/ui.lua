@@ -29,7 +29,7 @@ return {
   {
     "nvim-lualine/lualine.nvim",
     event = "VimEnter",
-    dependencies = { "kyazdani42/nvim-web-devicons" },
+    dependencies = { "nvim-tree/nvim-web-devicons" },
     opts = function()
       local lsp_progress = require("util.lsp")
 

@@ -11,7 +11,7 @@ return {
     branch = "main",
     dependencies = {
       "nvim-treesitter/nvim-treesitter",
-      "kyazdani42/nvim-web-devicons",
+      "nvim-tree/nvim-web-devicons",
     },
     opts = {
       lightbulb = {
