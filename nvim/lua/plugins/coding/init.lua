@@ -33,7 +33,11 @@ return {
     },
     event = "VeryLazy",
     config = function()
-      require("nvim-surround").setup()
+      require("nvim-surround").setup({
+        aliases = {
+          ["b"] = { ")", "}", "]" },
+        },
+      })
     end,
   },
   {
