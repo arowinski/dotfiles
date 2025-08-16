@@ -12,8 +12,7 @@
     ~/.bin: bin
     ~/.config/karabiner: karabiner
     ~/.config/nvim: nvim
-    ~/.gitconfig: git/gitconfig
-    ~/.pryrc: ruby/pryrc
+    ~/.config/git/config: git/gitconfig
     ~/.psqlrc: psql/psqlrc
     ~/.rgignore: rgignore
     ~/.rspec: ruby/rspec
@@ -21,3 +20,7 @@
     ~/.zlogin: zsh/zlogin
     ~/.zsh: zsh
     ~/.zshrc: zsh/zshrc
+    ~/.claude/CLAUDE.md: ai.md
+
+- create:
+    ~/.tool-versions
