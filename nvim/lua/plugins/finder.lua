@@ -4,7 +4,7 @@ return {
     { "<leader>fr", "<CMD>FzfLua resume<CR>", desc = "Resume finder" },
     { "<leader>ff", "<CMD>FzfLua files<CR>", desc = "Files" },
     { "<leader>fb", "<CMD>FzfLua buffers sort_mru=true sort_lastused=true<CR>", desc = "Buffers" },
-    { "<leader>fe", "<CMD>FzfLua live_grep_glob<CR>", desc = "Grep" },
+    { "<leader>fe", "<CMD>FzfLua live_grep<CR>", desc = "Grep" },
     { "<leader>fc", "<CMD>FzfLua command_history<CR>", desc = "Command history" },
     { "<leader>fw", "<CMD>FzfLua grep_cword<CR>", desc = "Find word" },
     { "<leader>fy", "<CMD>FzfLua grep_visual<CR>", desc = "Find selection", mode = "v" },
