@@ -21,6 +21,8 @@
     ~/.zsh: zsh
     ~/.zshrc: zsh/zshrc
     ~/.claude/CLAUDE.md: ai.md
+    ~/.claude/agents: claude/agents
+    ~/.claude/commands: claude/commands
 
 - create:
     ~/.tool-versions

@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/adam/.config/tmux/plugins/tmux-toggle-popup/src/**)",
+      "Read(//Users/adam/.config/tmux/plugins/tmux-toggle-popup/src/**)",
+      "Bash(grep:*)",
+      "Read(//Users/adam/Dev/work_notes/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
