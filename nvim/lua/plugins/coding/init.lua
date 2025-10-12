@@ -64,14 +64,6 @@ return {
     end,
   },
   {
-    "ggandor/leap.nvim",
-    event = "VeryLazy",
-    keys = {
-      { "s", "<Plug>(leap-forward)", mode = { "n", "x", "o" } },
-      { "S", "<Plug>(leap-backward)", mode = { "n", "x", "o" } },
-    },
-  },
-  {
     "tpope/vim-projectionist",
     lazy = false,
     dependencies = { "tpope/vim-rails" },
