@@ -1,0 +1,12 @@
+#!/bin/zsh
+# Clear Claude notifications for the focused tmux pane's session
+# Called by tmux pane-focus-in hook
+
+# Get the Claude session ID stored in this pane
+session_id=$(tmux show-option -pv @claude_session_id 2>/dev/null)
+
+if [[ -n "$session_id" ]]; then
+    # Clear only this session's notifications
+    group_id="claude-${session_id:0:8}"
+    terminal-notifier -remove "$group_id" >/dev/null 2>&1
+fi

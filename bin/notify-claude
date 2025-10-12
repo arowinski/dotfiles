@@ -1,0 +1,133 @@
+#!/bin/zsh
+# Script receives Claude hook and tries its best to send a notification with useful content
+# based on tool/transcript.
+
+# Add in ~/.claude/settings.json
+# "hooks": {
+#   "Notification": [
+#     {
+#       "hooks": [
+#         { "type": "command", "command": "notify-claude" }
+#       ]
+#     }
+#   ],
+#   "Stop": [
+#     {
+#       "hooks": [
+#         { "type": "command", "command": "notify-claude" }
+#       ]
+#     }
+#   ],
+# }
+
+validate_path() {
+    local path="$1"
+    if [[ ! "$path" =~ ^"$HOME"/* ]]; then
+        return 1
+    fi
+    # Prevent directory traversal
+    if [[ "$path" =~ /\.\./ ]]; then
+        return 1
+    fi
+    return 0
+}
+
+safe_trim() {
+    local text="$1"
+    echo "$text" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//'
+}
+
+get_transcript_details() {
+    local transcript_path="$1"
+    if [[ ! -f "$transcript_path" ]] || ! validate_path "$transcript_path"; then
+        echo "Transcript file not found or invalid path"
+        return 0
+    fi
+
+    local msg=$(jq -s '.[-1].message.content[0]' < "$transcript_path" 2>/dev/null)
+    if [[ $? -ne 0 ]]; then
+        echo "Could not parse transcript JSON"
+        return 0
+    fi
+
+    local msg_type=$(echo "$msg" | jq -r '.type // ""')
+    case "$msg_type" in
+        tool_use)
+            local text=$(echo "$msg" | jq -r '(.input.command + "\n" + .input.description) // ""')
+            echo "${text:0:280}"
+            ;;
+        text)
+            local text=$(echo "$msg" | jq -r '.text // ""')
+            echo "${text:0:280}"
+            ;;
+        *)
+            echo "Waiting for input..."
+            ;;
+    esac
+}
+
+json=$(cat)
+
+if [[ -z "$json" ]]; then
+    exit 0  # Exit gracefully
+fi
+
+if ! echo "$json" | jq empty 2>/dev/null; then
+    exit 0  # Exit gracefully
+fi
+
+hook_event_name=$(echo "$json" | jq -r '.hook_event_name // ""')
+transcript=$(echo "$json" | jq -r '.transcript_path // ""')
+session_id=$(echo "$json" | jq -r '.session_id // ""')
+tool_name=$(echo "$json" | jq -r '.tool_name // ""')
+
+# Store session ID in tmux pane variable for focus-based notification clearing
+if [[ -n "$TMUX" ]] && [[ -n "$session_id" ]]; then
+    tmux set-option -p @claude_session_id "$session_id" 2>/dev/null
+fi
+
+details=""
+if [[ -n "$transcript" ]]; then
+    details=$(get_transcript_details "$transcript")
+fi
+
+title=""
+message=""
+
+case "$hook_event_name" in
+    "Notification")
+        title=$(echo "$json" | jq -r '.title // "Notification"')
+        message="$(echo "$json" | jq -r '.message // ""')\n$details"
+        ;;
+    "Stop"|"SubagentStop")
+        title="Stopped"
+        message="Work completed"
+        ;;
+    "PreToolUse")
+        title="Tool: $tool_name"
+        message="$details"
+        ;;
+    "PostToolUse")
+        # Remove old notifications when tool completes (after accepting permission)
+        if [[ -n "$session_id" ]]; then
+            group_id="claude-${session_id:0:8}"
+            terminal-notifier -remove "$group_id" >/dev/null 2>&1
+        fi
+        exit 0
+        ;;
+    "UserPromptSubmit")
+        # Remove existing notifications when user submits new command
+        group_id="claude-${session_id:0:8}"
+        terminal-notifier -remove "$group_id" >/dev/null 2>&1
+        exit 0
+        ;;
+    *)
+        title="Unknown Event"
+        message="$hook_event_name"
+        ;;
+esac
+
+message=$(safe_trim "$message")
+
+group_id="claude-${session_id:0:8}"
+terminal-notifier -title "Claude: $title" -message "$message" -group "$group_id"
