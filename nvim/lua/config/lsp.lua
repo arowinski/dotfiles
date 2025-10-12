@@ -20,17 +20,19 @@ vim.keymap.del("n", "gri")
 vim.keymap.del("n", "gra")
 vim.keymap.del("n", "grt")
 
--- Set icons and colors for diagnostics
-for type, icon in pairs({ Error = "✗ ", Warn = " ", Hint = " ", Info = " " }) do
-  local hl = "DiagnosticSign" .. type
-  vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
-end
-
 vim.diagnostic.config({
   virtual_text = false,
   float = { source = "if_many", border = "rounded" },
   severity_sort = true,
   show_diagnostic_autocmds = { "InsertLeave", "TextChanged" },
+  signs = {
+    text = {
+      [vim.diagnostic.severity.ERROR] = "✗ ",
+      [vim.diagnostic.severity.WARN] = " ",
+      [vim.diagnostic.severity.HINT] = " ",
+      [vim.diagnostic.severity.INFO] = " ",
+    }
+  },
 })
 
 -- Enable all configs from nvim/lsp
