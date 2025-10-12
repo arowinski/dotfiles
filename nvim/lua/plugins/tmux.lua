@@ -28,7 +28,7 @@ return {
     cmd = {
       "VtrSendLinesToRunner",
       "VtrSendCommand",
-      "VtrAtachtoPane",
+      "VtrAttachToPane",
     },
     config = function()
       attach_to_pane(1)
