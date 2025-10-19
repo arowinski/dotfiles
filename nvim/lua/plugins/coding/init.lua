@@ -1,17 +1,6 @@
 return {
   { "tpope/vim-bundler", cmd = "Bopen" },
-  {
-    "numToStr/Comment.nvim",
-    keys = { "gc", "gcc", "gb", "gbc" },
-    config = function(_, _)
-      require("Comment").setup({
-        pre_hook = require("ts_context_commentstring.integrations.comment_nvim").create_pre_hook(),
-      })
-    end,
-    dependencies = {
-      "JoosepAlviste/nvim-ts-context-commentstring",
-    },
-  },
+  { "numToStr/Comment.nvim", keys = { "gc", "gcc", "gb", "gbc" } },
   {
     "gbprod/yanky.nvim",
     config = function()

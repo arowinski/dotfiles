@@ -1,12 +1,12 @@
 -- set line options
-vim.wo.relativenumber = true
-vim.wo.number = true
-vim.wo.cursorline = true
+vim.opt.relativenumber = true
+vim.opt.number = true
+vim.opt.cursorline = true
 
 -- disable swapfiles and backup
-vim.o.swapfile = false
-vim.o.backup = false
-vim.o.writebackup = false
+vim.opt.swapfile = false
+vim.opt.backup = false
+vim.opt.writebackup = false
 
 -- Put new windows below or right
 vim.opt.splitbelow = true
@@ -20,23 +20,23 @@ vim.opt.undolevels = 10000
 vim.opt.wrap = false
 
 -- Confirm possibly destructive actions
-vim.o.confirm = true
+vim.opt.confirm = true
 
 -- Always show sign column
-vim.wo.signcolumn = "yes"
+vim.opt.signcolumn = "yes"
 
 -- Decrease update time for CursorHold
-vim.o.updatetime = 250
+vim.opt.updatetime = 250
 
 --Case insensitive searching UNLESS /C or capital in search
-vim.o.ignorecase = true
-vim.o.smartcase = true
+vim.opt.ignorecase = true
+vim.opt.smartcase = true
 
 --Set indentation to 2 spaces always
-vim.o.shiftwidth = 2
-vim.o.tabstop = 2
-vim.o.softtabstop = 2
-vim.o.expandtab = true
+vim.opt.shiftwidth = 2
+vim.opt.tabstop = 2
+vim.opt.softtabstop = 2
+vim.opt.expandtab = true
 
 --Set highlight on search
-vim.o.hlsearch = false
+vim.opt.hlsearch = false

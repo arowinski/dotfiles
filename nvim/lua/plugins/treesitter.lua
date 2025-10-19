@@ -8,7 +8,6 @@ return {
       "nvim-treesitter/nvim-treesitter-textobjects",
       "windwp/nvim-ts-autotag",
       "RRethy/nvim-treesitter-endwise",
-      "JoosepAlviste/nvim-ts-context-commentstring",
     },
     opts = {
       ensure_installed = {
@@ -34,7 +33,7 @@ return {
         "yaml",
       },
       indent = { enable = false },
-      highlight = { enable = true, additional_vim_regex_highlighting = true },
+      highlight = { enable = true },
       matchup = { enable = true },
       endwise = { enable = true },
       autotag = { enable = true },
