@@ -135,7 +135,12 @@ return {
       }
     end,
   },
-  { "lukas-reineke/indent-blankline.nvim", event = "BufReadPre" },
+  {
+    "lukas-reineke/indent-blankline.nvim",
+    event = "BufReadPre",
+    main = "ibl",
+    opts = {},
+  },
   {
     "folke/noice.nvim",
     event = "VeryLazy",
