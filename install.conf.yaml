@@ -23,6 +23,7 @@
     ~/.claude/CLAUDE.md: ai.md
     ~/.claude/agents: claude/agents
     ~/.claude/commands: claude/commands
+    ~/.claude/skills: claude/skills
 
 - create:
     ~/.tool-versions
