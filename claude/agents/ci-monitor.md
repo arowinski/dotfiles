@@ -2,7 +2,7 @@
 name: ci-monitor
 description: Use this agent to monitor GitHub PR checks and analyze CI failures. Examples: <example>Context: User wants to check CI status for their PR. user: 'Check the CI status for my current PR' assistant: 'I'll use the ci-monitor agent to check your CI status and analyze any failures.' <commentary>Since the user wants CI monitoring, use the ci-monitor agent to handle GitHub checks operations.</commentary></example> <example>Context: User's PR has failing checks. user: 'My CI is failing, can you check what's wrong?' assistant: 'Let me use the ci-monitor agent to analyze the failing checks and provide actionable feedback.' <commentary>The user needs CI failure analysis, so use the ci-monitor agent.</commentary></example>
 tools: Bash, BashOutput, Read, Glob, Grep
-model: sonnet
+model: haiku
 color: yellow
 ---
 
