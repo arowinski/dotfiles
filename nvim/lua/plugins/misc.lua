@@ -26,9 +26,25 @@ return {
   },
   { "tpope/vim-eunuch", cmd = { "Delete", "Move", "Rename", "Remove" } },
   { "tpope/vim-abolish", event = "VeryLazy" },
-  { "elihunter173/dirbuf.nvim", event = "BufReadPre" },
   {
-    "NvChad/nvim-colorizer.lua",
+    "stevearc/oil.nvim",
+    dependencies = { "nvim-tree/nvim-web-devicons" },
+    keys = {
+      { "-", "<CMD>Oil<CR>", desc = "Open parent directory" },
+    },
+    opts = {
+      skip_confirm_for_simple_edits = true,
+      view_options = { show_hidden = true },
+      keymaps = {
+        ["<C-h>"] = false,
+        ["<C-j>"] = false,
+        ["<C-k>"] = false,
+        ["<C-l>"] = false,
+      },
+    },
+  },
+  {
+    "catgoose/nvim-colorizer.lua",
     event = "VeryLazy",
     opts = {
       user_default_options = { tailwind = "lsp" },
