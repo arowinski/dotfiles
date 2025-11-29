@@ -26,8 +26,8 @@ alias gsl="git stash list"
 
 alias gb="git branch"
 
-alias gd="git diff --color=always"
-alias gdc="git diff --cached --color=always"
+alias gd="git diff"
+alias gdc="git diff --cached"
 
 alias gcp='git cherry-pick'
 
