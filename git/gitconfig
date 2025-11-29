@@ -2,7 +2,12 @@
   editor = nvim
   excludesfile = ~/.gitignore
   autocrlf = input
-  pager = diff-so-fancy | less --tabs=4 -RFX
+  pager = delta
+[delta]
+  features = diff-so-fancy
+  navigate = true
+[rerere]
+  enabled = true
 [alias]
   conflicted = !nvim +Conflicted
 [color]
@@ -37,7 +42,7 @@
   name = arowinski
   email = arowinski02@gmail.com
 [interactive]
-  diffFilter = diff-so-fancy --patch
+  diffFilter = delta --color-only
 [includeIf "gitdir:/Users/adamrowinski/Work/"]
   path = ~/.gitconfig.work
 [alias]
