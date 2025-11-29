@@ -12,6 +12,27 @@ vim.api.nvim_create_autocmd("VimResized", {
   command = "wincmd =",
 })
 
+-- auto-save
+vim.api.nvim_create_autocmd({ "InsertLeave", "TextChanged" }, {
+  group = augroup,
+  callback = function(event)
+    local buf = event.buf
+    local bo = vim.bo[buf]
+
+    if
+      bo.modifiable
+      and bo.buftype == ""
+      and bo.filetype ~= ""
+      and not vim.tbl_contains({ "oil", "qf", "gitcommit", "gitrebase" }, bo.filetype)
+      and vim.fn.bufname(buf) ~= ""
+    then
+      vim.api.nvim_buf_call(buf, function()
+        vim.cmd("silent! write")
+      end)
+    end
+  end,
+})
+
 -- create directories on file save
 vim.api.nvim_create_autocmd("BufWritePre", {
   group = augroup,
