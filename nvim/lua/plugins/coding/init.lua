@@ -85,44 +85,4 @@ return {
       ]])
     end,
   },
-
-  {
-    "olimorris/codecompanion.nvim",
-    opts = {
-      strategies = {
-        inline = {
-          keymaps = {
-            accept_change = {
-              modes = { n = "ga" },
-              description = "Accept the suggested change",
-            },
-            reject_change = {
-              modes = { n = "gr" },
-              opts = { nowait = true },
-              description = "Reject the suggested change",
-            },
-          },
-        },
-      },
-    },
-    keys = {
-      {
-        "<leader>ca",
-        "<cmd>CodeCompanionActions<cr>",
-        mode = { "n", "v" },
-        desc = "CodeCompanion Actions",
-      },
-      {
-        "<leader>co",
-        "<cmd>CodeCompanionChat Toggle<cr>",
-        mode = { "n", "v" },
-        desc = "Toggle CodeCompanion Chat",
-      },
-      { "ga", "<cmd>CodeCompanionChat Add<cr>", mode = "v", desc = "Add to CodeCompanion Chat" },
-    },
-    dependencies = {
-      "nvim-lua/plenary.nvim",
-      "nvim-treesitter/nvim-treesitter",
-    },
-  },
 }
