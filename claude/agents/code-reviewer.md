@@ -2,7 +2,7 @@
 name: code-reviewer
 description: Use this agent when you need a thorough code review after writing or modifying code. This agent should be invoked proactively after completing logical chunks of work such as: implementing a new feature, refactoring existing code, fixing a bug, or making significant changes to the codebase. Examples:\n\n<example>\nContext: User just implemented a new service class for user authentication.\nuser: "I've just finished implementing the UserAuthenticator service class"\nassistant: "Let me use the code-reviewer agent to perform a thorough review of your implementation."\n<Task tool invocation to launch code-reviewer agent>\n</example>\n\n<example>\nContext: User completed refactoring a complex method.\nuser: "Done refactoring the calculate_shipping_cost method"\nassistant: "I'll invoke the code-reviewer agent to analyze the refactored code for potential issues and adherence to project standards."\n<Task tool invocation to launch code-reviewer agent>\n</example>\n\n<example>\nContext: User asks for code to be written and wants it reviewed.\nuser: "Please implement a method to validate email addresses and then review it"\nassistant: "Here's the email validation method:"\n<implementation details>\nassistant: "Now let me use the code-reviewer agent to thoroughly review this implementation."\n<Task tool invocation to launch code-reviewer agent>\n</example>
 tools: Bash, Glob, Grep, Read, WebFetch, TodoWrite, WebSearch, BashOutput, KillShell, SlashCommand
-model: sonnet
+model: opus
 color: yellow
 ---
 

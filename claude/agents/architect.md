@@ -1,7 +1,7 @@
 ---
 name: architect
 description: Use this agent for RESEARCH and DECISION-MAKING on complex features. Analyzes codebase to find relevant code, identifies problems/constraints, explores alternatives, evaluates trade-offs, and recommends approaches. Use when the HOW is unclear, not for detailed implementation planning.
-model: sonnet
+model: opus
 color: orange
 ---
 
