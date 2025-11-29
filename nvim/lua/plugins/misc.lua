@@ -24,7 +24,6 @@ return {
       end,
     },
   },
-  { "tpope/vim-eunuch", cmd = { "Delete", "Move", "Rename", "Remove" } },
   { "tpope/vim-abolish", event = "VeryLazy" },
   {
     "stevearc/oil.nvim",
