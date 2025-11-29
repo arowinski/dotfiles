@@ -54,17 +54,6 @@ return {
     dependencies = { "nvim-lua/plenary.nvim" },
   },
   {
-    "stevearc/quicker.nvim",
-    event = "FileType qf",
-    opts = {
-      highlight = {
-        treesitter = true,
-        lsp = false,
-        load_buffers = false,
-      },
-    },
-  },
-  {
     "HakonHarnes/img-clip.nvim",
     event = "VeryLazy",
     opts = {},
