@@ -51,7 +51,12 @@ return {
   },
   {
     "folke/todo-comments.nvim",
+    event = "VeryLazy",
     dependencies = { "nvim-lua/plenary.nvim" },
+    keys = {
+      { "<leader>ft", "<cmd>TodoFzfLua<cr>", desc = "Find TODOs" },
+    },
+    opts = {},
   },
   {
     "HakonHarnes/img-clip.nvim",
