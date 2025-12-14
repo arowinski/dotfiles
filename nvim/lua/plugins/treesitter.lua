@@ -36,7 +36,6 @@ return {
       highlight = { enable = true },
       matchup = { enable = true },
       endwise = { enable = true },
-      autotag = { enable = true },
       textobjects = {
         select = {
           enable = true,
@@ -56,6 +55,7 @@ return {
     },
     config = function(_, opts)
       require("nvim-treesitter.configs").setup(opts)
+      require("nvim-ts-autotag").setup()
     end,
   },
 }
