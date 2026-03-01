@@ -18,7 +18,14 @@ vim.api.nvim_create_user_command("Remove", function()
     vim.notify("No file to remove", vim.log.levels.ERROR)
     return
   end
+  local bufnr = vim.api.nvim_get_current_buf()
+  local alt_bufnr = vim.fn.bufnr("#")
+  if alt_bufnr ~= -1 and alt_bufnr ~= bufnr and vim.api.nvim_buf_is_loaded(alt_bufnr) then
+    vim.cmd("buffer " .. alt_bufnr)
+  else
+    vim.cmd("enew")
+  end
+  vim.api.nvim_buf_delete(bufnr, { force = true })
   vim.fn.delete(path)
-  vim.cmd("bdelete!")
   vim.notify("Removed " .. path)
 end, {})
