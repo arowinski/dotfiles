@@ -13,17 +13,6 @@ return {
       { "<C-c>", ":Bdelete<CR>", silent = true },
     },
   },
-  {
-    "axkirillov/hbac.nvim",
-    event = "VeryLazy",
-    opts = {
-      autoclose = true, -- set autoclose to false if you want to close manually
-      threshold = 20,
-      close_command = function(bufnr)
-        vim.api.nvim_buf_delete(bufnr, {})
-      end,
-    },
-  },
   { "tpope/vim-abolish", event = "VeryLazy" },
   {
     "stevearc/oil.nvim",
