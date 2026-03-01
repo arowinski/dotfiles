@@ -1,23 +1,7 @@
 return {
   "saghen/blink.cmp",
   lazy = false,
-  dependencies = {
-    "rafamadriz/friendly-snippets",
-    {
-      "giuxtaposition/blink-cmp-copilot",
-      dependencies = {
-        {
-          "zbirenbaum/copilot.lua",
-          cmd = "Copilot",
-          build = ":Copilot auth",
-          opts = {
-            suggestion = { enabled = false },
-            panel = { enabled = false },
-          },
-        },
-      },
-    },
-  },
+  dependencies = { "rafamadriz/friendly-snippets" },
   version = "v1.*",
   opts = {
     keymap = {
@@ -34,7 +18,6 @@ return {
     appearance = {
       kind_icons = {
         Snippet = "",
-        Copilot = "",
       },
     },
     completion = {
@@ -59,27 +42,7 @@ return {
       ghost_text = { enabled = true },
     },
     snippets = { preset = "luasnip" },
-    sources = {
-      default = { "lsp", "path", "snippets", "buffer", "copilot" },
-      providers = {
-        copilot = {
-          name = "copilot",
-          module = "blink-cmp-copilot",
-          score_offset = 100,
-          async = true,
-          transform_items = function(_, items)
-            local CompletionItemKind = require("blink.cmp.types").CompletionItemKind
-            local kind_idx = #CompletionItemKind + 1
-            CompletionItemKind[kind_idx] = "Copilot"
-
-            for _, item in ipairs(items) do
-              item.kind = kind_idx
-            end
-            return items
-          end,
-        },
-      },
-    },
+    sources = { default = { "lsp", "path", "snippets", "buffer" } },
     cmdline = { enabled = false },
   },
   opts_extend = { "sources.default" },
