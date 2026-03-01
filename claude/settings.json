@@ -27,7 +27,8 @@
       "Bash(gh run view:*)",
       "Bash(gh run list:*)",
       "Bash(gh run watch:*)",
-      "Bash(gh-comments:*)"
+      "Bash(gh-comments:*)",
+      "Skill(*)"
     ],
     "deny": [
       "Bash(grep:*)",
@@ -89,9 +90,7 @@
       }
     ]
   },
-  "enabledPlugins": {
-    "example-skills@anthropic-agent-skills": true
-  },
+  "enabledPlugins": {},
   "sandbox": {
     "enabled": true,
     "network": {
