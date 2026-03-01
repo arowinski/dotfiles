@@ -13,6 +13,7 @@
     ~/.config/karabiner: karabiner
     ~/.config/nvim: nvim
     ~/.config/git/config: git/gitconfig
+    ~/.gitignore: git/gitignore
     ~/.psqlrc: psql/psqlrc
     ~/.rgignore: rgignore
     ~/.rspec: ruby/rspec
