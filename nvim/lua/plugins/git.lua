@@ -1,5 +1,23 @@
 return {
   {
+    "esmuellert/vscode-diff.nvim",
+    dependencies = { "MunifTanjim/nui.nvim" },
+    cmd = "CodeDiff",
+    keys = {
+      { "<leader>dv", "<CMD>CodeDiff<CR>", desc = "Open diff" },
+    },
+    opts = {
+      keymaps = {
+        view = {
+          next_hunk = "<M-e>",
+          prev_hunk = "<M-i>",
+          next_file = "<M-o>",
+          prev_file = "<M-n>",
+        },
+      },
+    },
+  },
+  {
     "tpope/vim-fugitive",
     cmd = { "Git", "G" },
     keys = {
