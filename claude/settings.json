@@ -28,7 +28,10 @@
       "Bash(gh run list:*)",
       "Bash(gh run watch:*)",
       "Bash(gh-comments:*)",
-      "Skill(*)"
+      "Skill(*)",
+      "mcp__context7__*",
+      "mcp__sentry__*",
+      "mcp__db__*"
     ],
     "deny": [
       "Bash(grep:*)",
