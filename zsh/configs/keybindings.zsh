@@ -8,4 +8,5 @@ bindkey "^p" history-search-backward
 bindkey "^n" history-search-forward
 bindkey "^y" accept-and-hold
 bindkey "^w" backward-kill-word
+bindkey "^[^?" backward-kill-word
 bindkey "^u" backward-kill-line
