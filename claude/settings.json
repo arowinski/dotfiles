@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(rg:*)",
+      "Bash(fd:*)",
+
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(git branch:*)",
+      "Bash(git fetch:*)",
+      "Bash(git symbolic-ref:*)",
+      "Bash(git rev-parse:*)",
+      "Bash(git remote:*)",
+      "Bash(git stash:*)",
+      "Bash(git checkout:*)",
+      "Bash(git switch:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+
+      "Bash(gh pr view:*)",
+      "Bash(gh pr checks:*)",
+      "Bash(gh pr list:*)",
+      "Bash(gh pr diff:*)",
+      "Bash(gh run view:*)",
+      "Bash(gh run list:*)",
+      "Bash(gh run watch:*)",
+      "Bash(gh-comments:*)"
+    ],
+    "deny": [
+      "Bash(grep:*)",
+      "Bash(find:*)"
+    ],
+    "ask": [],
+    "defaultMode": "default"
+  },
+  "hooks": {
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "notify-claude"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "notify-claude"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "notify-claude"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "notify-claude"
+          }
+        ]
+      }
+    ]
+  },
+  "enabledPlugins": {
+    "example-skills@anthropic-agent-skills": true
+  },
+  "sandbox": {
+    "enabled": true,
+    "network": {
+      "allowLocalBinding": true
+    }
+  },
+  "alwaysThinkingEnabled": true,
+  "autoUpdatesChannel": "latest",
+  "feedbackSurveyState": {
+    "lastShownTime": 1754032881689
+  }
+}

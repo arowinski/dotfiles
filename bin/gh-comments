@@ -1,0 +1,84 @@
+#!/bin/zsh
+# Read-only wrapper for fetching all PR comments (conversation + inline reviews)
+# Usage: gh-comments <pr-number>              (detects repo from git remote)
+#        gh-comments <owner/repo> <pr-number>
+#        gh-comments <github-pr-url>
+
+set -euo pipefail
+
+repo_from_remote() {
+  local url=$(git remote get-url origin 2>/dev/null) || return 1
+  url="${url#https://github.com/}"
+  url="${url#git@github.com:}"
+  url="${url%.git}"
+  echo "$url"
+}
+
+parse_args() {
+  if [[ $# -eq 1 && "$1" =~ ^[0-9]+$ ]]; then
+    REPO=$(repo_from_remote) || { echo "Error: not in a git repo, provide owner/repo" >&2; exit 1; }
+    PR="$1"
+  elif [[ $# -eq 1 ]]; then
+    local url="$1"
+    url="${url#https://github.com/}"
+    url="${url#http://github.com/}"
+    url="${url%%#*}"
+    REPO=$(echo "$url" | cut -d'/' -f1,2)
+    PR=$(echo "$url" | cut -d'/' -f4)
+  elif [[ $# -eq 2 ]]; then
+    REPO="$1"
+    PR="$2"
+  else
+    echo "Usage: gh-comments <pr-number>              (detects repo from git remote)" >&2
+    echo "       gh-comments <owner/repo> <pr-number>" >&2
+    echo "       gh-comments <github-pr-url>" >&2
+    exit 1
+  fi
+
+  if [[ -z "$REPO" || -z "$PR" || ! "$PR" =~ ^[0-9]+$ ]]; then
+    echo "Error: could not parse repo and PR number" >&2
+    exit 1
+  fi
+}
+
+strip_html_comments() {
+  perl -0pe 's/<!--.*?-->//gs'
+}
+
+format_conversation() {
+  jq -s 'add // []' | jq -r '
+    def ts: .created_at | split("T") | .[0] + " " + (.[1] | split("Z")[0] | split(".")[0]);
+    def human: select((.user.login // "") | test("\\[bot\\]$") | not);
+    [.[] | human] |
+    if length == 0 then "No comments." else
+    .[] | "#\(.id) [\(.user.login) \(ts)]\n\(.body)"
+    end' | strip_html_comments
+}
+
+format_reviews() {
+  jq -s 'add // []' | jq -r '
+    def ts: .created_at | split("T") | .[0] + " " + (.[1] | split("Z")[0] | split(".")[0]);
+    def human: select((.user.login // "") | test("\\[bot\\]$") | not);
+    [.[] | human] |
+    if length == 0 then "No reviews." else
+    group_by(.path) | sort_by(.[0].path) | .[] |
+    "## \(.[0].path)",
+    (
+      group_by(.in_reply_to_id // .id) |
+      map(sort_by(.created_at)) |
+      sort_by(.[0].created_at) | .[] |
+      (.[0] | "L\(.line // .original_line // "?") #\(.id) [\(.user.login) \(ts)]\n\(.body)"),
+      (.[1:] | .[] | "↳ #\(.id) [\(.user.login) \(ts)]\n\(.body)"),
+      ""
+    )
+    end' | strip_html_comments
+}
+
+parse_args "$@"
+
+echo "# Conversation"
+gh api "repos/${REPO}/issues/${PR}/comments?per_page=100" --paginate | format_conversation
+
+echo ""
+echo "# Inline Reviews"
+gh api "repos/${REPO}/pulls/${PR}/comments?per_page=100" --paginate | format_reviews
