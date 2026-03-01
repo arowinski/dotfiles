@@ -76,6 +76,17 @@
           }
         ]
       }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cat ~/.claude/CLAUDE.md"
+          }
+        ]
+      }
     ]
   },
   "enabledPlugins": {
