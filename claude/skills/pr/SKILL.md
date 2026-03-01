@@ -1,7 +1,7 @@
 ---
 name: pr
 description: Creates pull requests with automatic title/template formatting. Use when asked to create a PR.
-allowed-tools: Bash(git fetch:*), Bash(git diff:*), Bash(git log:*), Bash(git push:*), Bash(git symbolic-ref:*), Bash(git rev-parse:*), Bash(gh pr create:*), Bash(gh pr list:*), Read, Glob, AskUserQuestion
+allowed-tools: Bash(git fetch:*), Bash(git diff:*), Bash(git log:*), Bash(git branch:*), Bash(git remote:*), Bash(git push:*), Bash(git symbolic-ref:*), Bash(git rev-parse:*), Bash(gh pr create:*), Bash(gh pr list:*), Bash(gh pr view:*), Read, Glob, AskUserQuestion
 ---
 
 # PR
@@ -58,8 +58,14 @@ Automates pull request creation by detecting repository-specific title patterns,
    - Use imperative mood ("Add feature", "Fix bug")
    - Focus on primary purpose, not implementation details
 
-2. Generate body from template (if found) or create summary of changes
-   - Focus on why, ask for context if don't have, not what.
+2. Generate body:
+   - **Focus on context/motivation/rationale (WHY), not implementation details (WHAT)**
+   - If context is unclear, ask user for background before proceeding
+   - Use template if found, otherwise create summary emphasizing:
+     - Why the change is needed
+     - What problem it solves
+     - Any relevant context or constraints
+   - Use third person to describe motivation/context/rationale
 
 ### Step 5: Interactive Confirmation (REQUIRED - DO NOT SKIP)
 

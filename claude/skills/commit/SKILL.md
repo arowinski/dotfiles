@@ -1,7 +1,7 @@
 ---
 name: commit
 description: Creates commits with generated messages following project conventions. Use when asked to commit changes or create a commit.
-allowed-tools: Bash(git status:*), Bash(git diff:*), Bash(git add:*), Bash(git commit:*), Read, Glob
+allowed-tools: Bash(git status:*), Bash(git diff:*), Bash(git log:*), Bash(git add:*), Bash(git commit:*), Read, Glob
 ---
 
 # Commit

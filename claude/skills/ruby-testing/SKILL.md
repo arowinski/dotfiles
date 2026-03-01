@@ -152,7 +152,7 @@ expect(&action).to change(User, :count).by(1)
 expect(&action).to change { user.reload.status }.from("pending").to("active")
 ```
 
-**For verifying method calls - use `have_called`:**
+**For verifying method calls - use `have_received`:**
 ```ruby
 # First stub the method
 allow(UserCreator).to receive(:create)
@@ -160,12 +160,12 @@ allow(UserCreator).to receive(:create)
 # Then call the code
 MyService.call
 
-# Then verify with have_called
-expect(UserCreator).to have_called(:create).with(email: "test@example.com")
+# Then verify with have_received
+expect(UserCreator).to have_received(:create).with(email: "test@example.com")
 ```
 
 **NEVER use:**
-- `expect(...).to receive(...)` - use `allow` then `have_called` instead
+- `expect(...).to receive(...)` - use `allow` then `have_received` instead
 - `allow_any_instance_of` - stub specific instances instead
 
 **Blank line after verify phase (if teardown exists)**
@@ -176,7 +176,7 @@ Before finishing, check:
 
 - [ ] Not testing private methods
 - [ ] Not using `allow_any_instance_of`
-- [ ] Not using `expect().to receive` (use `have_called` instead)
+- [ ] Not using `expect().to receive` (use `have_received` instead)
 - [ ] Phases separated with blank lines
 - [ ] No phase comments (setup, exercise, verify should be obvious from structure)
 - [ ] Using existing factories (searched before creating new ones)
