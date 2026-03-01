@@ -19,6 +19,7 @@
       "Bash(git switch:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
+      "Bash(git pull:*)",
 
       "Bash(gh pr view:*)",
       "Bash(gh pr checks:*)",
@@ -28,6 +29,9 @@
       "Bash(gh run list:*)",
       "Bash(gh run watch:*)",
       "Bash(gh-comments:*)",
+      "Bash(just:*)",
+      "Bash(bundle exec rspec:*)",
+      "Bash(bundle exec rubocop:*)",
       "Skill(*)",
       "mcp__context7__*",
       "mcp__sentry__*",
