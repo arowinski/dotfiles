@@ -8,6 +8,7 @@ alias fgrep="fgrep --color=auto"
 alias egrep="egrep --color=auto"
 
 alias v="nvim"
+alias cc="claude"
 alias y="yarn"
 alias k=kubectl
 alias dc='f() { docker exec -it $1 sh; }; f'
