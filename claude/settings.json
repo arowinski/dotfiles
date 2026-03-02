@@ -4,7 +4,6 @@
     "allow": [
       "Bash(rg:*)",
       "Bash(fd:*)",
-
       "Bash(git status:*)",
       "Bash(git diff:*)",
       "Bash(git log:*)",
@@ -20,7 +19,6 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(git pull:*)",
-
       "Bash(gh pr view:*)",
       "Bash(gh pr checks:*)",
       "Bash(gh pr list:*)",

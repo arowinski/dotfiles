@@ -48,8 +48,6 @@ Automates pull request creation by detecting repository-specific title patterns,
    - **Don't mention tests** - tests are expected and obvious. Only mention if they're a major part of the PR (e.g., new testing framework, significant test infrastructure changes)
    - Use backticks for code references (variables, methods, classes, file names)
    - Use third person ("This adds..." not "I added...")
-   - **NEVER mention Claude, add attribution footers, or Co-Authored-By lines**
-
 ### Step 4: Generate Title and Body
 
 1. Craft title following detected pattern:

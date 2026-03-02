@@ -6,6 +6,7 @@ Be brutally honest — if I'm wrong, say so bluntly.
 - Run tests and linters before committing.
 - NEVER test private methods.
 - NEVER comment out code to make tests pass.
+- NEVER add Claude footer, "Generated with Claude Code", or "Co-Authored-By" lines.
 
 ### Skills
 
@@ -13,6 +14,11 @@ You MUST use these skills when applicable:
 - commit — when committing changes
 - pr — when creating pull requests
 - ruby-testing — when writing or modifying Ruby tests
+
+### Tools
+
+Use `gh-comments <pr-number>` to fetch PR comments (conversation + inline reviews).
+Check for a `justfile` in the project root — prefer `just <recipe>` over raw commands when a recipe exists.
 
 ### Patterns
 
