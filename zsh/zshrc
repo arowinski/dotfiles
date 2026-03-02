@@ -30,12 +30,9 @@ for config in $HOME/.zsh/configs/*; do
   source $config
 done
 
-source "${XDG_CONFIG_HOME:-$HOME/.config}/asdf-direnv/zshrc"
-export DIRENV_LOG_FORMAT=
+eval "$(mise activate zsh)"
+eval "$(direnv hook zsh)"
 
 [[ -f $HOME/.zsh_local ]] && source $HOME/.zsh_local
 
 [[ $commands[kubectl] ]] && source <(kubectl completion zsh)
-
-export ASDF_DATA_DIR="$HOME/.asdf"
-export PATH="$ASDF_DATA_DIR/shims:$PATH"

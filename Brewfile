@@ -1,4 +1,5 @@
-brew 'asdf'
+brew 'direnv'
+brew 'mise'
 brew 'git-delta'
 brew 'fd'
 brew 'fzf'
