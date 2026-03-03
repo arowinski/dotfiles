@@ -6,6 +6,9 @@
 
 set -euo pipefail
 
+# Bots whose comments are noise (CI, deployments). Review bots like coderabbitai pass through.
+DENIED_BOTS="github-actions[bot]"
+
 repo_from_remote() {
   local url=$(git remote get-url origin 2>/dev/null) || return 1
   url="${url#https://github.com/}"
@@ -45,21 +48,21 @@ strip_html_comments() {
   perl -0pe 's/<!--.*?-->//gs'
 }
 
+bot_filter() {
+  jq --arg denied "$DENIED_BOTS" '[.[] | select((.user.login // "") as $login | ($denied | split("\n") | map(select(. != "")) | all(. != $login)))]'
+}
+
 format_conversation() {
-  jq -s 'add // []' | jq -r '
+  jq -s 'add // []' | bot_filter | jq -r '
     def ts: .created_at | split("T") | .[0] + " " + (.[1] | split("Z")[0] | split(".")[0]);
-    def human: select((.user.login // "") | test("\\[bot\\]$") | not);
-    [.[] | human] |
     if length == 0 then "No comments." else
     .[] | "#\(.id) [\(.user.login) \(ts)]\n\(.body)"
     end' | strip_html_comments
 }
 
 format_reviews() {
-  jq -s 'add // []' | jq -r '
+  jq -s 'add // []' | bot_filter | jq -r '
     def ts: .created_at | split("T") | .[0] + " " + (.[1] | split("Z")[0] | split(".")[0]);
-    def human: select((.user.login // "") | test("\\[bot\\]$") | not);
-    [.[] | human] |
     if length == 0 then "No reviews." else
     group_by(.path) | sort_by(.[0].path) | .[] |
     "## \(.[0].path)",
