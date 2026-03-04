@@ -1,16 +1,26 @@
 #!/bin/zsh
 # Read-only wrapper for fetching all PR comments (conversation + inline reviews)
-# Usage: gh-comments <pr-number>              (detects repo from git remote)
-#        gh-comments <owner/repo> <pr-number>
-#        gh-comments <github-pr-url>
+# Groups inline comments under their parent review for better context.
+# Uses GraphQL for resolved/unresolved thread filtering.
+# Usage: gh-comments [--all] <pr-number>              (detects repo from git remote)
+#        gh-comments [--all] <owner/repo> <pr-number>
+#        gh-comments [--all] <github-pr-url>
+#   --all  Include resolved threads (default: only unresolved)
 
 set -euo pipefail
 
 # Bots whose comments are noise (CI, deployments). Review bots like coderabbitai pass through.
 DENIED_BOTS="github-actions[bot]"
 
+SHOW_RESOLVED=false
+if [[ "${1:-}" == "--all" ]]; then
+  SHOW_RESOLVED=true
+  shift
+fi
+
 repo_from_remote() {
-  local url=$(git remote get-url origin 2>/dev/null) || return 1
+  local url
+  url=$(git remote get-url origin 2>/dev/null) || return 1
   url="${url#https://github.com/}"
   url="${url#git@github.com:}"
   url="${url%.git}"
@@ -32,9 +42,9 @@ parse_args() {
     REPO="$1"
     PR="$2"
   else
-    echo "Usage: gh-comments <pr-number>              (detects repo from git remote)" >&2
-    echo "       gh-comments <owner/repo> <pr-number>" >&2
-    echo "       gh-comments <github-pr-url>" >&2
+    echo "Usage: ${0:t} [--all] <pr-number>              (detects repo from git remote)" >&2
+    echo "       ${0:t} [--all] <owner/repo> <pr-number>" >&2
+    echo "       ${0:t} [--all] <github-pr-url>" >&2
     exit 1
   fi
 
@@ -44,44 +54,181 @@ parse_args() {
   fi
 }
 
-strip_html_comments() {
-  perl -0pe 's/<!--.*?-->//gs'
-}
+# Strip noise from body fields: <details> blocks, HTML comments, CodeRabbit boilerplate.
+# Preserves "Outside diff range" and "Nitpick" blocks (often only exist in review body).
+clean_bodies() {
+  python3 -c '
+import json, re, sys, html
+try: from bs4 import BeautifulSoup, Comment
+except ImportError: sys.exit("missing beautifulsoup4 — run: pip3 install beautifulsoup4")
 
-bot_filter() {
-  jq --arg denied "$DENIED_BOTS" '[.[] | select((.user.login // "") as $login | ($denied | split("\n") | map(select(. != "")) | all(. != $login)))]'
-}
+def clean(body):
+    # Protect backtick-enclosed content from HTML parser (generics, JSX, etc.)
+    codes = []
+    def save_code(m):
+        codes.append(m.group(0))
+        return f"\x00CODE{len(codes)-1}\x00"
+    body = re.sub(r"```.*?```|`[^`]+`", save_code, body, flags=re.DOTALL)
 
-format_conversation() {
-  jq -s 'add // []' | bot_filter | jq -r '
-    def ts: .created_at | split("T") | .[0] + " " + (.[1] | split("Z")[0] | split(".")[0]);
-    if length == 0 then "No comments." else
-    .[] | "#\(.id) [\(.user.login) \(ts)]\n\(.body)"
-    end' | strip_html_comments
-}
+    soup = BeautifulSoup(body, "html.parser")
+    protected = set()
+    for d in soup.find_all("details"):
+        summary = d.find("summary")
+        if summary and ("Outside diff range" in summary.get_text() or "Nitpick" in summary.get_text()):
+            protected |= {id(d)} | {id(c) for c in d.find_all("details")}
+    for d in soup.find_all("details"):
+        if id(d) not in protected:
+            d.decompose()
+    for c in soup.find_all(string=lambda t: isinstance(t, Comment)):
+        c.extract()
+    for sub in soup.find_all("sub"):
+        sub.decompose()
+    s = html.unescape(str(soup))
+    s = re.sub(r"(?m)^> \[!IMPORTANT\].*?(?=\n(?!> )|\Z)", "", s, flags=re.DOTALL)
+    s = re.sub(r"(?m)^\[[\w-]+\]: https://\S+\n?", "", s)
+    s = re.sub(r"(?m)^---\s*$", "", s)
 
-format_reviews() {
-  jq -s 'add // []' | bot_filter | jq -r '
-    def ts: .created_at | split("T") | .[0] + " " + (.[1] | split("Z")[0] | split(".")[0]);
-    if length == 0 then "No reviews." else
-    group_by(.path) | sort_by(.[0].path) | .[] |
-    "## \(.[0].path)",
-    (
-      group_by(.in_reply_to_id // .id) |
-      map(sort_by(.created_at)) |
-      sort_by(.[0].created_at) | .[] |
-      (.[0] | "L\(.line // .original_line // "?") #\(.id) [\(.user.login) \(ts)]\n\(.body)"),
-      (.[1:] | .[] | "↳ #\(.id) [\(.user.login) \(ts)]\n\(.body)"),
-      ""
-    )
-    end' | strip_html_comments
+    # Restore code blocks
+    for i, code in enumerate(codes):
+        s = s.replace(f"\x00CODE{i}\x00", code)
+    return re.sub(r"\n{3,}", "\n\n", s).strip()
+
+def walk(obj):
+    if isinstance(obj, dict):
+        for k, v in obj.items():
+            if k == "body" and isinstance(v, str):
+                obj[k] = clean(v)
+            else:
+                walk(v)
+    elif isinstance(obj, list):
+        for item in obj:
+            walk(item)
+
+data = json.load(sys.stdin)
+walk(data)
+json.dump(data, sys.stdout)
+'
 }
 
 parse_args "$@"
 
-echo "# Conversation"
-gh api "repos/${REPO}/issues/${PR}/comments?per_page=100" --paginate | format_conversation
+OWNER="${REPO%%/*}"
+NAME="${REPO##*/}"
 
-echo ""
-echo "# Inline Reviews"
-gh api "repos/${REPO}/pulls/${PR}/comments?per_page=100" --paginate | format_reviews
+# Fetch everything via GraphQL in parallel
+conv_file=$(mktemp)
+threads_file=$(mktemp)
+reviews_file=$(mktemp)
+cleanup() { rm -f "$conv_file" "$threads_file" "$reviews_file"; }
+trap cleanup EXIT
+
+# Conversation comments (REST — GraphQL IssueComment doesn't have databaseId on older APIs)
+gh api "repos/${REPO}/issues/${PR}/comments?per_page=100" --paginate | jq -s 'add // []' > "$conv_file" &
+pid1=$!
+
+# Review threads with resolved status + all inline comments (GraphQL)
+gh api graphql --paginate -f query='
+query($owner: String!, $name: String!, $pr: Int!, $cursor: String) {
+  repository(owner: $owner, name: $name) {
+    pullRequest(number: $pr) {
+      reviewThreads(first: 100, after: $cursor) {
+        pageInfo { hasNextPage endCursor }
+        nodes {
+          isResolved
+          comments(first: 100) {
+            nodes {
+              databaseId
+              path
+              line: originalLine
+              author { login }
+              body
+              createdAt
+              replyTo { databaseId }
+              pullRequestReview { databaseId }
+            }
+          }
+        }
+      }
+    }
+  }
+}' -f owner="$OWNER" -f name="$NAME" -F pr="$PR" \
+  --jq '.data.repository.pullRequest.reviewThreads.nodes' | jq -s 'add // []' > "$threads_file" &
+pid2=$!
+
+# Reviews (REST — simpler for review body + state)
+gh api "repos/${REPO}/pulls/${PR}/reviews?per_page=100" --paginate | jq -s 'add // []' > "$reviews_file" &
+pid3=$!
+
+fail=0
+wait $pid1 || fail=1
+wait $pid2 || fail=1
+wait $pid3 || fail=1
+if [[ $fail -ne 0 ]]; then
+  echo "Error: one or more API calls failed" >&2
+  exit 1
+fi
+
+# Strip <details> blocks from all body fields (noise like walkthroughs, AI prompts)
+# Preserves "Outside diff range" and "Nitpick" blocks (often not posted as inline threads)
+for f in "$conv_file" "$reviews_file" "$threads_file"; do
+  clean_bodies < "$f" > "${f}.clean" && mv "${f}.clean" "$f"
+done
+
+# Merge and format
+jq -n \
+  --arg denied "$DENIED_BOTS" \
+  --argjson show_resolved "$SHOW_RESOLVED" \
+  --slurpfile conv "$conv_file" \
+  --slurpfile threads "$threads_file" \
+  --slurpfile reviews "$reviews_file" \
+  -r '
+def allowed_user: (.author.login // .user.login // "") as $login | ($denied | split(" ") | all(. != $login));
+def ts: .createdAt // .created_at | split("T") | .[0] + " " + (.[1] | split("Z")[0] | split(".")[0]);
+def ts_submitted: (.submitted_at // "") | if . == "" then "pending" else split("T") | .[0] + " " + (.[1] | split("Z")[0] | split(".")[0]) end;
+def fmt_threads: group_by(.path) | sort_by(.[0].path) | .[] |
+  "\n--file path=\(.[0].path)--",
+  (group_by(._reply_to // .databaseId) | map(sort_by(.createdAt)) | sort_by(.[0].createdAt) | .[] |
+    (.[0] | "\n--comment id=\(.databaseId) by=\(.author.login) at=\(ts) line=\(.line // "?")--\n\(.body // "")"),
+    (.[1:] | .[] | "\n  --reply id=\(.databaseId) by=\(.author.login) at=\(ts)--\n\(.body // "")"));
+
+([$threads[] | .[]] | if $show_resolved then . else [.[] | select(.isResolved | not)] end) as $active_threads |
+
+([
+  $active_threads[] | .comments.nodes[] |
+  . + {_review_id: (.pullRequestReview.databaseId // null), _reply_to: (.replyTo.databaseId // null)}
+] | map(select(allowed_user))) as $all_inline |
+
+($all_inline | map(select(._reply_to == null)) | map({(.databaseId | tostring): ._review_id}) | add // {}) as $root_review_map |
+($all_inline | map(. + {_owner_review: (if ._reply_to == null then ._review_id else $root_review_map[._reply_to | tostring] end)})) as $threaded_inline |
+
+"==CONVERSATION==",
+(
+  [$conv[0][] | select(allowed_user) | select((.body // "") | gsub("\\s";"") | length > 0)] |
+  if length == 0 then "No comments."
+  else .[] | "\n--comment id=\(.id) by=\(.user.login) at=\(ts)--\n\(.body)"
+  end
+),
+
+"\n==REVIEWS==",
+(
+  [$reviews[0][] | select(allowed_user)] | sort_by(.submitted_at // "") |
+  if length == 0 then "No reviews."
+  else .[] |
+    . as $review |
+    ((.body // "") != "") as $has_body |
+    ([$threaded_inline[] | select(._owner_review == $review.id)]) as $comments |
+    if ($has_body or ($comments | length > 0)) then
+      "\n--review id=\(.id) by=\(.user.login) at=\(ts_submitted) state=\(.state)--",
+      (if $has_body then (.body // "") else empty end),
+      ($comments | if length == 0 then empty else fmt_threads end)
+    else empty end
+  end
+),
+
+(
+  [$threaded_inline[] | select(._owner_review == null)] |
+  if length == 0 then empty
+  else "\n==STANDALONE==", fmt_threads
+  end
+)
+'
