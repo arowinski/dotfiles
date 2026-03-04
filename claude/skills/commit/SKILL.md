@@ -13,9 +13,10 @@ If the last commit is unpushed and current changes are related, propose amending
 ## Message rules
 
 - First line: max 80 chars, imperative mood
-- Body (optional): bullet points for secondary changes
+- Prefer single-line messages — the diff shows WHAT, the message explains WHY
 - Don't mention tests unless they're the main change
 - Use backticks for code references
+- Only stage changes relevant to the requested change
 
 ## Commit format
 
