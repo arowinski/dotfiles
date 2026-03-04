@@ -10,15 +10,18 @@ Be brutally honest — if I'm wrong, say so bluntly.
 
 ### Skills
 
-You MUST use these skills when applicable:
-- commit — when committing changes
+ALWAYS load the matching skill BEFORE taking action. Never fall back to built-in behavior.
+- commit — when committing or amending
 - pr — when creating pull requests
+- reply-to-review — when replying to PR review comments
 - ruby-testing — when writing or modifying Ruby tests
 
 ### Tools
 
 Use `gh-comments <pr-number>` to fetch PR comments (conversation + inline reviews).
 Check for a `justfile` in the project root — prefer `just <recipe>` over raw commands when a recipe exists.
+Use dedicated Grep/Glob tools, or `rg`/`fd` when shell is needed. Never use `grep`/`find`.
+Don't `cd` outside the working directory without asking. Use `git -C <path>` instead of `cd <path> && git`.
 
 ### Patterns
 
