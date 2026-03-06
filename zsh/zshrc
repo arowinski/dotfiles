@@ -31,6 +31,7 @@ for config in $HOME/.zsh/configs/*; do
 done
 
 eval "$(mise activate zsh)"
+export DIRENV_LOG_FORMAT=
 eval "$(direnv hook zsh)"
 
 [[ -f $HOME/.zsh_local ]] && source $HOME/.zsh_local
