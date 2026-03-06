@@ -101,7 +101,7 @@ case "$hook_event_name" in
         ;;
     "Stop"|"SubagentStop")
         title="Stopped"
-        message="Work completed"
+        message="${details:-Work completed}"
         ;;
     "PreToolUse")
         title="Tool: $tool_name"
