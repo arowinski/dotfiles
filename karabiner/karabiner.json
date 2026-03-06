@@ -5,6 +5,21 @@
             "complex_modifications": {
                 "rules": [
                     {
+                        "description": "Block sysdiagnose shortcut",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "period",
+                                    "modifiers": {
+                                        "mandatory": ["left_control", "left_shift", "left_option", "left_command"]
+                                    }
+                                },
+                                "to": [{ "key_code": "vk_none" }],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
                         "description": "Escape",
                         "manipulators": [
                             {
