@@ -2,7 +2,25 @@
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "permissions": {
     "allow": [
+      "Read(~/.local/share/mise/*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(cut:*)",
+      "Bash(tr:*)",
+      "Bash(awk:*)",
+      "Bash(sed:*)",
+      "Bash(uniq:*)",
+      "Bash(diff:*)",
+      "Bash(jq:*)",
+      "Bash(echo:*)",
+      "Bash(which:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(sort:*)",
+      "Bash(wc:*)",
+      "Bash(grep:*)",
       "Bash(rg:*)",
+      "Bash(find:*)",
       "Bash(fd:*)",
       "Bash(git status:*)",
       "Bash(git diff:*)",
@@ -27,18 +45,25 @@
       "Bash(gh run list:*)",
       "Bash(gh run watch:*)",
       "Bash(gh-comments:*)",
+      "Bash(coderabbit:*)",
       "Bash(just:*)",
+      "Bash(npx playwright test:*)",
+      "Bash(mix compile:*)",
+      "Bash(mix test:*)",
+      "Bash(mix format:*)",
       "Bash(bundle exec rspec:*)",
       "Bash(bundle exec rubocop:*)",
+      "Bash(bundle show:*)",
+      "Bash(bundle info:*)",
       "Skill(*)",
       "mcp__context7__*",
       "mcp__sentry__*",
-      "mcp__db__*"
+      "mcp__db__*",
+      "mcp__db_hive__*",
+      "mcp__db_tracker__*",
+      "mcp__db_model__*"
     ],
-    "deny": [
-      "Bash(grep:*)",
-      "Bash(find:*)"
-    ],
+    "deny": [],
     "ask": [],
     "defaultMode": "default"
   },
@@ -83,28 +108,15 @@
         ]
       }
     ],
-    "SessionStart": [
-      {
-        "matcher": "compact",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "cat ~/.claude/CLAUDE.md"
-          }
-        ]
-      }
-    ]
+    "SessionStart": []
   },
-  "enabledPlugins": {},
+  "enabledPlugins": {
+    "coderabbit@claude-plugins-official": true,
+    "claude-permissions-plugin@broven-claude-permissions-plugin": true
+  },
   "sandbox": {
-    "enabled": true,
-    "network": {
-      "allowLocalBinding": true
-    }
+    "enabled": false
   },
   "alwaysThinkingEnabled": true,
-  "autoUpdatesChannel": "latest",
-  "feedbackSurveyState": {
-    "lastShownTime": 1754032881689
-  }
+  "autoUpdatesChannel": "latest"
 }

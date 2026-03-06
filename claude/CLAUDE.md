@@ -1,6 +1,6 @@
 ### Fundamental rules
 
-Be brutally honest — if I'm wrong, say so bluntly.
+Be brutally honest — if I'm wrong, say so bluntly. When uncertain, say so — don't present guesses as facts.
 
 - NEVER attempt to install packages or modify the system.
 - Run tests and linters before committing.
@@ -14,14 +14,14 @@ ALWAYS load the matching skill BEFORE taking action. Never fall back to built-in
 - commit — when committing or amending
 - pr — when creating pull requests
 - reply-to-review — when replying to PR review comments
-- ruby-testing — when writing or modifying Ruby tests
 
 ### Tools
 
 Use `gh-comments <pr-number>` to fetch PR comments (conversation + inline reviews).
 Check for a `justfile` in the project root — prefer `just <recipe>` over raw commands when a recipe exists.
 Use dedicated Grep/Glob tools, or `rg`/`fd` when shell is needed. Never use `grep`/`find`.
-Don't `cd` outside the working directory without asking. Use `git -C <path>` instead of `cd <path> && git`.
+Run `git` directly — you're already in the repo. For a different repo, use `cd <path> && git <cmd>`.
+When launching agents, always include: "Run `git` directly. For a different repo use `cd <path> && git <cmd>`."
 
 ### Patterns
 

@@ -25,5 +25,6 @@
     ~/.claude/agents: claude/agents
     ~/.claude/commands: claude/commands
     ~/.claude/settings.json: claude/settings.json
+    ~/.claude/rules: claude/rules
     ~/.claude/skills: claude/skills
 
