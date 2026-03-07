@@ -1,5 +1,6 @@
 ---
-globs: "**/*_spec.rb"
+paths:
+  - "**/*_spec.rb"
 ---
 
 # Ruby/RSpec Testing Conventions
