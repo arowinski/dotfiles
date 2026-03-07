@@ -38,9 +38,10 @@ Process:
    - If input contains Jira URL (e.g., https://jira.company.com/browse/ENG-555):
      * Extract ticket ID (e.g., ENG-555)
      * Use Atlassian MCP to fetch ticket details if available
-     * Extract: title, description, acceptance criteria, status
+     * Extract: title, description, acceptance criteria, status, issue type
      * Store ticket ID for branch naming
    - Otherwise: use input as task description directly
+   - **Save raw ticket details** (title, description, AC, status) — these will be written to the plan file in step 6 so context survives session compression
 
 4. **Research codebase (delegate to architect agent):**
 
@@ -92,6 +93,7 @@ Process:
    - Write plan to plan file with structure:
      * Task title
      * Jira ticket link (if from Jira)
+     * Jira ticket details (if from Jira): description, acceptance criteria, issue type — preserve these verbatim so context survives session compression
      * Goal (what we're trying to achieve)
      * Research findings (patterns found, constraints, risks)
      * Approach (high-level strategy based on research)
