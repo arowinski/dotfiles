@@ -7,6 +7,8 @@ Be brutally honest — if I'm wrong, say so bluntly. When uncertain, say so — 
 - NEVER test private methods.
 - NEVER comment out code to make tests pass.
 - NEVER add Claude footer, "Generated with Claude Code", or "Co-Authored-By" lines.
+- When the request is ambiguous, clarify before acting. Don't guess intent.
+- Prefer the simplest solution. Don't over-engineer.
 
 ### Skills
 
