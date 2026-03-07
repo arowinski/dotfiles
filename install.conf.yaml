@@ -27,4 +27,5 @@
     ~/.claude/settings.json: claude/settings.json
     ~/.claude/rules: claude/rules
     ~/.claude/skills: claude/skills
+    ~/.dippy/config: dippy/config
 

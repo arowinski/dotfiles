@@ -1,3 +1,5 @@
+tap 'ldayton/dippy'
+brew 'dippy'
 brew 'direnv'
 brew 'mise'
 brew 'git-delta'
