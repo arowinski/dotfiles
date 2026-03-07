@@ -1,14 +1,10 @@
 ---
 name: pr
 description: Creates pull requests with automatic title/template formatting. Use when asked to create a PR.
-allowed-tools: Bash(git fetch:*), Bash(git diff:*), Bash(git log:*), Bash(git branch:*), Bash(git remote:*), Bash(git push:*), Bash(git symbolic-ref:*), Bash(git rev-parse:*), Bash(gh pr create:*), Bash(gh pr list:*), Bash(gh pr view:*), Read, Glob, AskUserQuestion
+allowed-tools: Bash(git fetch:*), Bash(git diff:*), Bash(git log:*), Bash(git branch:*), Bash(git remote:*), Bash(git push:*), Bash(git symbolic-ref:*), Bash(git rev-parse:*), Bash(gh pr create:*), Bash(gh pr list:*), Bash(gh pr view:*), Read, Glob, AskUserQuestion, mcp__atlassian__getJiraIssue, mcp__atlassian__getAccessibleAtlassianResources
 ---
 
 # PR
-
-## Overview
-
-Automates pull request creation by detecting repository-specific title patterns, adapting PR templates, and creating draft PRs after user confirmation.
 
 ## Workflow
 
@@ -17,37 +13,24 @@ Automates pull request creation by detecting repository-specific title patterns,
 1. Run `git diff origin/<base>...HEAD` to examine all changes
 2. Run `git log origin/<base>..HEAD` to see commit history
 3. **Identify the single most important change** - what's the primary purpose of this PR?
-   - New feature? Which one?
-   - Bug fix? What bug?
-   - Refactoring? Of what?
-   - Performance improvement? Where?
 4. Understand scope: frontend, backend, infrastructure, tests, etc.
 
 ### Step 2: Detect Title Pattern
 
 1. Run `gh pr list --limit 10 --json title` to examine recent PRs
-2. Identify common patterns:
-   - Prefix formats: `[TICKET-123]`, `feature(TICKET-123):`, `fix:`
-   - Ticket number formats: `ENG-555`, `FGF-123`, `JIRA-456`
-3. Extract ticket number from current branch name if pattern exists
-4. If pattern detected but ticket number not found in branch name, ask user for it
+2. Identify common prefix/ticket patterns and extract ticket number from branch name
+3. If pattern detected but ticket number not found in branch name, ask user for it
+4. If ticket number found, use the Jira ticket for full context on motivation/rationale
 
 ### Step 3: Check for PR Template
 
-1. Look for template at:
-   - `.github/pull_request_template.md`
-   - `.github/PULL_REQUEST_TEMPLATE.md`
-
-2. If template found, adapt it:
-   - Remove/skip UI-related sections if changes don't touch frontend code (no views, CSS, JS, React)
-   - Fill relevant sections based on change analysis
-
+1. Look for `.github/pull_request_template.md` (or `PULL_REQUEST_TEMPLATE.md`)
+2. If found, adapt it — skip UI-related sections if changes don't touch frontend
 3. Content guidelines:
-   - Use imperative language ("Add feature", not "Added feature")
-   - Focus only on most important changes
-   - **Don't mention tests** - tests are expected and obvious. Only mention if they're a major part of the PR (e.g., new testing framework, significant test infrastructure changes)
-   - Use backticks for code references (variables, methods, classes, file names)
-   - Use third person ("This adds..." not "I added...")
+   - Imperative mood, third person ("This adds..." not "I added...")
+   - Focus on most important changes, don't mention tests unless they're the main change
+   - Use backticks for code references
+
 ### Step 4: Generate Title and Body
 
 1. Craft title following detected pattern:
