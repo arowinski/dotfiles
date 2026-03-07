@@ -1,0 +1,22 @@
+# Mutations explicitly allowed in Claude Code settings.json
+# Dippy's built-in handlers consider these unsafe, but they're
+# standard workflow commands that shouldn't require prompting.
+
+# Git mutations
+allow git add
+allow git commit
+allow git switch
+allow git pull
+allow git stash list
+allow git stash show
+
+# Filesystem
+allow touch
+allow mkdir
+
+# Project tools
+allow mix
+allow just
+allow bundle exec rspec
+allow bundle exec rubocop
+allow npx playwright test

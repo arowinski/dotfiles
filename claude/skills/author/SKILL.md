@@ -1,7 +1,6 @@
 ---
 name: author
 description: Create or improve Claude Code agent and skill configuration files. Use when creating new agents/skills or reviewing existing ones.
-disable-model-invocation: true
 argument-hint: <path, "all", or description>
 allowed-tools: Read, Glob, Grep, AskUserQuestion
 ---

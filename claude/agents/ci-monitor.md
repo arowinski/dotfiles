@@ -21,8 +21,8 @@ Your core workflow:
    - If no runs found, inform user that no CI runs exist for this branch yet
 
 3. **Analyze failures and provide actionable feedback**:
-   - Filter out e2e (end-to-end) test failures - ignore them completely (project policy)
-   - For remaining failed checks, fetch logs: `gh run view <run_id> --log-failed | tail -100`
+   - For all failed checks, fetch logs: `gh run view <run_id> --log-failed | tail -100`
+   - E2e test failures are often flaky — report them but note they may need a rerun
    - Categorize and recommend:
      - **Code issue** (test failure, lint, type error): Show exact file/line, suggest fix
      - **Flaky test** (random failure, timeout, race condition): Suggest rerun or test fix

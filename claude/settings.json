@@ -7,8 +7,6 @@
       "Bash(cat:*)",
       "Bash(cut:*)",
       "Bash(tr:*)",
-      "Bash(awk:*)",
-      "Bash(sed:*)",
       "Bash(uniq:*)",
       "Bash(diff:*)",
       "Bash(jq:*)",
@@ -22,6 +20,16 @@
       "Bash(rg:*)",
       "Bash(find:*)",
       "Bash(fd:*)",
+      "Bash(pwd:*)",
+      "Bash(basename:*)",
+      "Bash(dirname:*)",
+      "Bash(realpath:*)",
+      "Bash(readlink:*)",
+      "Bash(file:*)",
+      "Bash(date:*)",
+      "Bash(test:*)",
+      "Bash(touch:*)",
+      "Bash(mkdir:*)",
       "Bash(git status:*)",
       "Bash(git diff:*)",
       "Bash(git log:*)",
@@ -31,8 +39,8 @@
       "Bash(git symbolic-ref:*)",
       "Bash(git rev-parse:*)",
       "Bash(git remote:*)",
-      "Bash(git stash:*)",
-      "Bash(git checkout:*)",
+      "Bash(git stash list:*)",
+      "Bash(git stash show:*)",
       "Bash(git switch:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
@@ -61,7 +69,19 @@
       "mcp__db__*",
       "mcp__db_hive__*",
       "mcp__db_tracker__*",
-      "mcp__db_model__*"
+      "mcp__db_model__*",
+      "mcp__atlassian__getJiraIssue",
+      "mcp__atlassian__getAccessibleAtlassianResources",
+      "mcp__atlassian__searchJiraIssuesUsingJql",
+      "mcp__atlassian__search",
+      "mcp__atlassian__atlassianUserInfo",
+      "mcp__atlassian__getVisibleJiraProjects",
+      "mcp__atlassian__getJiraIssueRemoteIssueLinks",
+      "mcp__atlassian__getJiraIssueTypeMetaWithFields",
+      "mcp__atlassian__getJiraProjectIssueTypesMetadata",
+      "mcp__atlassian__getTransitionsForJiraIssue",
+      "mcp__atlassian__jiraRead",
+      "mcp__atlassian__fetch"
     ],
     "deny": [],
     "ask": [],
@@ -108,15 +128,29 @@
         ]
       }
     ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "dippy"
+          }
+        ]
+      }
+    ],
     "SessionStart": []
   },
   "enabledPlugins": {
-    "coderabbit@claude-plugins-official": true,
-    "claude-permissions-plugin@broven-claude-permissions-plugin": true
+    "coderabbit@claude-plugins-official": true
+  },
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   },
   "sandbox": {
     "enabled": false
   },
   "alwaysThinkingEnabled": true,
-  "autoUpdatesChannel": "latest"
+  "autoUpdatesChannel": "latest",
+  "effortLevel": "high"
 }

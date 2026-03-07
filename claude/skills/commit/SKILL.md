@@ -10,6 +10,10 @@ Check `git log` for the repo's commit message style and follow it.
 
 If the last commit is unpushed and current changes are related, propose amending. Ask first.
 
+## Pre-commit checks
+
+If tests or linter fail, stop and report the failure. Do not commit.
+
 ## Message rules
 
 - First line: max 80 chars, imperative mood
