@@ -11,17 +11,6 @@ zplug load
 
 source $HOME/.zsh/zshenv
 
-export VISUAL=nvim
-export EDITOR="$VISUAL"
-
-export LANG="en_US.UTF-8"
-export LC_ALL="en_US.UTF-8"
-export LC_CTYPE="en_US.UTF-8"
-
-export ERL_AFLAGS="-kernel shell_history enabled -kernel shell_history_file_bytes 1024000"
-
-bindkey -e
-
 if type brew &>/dev/null; then
   FPATH=$(brew --prefix)/share/zsh/site-functions:$FPATH
 fi
