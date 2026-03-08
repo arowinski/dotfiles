@@ -16,6 +16,7 @@ ALWAYS load the matching skill BEFORE taking action. Never fall back to built-in
 - commit — when committing or amending
 - pr — when creating pull requests
 - reply-to-review — when replying to PR review comments
+- clear-writing — when writing or editing prose for humans
 
 ### Tools
 
