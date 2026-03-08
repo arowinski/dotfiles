@@ -1,9 +1,8 @@
 ---
 description: Spawn an agent team to debate a design question and converge on a recommendation
 argument-hint: <question, topic, or Jira URL>
+model: opus
 ---
-
-Facilitate a structured debate on the given topic using an agent team.
 
 Accept a design question, pasted requirements, or Jira URL as input.
 If no argument provided, ask for a topic.
@@ -21,6 +20,8 @@ If no argument provided, ask for a topic.
    - Wait for confirmation before spawning the team
 
 ## Team
+
+You MUST use the TeamCreate and SendMessage tools to create a real agent team. Do NOT simulate the debate in your own context.
 
 Create an agent team with 2-3 teammates. Each teammate:
 - Argues FOR their assigned position and AGAINST the others
