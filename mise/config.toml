@@ -1,5 +1,5 @@
 [tools]
-direnv = "2.37.1"
+direnv = "2.34.0"
 ruby = "3.3.5"
 node = "22.11.0"
 elixir = "1.18.4-otp-27"
