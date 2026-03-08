@@ -1,0 +1,17 @@
+#!/bin/sh
+
+current=$(tmux display-message -p '#{session_name}')
+window=$(tmux display-message -p '#{window_name}')
+cwd=$(tmux display-message -p '#{pane_current_path}')
+
+if echo "$current" | grep -q -- '-util$'; then
+  tmux switch-client -t "=${current%-util}"
+else
+  target="${current}-util"
+  if ! tmux has-session -t "=$target" 2>/dev/null; then
+    tmux new-session -ds "$target" -c "$cwd" -n "$window"
+  elif ! tmux list-windows -t "=$target" -F '#{window_name}' | grep -qx "$window"; then
+    tmux new-window -t "=$target" -n "$window" -c "$cwd"
+  fi
+  tmux switch-client -t "=$target:=$window"
+fi
