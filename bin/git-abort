@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 if [[ -e .git/CHERRY_PICK_HEAD ]] ; then
     exec git cherry-pick --abort "$@"
@@ -14,5 +14,5 @@ elif [[ -e .git/MERGE_MODE ]] ; then
     exec git merge --abort "$@"
 else
     echo git-abort: unknown state
-    exit -1
+    exit 1
 fi

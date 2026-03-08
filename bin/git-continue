@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 if [[ -e .git/CHERRY_PICK_HEAD ]] ; then
     exec git cherry-pick --continue "$@"
@@ -10,5 +10,5 @@ elif [[ -e .git/rebase-merge ]] ; then
     exec git rebase --continue "$@"
 else
     echo git-continue: unknown state
-    exit -1
+    exit 1
 fi
