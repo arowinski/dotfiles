@@ -1,14 +1,11 @@
-#!/bin/sh
-
 alias c='clear'
-
-# colorize grep
-alias grep="grep --color=auto"
-alias fgrep="fgrep --color=auto"
-alias egrep="egrep --color=auto"
 
 alias v="nvim"
 alias cc="claude"
-alias y="yarn"
 alias k=kubectl
-alias dc='f() { docker exec -it $1 sh; }; f'
+
+alias b='bundle exec'
+alias rc='bundle exec rails c'
+alias dbm='bundle exec rails db:migrate'
+
+alias r='bundle exec rails'

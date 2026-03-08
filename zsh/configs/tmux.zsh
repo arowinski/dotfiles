@@ -1,5 +1,3 @@
-#!/bin/sh
-
 _not_inside_tmux() {
   [[ -z "$TMUX" ]]
 }

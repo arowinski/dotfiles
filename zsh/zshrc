@@ -1,28 +1,25 @@
-export ZPLUG_HOME=/opt/homebrew/opt/zplug
-source $ZPLUG_HOME/init.zsh
-
-zplug 'zsh-users/zsh-completions', defer:2
-zplug 'zsh-users/zsh-syntax-highlighting', defer:2
-zplug 'zsh-users/zsh-autosuggestions', defer:2
+fpath=(/opt/homebrew/share/zsh-completions $fpath)
+source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'
 ZSH_AUTOSUGGEST_STRATEGY=(history completion)
 
-zplug load
-
-source $HOME/.zsh/zshenv
-
-if type brew &>/dev/null; then
-  FPATH=$(brew --prefix)/share/zsh/site-functions:$FPATH
-fi
+[[ -f $HOME/.zsh_local ]] && source $HOME/.zsh_local
 
 for config in $HOME/.zsh/configs/*; do
   source $config
 done
 
-eval "$(mise activate zsh)"
-export DIRENV_LOG_FORMAT=
 eval "$(direnv hook zsh)"
 
-[[ -f $HOME/.zsh_local ]] && source $HOME/.zsh_local
-
-[[ $commands[kubectl] ]] && source <(kubectl completion zsh)
+for _cmd in kubectl helm mise; do
+  if [[ $commands[$_cmd] ]]; then
+    _cache="$HOME/.zsh/cache/_$_cmd"
+    if [[ ! -f "$_cache" || "$commands[$_cmd]" -nt "$_cache" ]]; then
+      mkdir -p "${_cache:h}"
+      $_cmd completion zsh > "$_cache"
+    fi
+    source "$_cache"
+  fi
+done
+unset _cmd _cache

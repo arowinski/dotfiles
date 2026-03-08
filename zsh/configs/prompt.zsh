@@ -1,5 +1,3 @@
-#!/bin/sh
-
 setopt PROMPT_SUBST
 
 git_changes() {
