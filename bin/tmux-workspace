@@ -1,5 +1,5 @@
 #!/bin/sh
 
 tmux send-keys v Enter
-tmux split-window -h -p 30 -c $1
-tmux split-window -v -c $1
+tmux split-window -h -p 30 -c "$1"
+tmux split-window -v -c "$1"
