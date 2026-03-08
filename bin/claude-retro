@@ -1,0 +1,290 @@
+#!/usr/bin/env python3
+"""Analyze Claude Code daily usage for retro."""
+
+import json
+import re
+import sys
+from collections import defaultdict
+from datetime import date, datetime, timedelta
+from pathlib import Path
+
+CLAUDE_DIR = Path.home() / ".claude"
+HISTORY = CLAUDE_DIR / "history.jsonl"
+PROJECTS = CLAUDE_DIR / "projects"
+
+META_PROMPTS = frozenset({
+    "/usage", "/model", "/config", "/clear", "/login", "/hooks",
+    "/help", "/cost", "/status", "/logout",
+})
+MAX_PROMPTS_SHOWN = 10
+
+
+def parse_date(arg):
+    if not arg or arg == "today":
+        return date.today()
+    if arg == "yesterday":
+        return date.today() - timedelta(days=1)
+    return date.fromisoformat(arg)
+
+
+def is_meta_prompt(prompt):
+    stripped = prompt.strip().lower()
+    return stripped in META_PROMPTS or stripped.startswith(("!", "/usage", "/model", "/config", "/clear"))
+
+
+def get_sessions(target):
+    sessions = {}
+    with open(HISTORY) as f:
+        for line in f:
+            try:
+                entry = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            ts = datetime.fromtimestamp(entry["timestamp"] / 1000)
+            if ts.date() != target:
+                continue
+            sid = entry["sessionId"]
+            if sid not in sessions:
+                sessions[sid] = {
+                    "project": entry.get("project", "unknown"),
+                    "prompts": [],
+                    "start": ts,
+                    "end": ts,
+                }
+            sessions[sid]["prompts"].append(entry.get("display", "").strip())
+            sessions[sid]["end"] = max(sessions[sid]["end"], ts)
+            sessions[sid]["start"] = min(sessions[sid]["start"], ts)
+    return sessions
+
+
+def is_agent_session(sid, project):
+    encoded = project.replace("/", "-")
+    path = PROJECTS / encoded / f"{sid}.jsonl"
+    if not path.exists():
+        return False, None, None
+    with open(path) as f:
+        try:
+            first = json.loads(f.readline())
+        except (json.JSONDecodeError, StopIteration):
+            return False, None, None
+    agent = first.get("agentName")
+    team = first.get("teamName")
+    if agent:
+        return True, agent, team
+    return False, None, None
+
+
+def extract_commit_message(cmd):
+    """Extract commit message from a git commit command."""
+    # Match heredoc style: git commit -m "$(cat <<'EOF'\nmessage\nEOF\n)"
+    m = re.search(r"<<'?EOF'?\n(.+?)\n\s*EOF", cmd, re.DOTALL)
+    if m:
+        msg = m.group(1).strip()
+        # Remove Co-Authored-By lines
+        msg = re.sub(r"\n\s*Co-Authored-By:.*", "", msg).strip()
+        return msg
+    # Match simple: git commit -m "message"
+    m = re.search(r'git commit\s+-m\s+["\'](.+?)["\']', cmd)
+    if m:
+        return m.group(1).strip()
+    return None
+
+
+def count_net_commits(commands):
+    """Count net commits and extract messages."""
+    commits = []
+    resets = 0
+    for cmd in commands:
+        if re.search(r"git commit\b", cmd) and "--amend" not in cmd:
+            msg = extract_commit_message(cmd)
+            commits.append(msg or "(message not parsed)")
+        elif re.search(r"git reset\b", cmd):
+            m = re.search(r"HEAD~(\d+)", cmd)
+            n = int(m.group(1)) if m else 1
+            resets += n
+    # Resets undo the most recent commits
+    if resets > 0:
+        commits = commits[:-resets] if resets < len(commits) else []
+    return commits
+
+
+def analyze_session(sid, project):
+    encoded = project.replace("/", "-")
+    path = PROJECTS / encoded / f"{sid}.jsonl"
+    if not path.exists():
+        return {}
+
+    tools = defaultdict(int)
+    tool_errors = []
+    models = defaultdict(int)
+    teams = set()
+    git_commands = []
+
+    with open(path) as f:
+        for line in f:
+            try:
+                e = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+
+            if e.get("teamName"):
+                teams.add(e["teamName"])
+
+            msg = e.get("message", {})
+            if model := msg.get("model"):
+                models[model] += 1
+
+            if msg.get("role") == "assistant" and isinstance(msg.get("content"), list):
+                for block in msg["content"]:
+                    if isinstance(block, dict) and block.get("type") == "tool_use":
+                        tools[block.get("name", "?")] += 1
+                        cmd = block.get("input", {}).get("command", "")
+                        if re.search(r"git (commit|reset)\b", cmd):
+                            git_commands.append(cmd)
+
+            if msg.get("role") == "tool" and isinstance(msg.get("content"), list):
+                for block in msg["content"]:
+                    if isinstance(block, dict) and block.get("is_error"):
+                        tool_errors.append(block.get("text", "")[:200])
+
+    commit_messages = count_net_commits(git_commands)
+    return {
+        "tools": dict(tools),
+        "tool_errors": tool_errors[:10],
+        "models": dict(models),
+        "teams": sorted(teams),
+        "commits": len(commit_messages),
+        "commit_messages": commit_messages,
+    }
+
+
+def cap_prompts(prompts):
+    """Return first/last N prompts if list is too long, filtering meta prompts."""
+    work_prompts = [p for p in prompts if not is_meta_prompt(p)]
+    total = len(work_prompts)
+    if total <= MAX_PROMPTS_SHOWN:
+        return work_prompts, total
+    half = MAX_PROMPTS_SHOWN // 2
+    capped = work_prompts[:half] + [f"... ({total - MAX_PROMPTS_SHOWN} more) ..."] + work_prompts[-half:]
+    return capped, total
+
+
+def main():
+    target = parse_date(sys.argv[1] if len(sys.argv) > 1 else "today")
+    sessions = get_sessions(target)
+
+    if not sessions:
+        json.dump({"date": str(target), "summary": "No sessions found"}, sys.stdout)
+        return
+
+    by_project = defaultdict(lambda: {"user": [], "agent": []})
+    all_errors = []
+    all_tools = defaultdict(int)
+    all_models = defaultdict(int)
+    all_teams = set()
+    total_commits = 0
+    total_work_prompts = 0
+    short_sessions = 0
+    user_session_count = 0
+    agent_session_count = 0
+
+    for sid, info in sessions.items():
+        is_agent, agent_name, team_name = is_agent_session(sid, info["project"])
+        detail = analyze_session(sid, info["project"])
+        dur = round((info["end"] - info["start"]).total_seconds() / 60, 1)
+
+        capped, work_count = cap_prompts(info["prompts"])
+        meta_count = len(info["prompts"]) - work_count
+
+        s = {
+            "id": sid[:8],
+            "prompts": capped,
+            "prompt_count": work_count,
+            "start": info["start"].strftime("%H:%M"),
+            "end": info["end"].strftime("%H:%M"),
+            "duration_min": dur,
+            **detail,
+        }
+        if meta_count:
+            s["meta_prompts_filtered"] = meta_count
+
+        if is_agent:
+            s["agent"] = agent_name
+            s["team"] = team_name
+            agent_session_count += 1
+        else:
+            user_session_count += 1
+            total_work_prompts += work_count
+            if dur < 2 and work_count <= 2:
+                short_sessions += 1
+
+        all_errors.extend(detail.get("tool_errors", []))
+        total_commits += detail.get("commits", 0)
+        for t, c in detail.get("tools", {}).items():
+            all_tools[t] += c
+        for m, c in detail.get("models", {}).items():
+            all_models[m] += c
+        all_teams.update(detail.get("teams", []))
+
+        project = info["project"].split("/")[-1]
+        bucket = "agent" if is_agent else "user"
+        by_project[project][bucket].append(s)
+
+    project_wall_clock = {}
+    for project, buckets in by_project.items():
+        user_sessions = buckets["user"]
+        if user_sessions:
+            starts = [s["start"] for s in user_sessions]
+            ends = [s["end"] for s in user_sessions]
+            project_wall_clock[project] = {"from": min(starts), "to": max(ends)}
+
+    output = {
+        "date": str(target),
+        "summary": {
+            "user_sessions": user_session_count,
+            "agent_sessions": agent_session_count,
+            "work_prompts": total_work_prompts,
+            "commits": total_commits,
+            "short_sessions": short_sessions,
+            "tool_errors": len(all_errors),
+            "models": dict(all_models),
+            "top_tools": dict(sorted(all_tools.items(), key=lambda x: -x[1])[:10]),
+            "teams": sorted(all_teams),
+        },
+        "projects": {},
+    }
+
+    for project, buckets in sorted(by_project.items()):
+        user_sessions = buckets["user"]
+        agent_sessions = buckets["agent"]
+        all_commit_msgs = []
+        for s in user_sessions:
+            all_commit_msgs.extend(s.get("commit_messages", []))
+
+        p = {
+            "user_sessions": len(user_sessions),
+            "prompts": sum(s["prompt_count"] for s in user_sessions),
+            "commits": sum(s.get("commits", 0) for s in user_sessions),
+        }
+        if all_commit_msgs:
+            p["commit_messages"] = all_commit_msgs
+        if project in project_wall_clock:
+            p["wall_clock"] = project_wall_clock[project]
+        if user_sessions:
+            p["details"] = user_sessions
+        if agent_sessions:
+            p["agent_sessions"] = len(agent_sessions)
+            p["agents"] = [
+                {"agent": s.get("agent"), "team": s.get("team")}
+                for s in agent_sessions
+            ]
+        output["projects"][project] = p
+
+    if all_errors:
+        output["error_samples"] = all_errors[:15]
+
+    json.dump(output, sys.stdout, indent=2, default=str)
+
+
+if __name__ == "__main__":
+    main()
