@@ -20,6 +20,7 @@
     ~/.config/tmux/tmux.conf: tmux/tmux.conf
     ~/.zlogin: zsh/zlogin
     ~/.zsh: zsh
+    ~/.zshenv: zsh/zshenv
     ~/.zshrc: zsh/zshrc
     ~/.claude/CLAUDE.md: claude/CLAUDE.md
     ~/.claude/agents: claude/agents
