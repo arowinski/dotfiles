@@ -21,3 +21,4 @@ allow bundle exec rspec
 allow bundle exec rubocop
 allow npx playwright test
 allow claude-retro
+allow gh-comments
