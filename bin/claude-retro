@@ -11,11 +11,8 @@ from pathlib import Path
 CLAUDE_DIR = Path.home() / ".claude"
 HISTORY = CLAUDE_DIR / "history.jsonl"
 PROJECTS = CLAUDE_DIR / "projects"
+HOOK_LOG = CLAUDE_DIR / "hook-approvals.log"
 
-META_PROMPTS = frozenset({
-    "/usage", "/model", "/config", "/clear", "/login", "/hooks",
-    "/help", "/cost", "/status", "/logout",
-})
 MAX_PROMPTS_SHOWN = 10
 
 
@@ -29,7 +26,7 @@ def parse_date(arg):
 
 def is_meta_prompt(prompt):
     stripped = prompt.strip().lower()
-    return stripped in META_PROMPTS or stripped.startswith(("!", "/usage", "/model", "/config", "/clear"))
+    return not stripped or stripped.startswith(("/", "!"))
 
 
 def get_sessions(target):
@@ -98,10 +95,8 @@ def count_net_commits(commands):
         if re.search(r"git commit\b", cmd) and "--amend" not in cmd:
             msg = extract_commit_message(cmd)
             commits.append(msg or "(message not parsed)")
-        elif re.search(r"git reset\b", cmd):
-            m = re.search(r"HEAD~(\d+)", cmd)
-            n = int(m.group(1)) if m else 1
-            resets += n
+        elif re.search(r"git reset\b", cmd) and re.search(r"HEAD~(\d+)", cmd):
+            resets += int(re.search(r"HEAD~(\d+)", cmd).group(1))
     # Resets undo the most recent commits
     if resets > 0:
         commits = commits[:-resets] if resets < len(commits) else []
@@ -158,15 +153,66 @@ def analyze_session(sid, project):
     }
 
 
+CORRECTION_PATTERNS = re.compile(
+    r"^(no[,.]\s|stop[,.]\s|stop$|don'?t do |don'?t use |i said |i meant |that'?s not |wrong[,.]\s|not what )",
+    re.IGNORECASE,
+)
+
+
+def count_corrections(prompts):
+    """Count prompts that look like corrections or restatements."""
+    return sum(1 for p in prompts if CORRECTION_PATTERNS.search(p))
+
+
 def cap_prompts(prompts):
     """Return first/last N prompts if list is too long, filtering meta prompts."""
     work_prompts = [p for p in prompts if not is_meta_prompt(p)]
     total = len(work_prompts)
     if total <= MAX_PROMPTS_SHOWN:
-        return work_prompts, total
+        return work_prompts, total, count_corrections(work_prompts)
     half = MAX_PROMPTS_SHOWN // 2
+    corrections = count_corrections(work_prompts)
     capped = work_prompts[:half] + [f"... ({total - MAX_PROMPTS_SHOWN} more) ..."] + work_prompts[-half:]
-    return capped, total
+    return capped, total, corrections
+
+
+# Extract base command: two words for git/bundle, first word otherwise
+BASE_CMD = re.compile(r"^((?:git|bundle)\s+[a-z][\w-]*|[a-z][\w-]*)")
+
+
+def parse_hook_log(target):
+    """Parse hook-approvals.log for permission friction on target date."""
+    if not HOOK_LOG.exists():
+        return {"ask_count": 0, "approved_count": 0, "top_ask": []}
+
+    prefix = str(target)
+    ask_cmds = defaultdict(int)
+    approved_count = 0
+    ask_count = 0
+
+    with open(HOOK_LOG) as f:
+        for line in f:
+            if not line.startswith(prefix):
+                continue
+            if "APPROVED:" in line:
+                approved_count += 1
+            elif "ASK:" in line:
+                ask_count += 1
+                m = re.search(r"ASK: (.+)$", line)
+                if m:
+                    for part in m.group(1).split(","):
+                        cm = BASE_CMD.match(part.strip())
+                        if cm:
+                            ask_cmds[cm.group(1)] += 1
+
+    top = sorted(ask_cmds.items(), key=lambda x: -x[1])[:10]
+    suggest = [cmd for cmd, n in top if n >= 3]
+    return {
+        "ask_count": ask_count,
+        "approved_count": approved_count,
+        "top_ask": [{"command": cmd, "count": n} for cmd, n in top],
+        "suggest_allow": suggest,
+    }
 
 
 def main():
@@ -193,7 +239,7 @@ def main():
         detail = analyze_session(sid, info["project"])
         dur = round((info["end"] - info["start"]).total_seconds() / 60, 1)
 
-        capped, work_count = cap_prompts(info["prompts"])
+        capped, work_count, corrections = cap_prompts(info["prompts"])
         meta_count = len(info["prompts"]) - work_count
 
         s = {
@@ -207,6 +253,11 @@ def main():
         }
         if meta_count:
             s["meta_prompts_filtered"] = meta_count
+        if corrections:
+            s["corrections"] = corrections
+        if work_count:
+            model_calls = sum(detail.get("models", {}).values())
+            s["model_calls_per_prompt"] = round(model_calls / work_count, 1)
 
         if is_agent:
             s["agent"] = agent_name
@@ -282,6 +333,8 @@ def main():
 
     if all_errors:
         output["error_samples"] = all_errors[:15]
+
+    output["permissions"] = parse_hook_log(target)
 
     json.dump(output, sys.stdout, indent=2, default=str)
 

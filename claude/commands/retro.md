@@ -6,29 +6,19 @@ argument-hint: [today|yesterday|YYYY-MM-DD]
 Run a daily retrospective on Claude Code usage.
 
 1. Run `claude-retro $ARGUMENTS` (defaults to today)
-2. Analyze the JSON output looking for:
+2. Analyze the JSON output. Only report findings — skip anything that looks fine.
 
-**Productivity**
-- Sessions and prompts per project — where was time spent?
-- Commits made — use commit messages to describe what was shipped
-- Duration patterns — long productive sessions vs short abandoned ones
-- Overlapping wall clocks across projects — how much context-switching happened?
-
-**Hurdles & Frustrations**
-- Tool errors — what kept failing and why?
+**What went wrong** — this is the retro. Use stats as evidence, not as standalone items. Look for:
+- Permission friction — check `permissions.suggest_allow` for commands with 3+ asks. Only recommend allowing read-only commands; for everything else, report the friction but don't suggest allowing.
+- Tool errors and repeated failures
 - Short/abandoned sessions — what caused giving up?
 - Repeated similar prompts — signs of retrying or struggling
 - High prompt count with low commits — spinning wheels?
+- Sessions with `corrections` > 0 — signs Claude misunderstood or overstepped. Read the prompts to understand what went wrong.
+- High `model_calls_per_prompt` — Claude churning (doing lots of work per prompt without clear direction). Compare across sessions to spot outliers.
 
-**Workflow Patterns**
-- Which tools were used most? Any surprising patterns?
-- Team/agent usage — were debate/review/investigate used effectively?
-- Model distribution — right models for right tasks?
-- Note: meta prompts (/usage, /clear, etc.) are filtered from counts
+**Observations** — patterns worth noting: team/agent effectiveness, workflows worth repeating, automatable manual steps.
 
-**Improvements**
-- Recurring errors that could be prevented with better config or rules
-- Workflow gaps — steps that could be automated
-- Patterns worth adding to CLAUDE.md or memory
+**Fixes** — concrete, actionable changes to config, rules, skills, or workflow. No vague suggestions.
 
-Present the retro as a concise narrative, not raw data dumps. Be honest about what went poorly. End with 2-3 actionable takeaways.
+Be brief — bullet points, not paragraphs. If the day was clean, say so and stop.
