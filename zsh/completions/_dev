@@ -1,0 +1,44 @@
+#compdef dev
+
+_dev_processes() {
+  local session
+  session=$(tmux list-sessions -F '#{session_name}' 2>/dev/null | while read -r s; do
+    [ -n "$(tmux show -t "$s" -v @dev-procfile 2>/dev/null)" ] && echo "$s" && break
+  done)
+  [ -z "$session" ] && return
+  local -a procs
+  procs=(${(f)"$(tmux list-windows -t "$session" -F '#{window_name}' 2>/dev/null)"})
+  _describe 'process' procs
+}
+
+_dev() {
+  local -a commands=(
+    'start:Start processes from a Procfile'
+    'stop:Kill the session'
+    'restart:Restart all or one process'
+    'switch:Switch worktree'
+    'run:Run command in procfile dir'
+    'logs:Show process logs'
+    'status:Show running processes'
+  )
+
+  if (( CURRENT == 2 )); then
+    _describe 'command' commands
+    return
+  fi
+
+  case "${words[2]}" in
+    start)
+      _arguments '1:procfile:_files' '-s[session name]:name' ;;
+    restart|logs)
+      _dev_processes ;;
+    stop)
+      ;;
+    switch)
+      _message 'worktree suffix (e.g. 2)' ;;
+    run)
+      _normal ;;
+  esac
+}
+
+_dev "$@"

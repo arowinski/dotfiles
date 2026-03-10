@@ -1,0 +1,28 @@
+#!/bin/bash
+#
+# Switch to next/prev tmux session, skipping dev-managed sessions.
+
+current=$(tmux display -p '#{session_name}')
+
+# Build list of non-dev sessions
+sessions=()
+while read -r s; do
+  tmux show -t "$s" -v @dev-procfile 2>/dev/null >/dev/null && continue
+  sessions+=("$s")
+done < <(tmux list-sessions -F '#{session_name}')
+
+[ ${#sessions[@]} -le 1 ] && tmux display-message "No other sessions" && exit 0
+
+# Find current index
+idx=0
+for i in "${!sessions[@]}"; do
+  [ "${sessions[$i]}" = "$current" ] && idx=$i
+done
+
+if [ "$1" = "next" ]; then
+  idx=$(( (idx + 1) % ${#sessions[@]} ))
+else
+  idx=$(( (idx - 1 + ${#sessions[@]}) % ${#sessions[@]} ))
+fi
+
+tmux switch-client -t "${sessions[$idx]}"

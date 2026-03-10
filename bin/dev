@@ -1,0 +1,275 @@
+#!/bin/bash
+#
+# Run processes from a Procfile in a tmux session.
+# Each process gets its own window with auto-restart on exit.
+#
+# Uses DEV_PROCFILE and DEV_WORKTREE from environment when available.
+#
+# Usage:
+#   dev start [procfile] [-s NAME]    # start processes
+#   dev run <command>                 # run command in procfile dir
+#   dev stop                          # kill the session
+#   dev restart [process]             # restart all or one process
+#   dev switch <N>                    # switch worktree (DEV_WORKTREE base + -N)
+#   dev logs [process] [lines]        # show logs (default: 100 lines)
+#   dev status                        # show running processes
+
+set -e
+
+META_PROCFILE="@dev-procfile"
+META_WORKTREE="@dev-worktree"
+
+# Find dev session(s) with @dev-procfile set
+find_sessions() {
+  while read -r s; do
+    if [ -n "$(tmux show -t "$s" -v "$META_PROCFILE" 2>/dev/null)" ]; then
+      echo "$s"
+    fi
+  done < <(tmux list-sessions -F '#{session_name}' 2>/dev/null)
+}
+
+# Resolve session: use argument if given, otherwise find the single running one
+resolve_session() {
+  if [ -n "$1" ]; then
+    echo "$1"
+    return
+  fi
+  local sessions
+  sessions="$(find_sessions)"
+  if [ -z "$sessions" ]; then
+    echo "No dev session running" >&2
+    return 1
+  fi
+  local count=$(echo "$sessions" | wc -l | tr -d ' ')
+  if [ "$count" -gt 1 ]; then
+    echo "Multiple dev sessions running, specify one:" >&2
+    echo "$sessions" | sed 's/^/  /' >&2
+    return 1
+  fi
+  echo "$sessions"
+}
+
+start_session() {
+  local procfile="${1:-$DEV_PROCFILE}"
+  [ -n "$1" ] && shift
+  [ -z "$procfile" ] && echo "Usage: dev start [procfile] [-s NAME]" && echo "Or set DEV_PROCFILE in your environment" && exit 1
+  [ ! -f "$procfile" ] && echo "Procfile not found: $procfile" && exit 1
+
+  procfile="$(cd "$(dirname "$procfile")" && pwd)/$(basename "$procfile")"
+  local procdir="$(dirname "$procfile")"
+  local session=""
+
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      -s) session="$2"; shift 2 ;;
+      *) echo "Unknown option: $1"; exit 1 ;;
+    esac
+  done
+
+  if [ -z "$session" ]; then
+    session="$(basename "$procdir" | tr '[:lower:]' '[:upper:]' | tr . -)"
+  fi
+
+  # If session exists, nothing to do
+  if tmux has-session -t "$session" 2>/dev/null; then
+    echo "Session '$session' already running"
+    exit 0
+  fi
+
+  # Export DEV_WORKTREE so tmux windows inherit it
+  export DEV_WORKTREE
+
+  create_windows "$session" "$procfile" "$procdir"
+
+  # Store metadata for restart/switch
+  tmux set -t "$session" "$META_PROCFILE" "$procfile"
+  tmux set -t "$session" "$META_WORKTREE" "${DEV_WORKTREE:-}"
+
+  tmux select-window -t "$session:1"
+  echo "Started $session"
+}
+
+create_windows() {
+  local session="$1" procfile="$2" procdir="$3"
+  local first=true
+
+  while IFS= read -r line; do
+    [[ -z "$line" || "$line" =~ ^# ]] && continue
+
+    local name="${line%%:*}"
+    local cmd="${line#*: }"
+    name="$(echo "$name" | xargs)"
+
+    # Write a temp script — use printf to preserve command literally
+    local tmpdir="/tmp/dev-${session}"
+    mkdir -p "$tmpdir"
+    local script="${tmpdir}/${name}"
+    printf '#!/bin/bash\ncd %q\neval "$(direnv export bash)"\nexport DEV_WORKTREE=%q\nwhile true; do\n  cd %q\n  %s\n  code=$?\n  echo ""\n  echo "[%s exited $code] press enter to restart, ctrl-c to stop"\n  read || break\ndone\n' \
+      "$procdir" "${DEV_WORKTREE:-}" "$procdir" "$cmd" "$name" > "$script"
+    chmod +x "$script"
+
+    if $first; then
+      tmux new-session -d -s "$session" -n "$name" "$script"
+      first=false
+    else
+      tmux new-window -t "$session" -n "$name" "$script"
+    fi
+  done < "$procfile"
+}
+
+stop_session() {
+  local session
+  session="$(resolve_session "$1")" || exit 1
+  tmux kill-session -t "$session"
+  rm -rf "/tmp/dev-${session}"
+  echo "Stopped $session"
+}
+
+restart_session() {
+  local process="$1"
+  local session
+  session="$(resolve_session)" || exit 1
+
+  if [ -n "$process" ]; then
+    if tmux list-windows -t "$session" -F '#{window_name}' | grep -q "^${process}$"; then
+      tmux send-keys -t "$session:$process" C-c
+      sleep 0.5
+      tmux send-keys -t "$session:$process" Enter
+      echo "Restarted $process"
+    else
+      echo "Process '$process' not found"
+      exit 1
+    fi
+    return
+  fi
+
+  # Restart all: send C-c to each window, then Enter to trigger restart loop
+  tmux list-windows -t "$session" -F '#{window_name}' | while read -r w; do
+    tmux send-keys -t "$session:$w" C-c
+  done
+  sleep 0.5
+  tmux list-windows -t "$session" -F '#{window_name}' | while read -r w; do
+    tmux send-keys -t "$session:$w" Enter
+  done
+  echo "Restarted all processes"
+}
+
+switch_worktree() {
+  local session
+  session="$(resolve_session)" || exit 1
+
+  local procfile="$(tmux show -t "$session" -v "$META_PROCFILE" 2>/dev/null)"
+  local procdir="$(dirname "$procfile")"
+  local worktree="$(tmux show -t "$session" -v "$META_WORKTREE" 2>/dev/null)"
+  [ -z "$worktree" ] && echo "No DEV_WORKTREE set for this session" && exit 1
+
+  local base="${worktree%-[0-9]*}"
+  local new_worktree="$1"
+
+  # No argument — fzf picker from sibling directories
+  if [ -z "$new_worktree" ]; then
+    new_worktree=$(ls -d "$procdir"/${base}* 2>/dev/null \
+      | xargs -n1 basename \
+      | grep -v "^${worktree}$" \
+      | fzf --header="Switch from $worktree" --reverse) || exit 0
+  else
+    new_worktree="${base}-${new_worktree}"
+  fi
+
+  stop_session "$session"
+
+  DEV_WORKTREE="$new_worktree" start_session "$procfile" -s "$session"
+}
+
+run_command() {
+  [ $# -eq 0 ] && echo "Usage: dev run <command>" && exit 1
+
+  local session="$(resolve_session 2>/dev/null)"
+  if [ -n "$session" ]; then
+    local procdir="$(dirname "$(tmux show -t "$session" -v "$META_PROCFILE" 2>/dev/null)")"
+    cd "$procdir"
+  fi
+
+  exec "$@"
+}
+
+show_logs() {
+  local process="$1"
+  local lines="${2:-100}"
+  local session
+  session="$(resolve_session)" || exit 1
+
+  if [ -z "$process" ]; then
+    # Show last N lines from all processes
+    tmux list-windows -t "$session" -F '#{window_name}' | while read -r w; do
+      echo "=== $w ==="
+      tmux capture-pane -t "$session:$w" -p -S -"$lines" | tail -"$lines"
+      echo ""
+    done
+  else
+    tmux capture-pane -t "$session:$process" -p -S -"$lines" 2>/dev/null \
+      || { echo "Process '$process' not found"; exit 1; }
+  fi
+}
+
+show_status() {
+  local session
+  session="$(resolve_session)" || exit 1
+
+  local procfile="$(tmux show -t "$session" -v "$META_PROCFILE" 2>/dev/null)"
+  local worktree="$(tmux show -t "$session" -v "$META_WORKTREE" 2>/dev/null)"
+
+  echo "Session:   $session"
+  echo "Procfile:  $procfile"
+  [ -n "$worktree" ] && echo "Worktree:  $worktree"
+  echo ""
+  local has_stopped=false
+  while read -r w; do
+    local last_line
+    last_line=$(tmux capture-pane -t "$session:$w" -p | grep -v '^$' | tail -1)
+    if echo "$last_line" | grep -q 'press enter to restart'; then
+      printf '  \033[31m●\033[0m %s (stopped)\n' "$w"
+      has_stopped=true
+    else
+      printf '  \033[32m●\033[0m %s\n' "$w"
+    fi
+  done < <(tmux list-windows -t "$session" -F '#{window_name}' 2>/dev/null)
+  $has_stopped && return 1 || return 0
+}
+
+show_status_short() {
+  local session
+  session="$(resolve_session 2>/dev/null)" || return
+  local stopped=0
+  while read -r w; do
+    local last_line
+    last_line=$(tmux capture-pane -t "$session:$w" -p | grep -v '^$' | tail -1)
+    echo "$last_line" | grep -q 'press enter to restart' && stopped=$((stopped + 1))
+  done < <(tmux list-windows -t "$session" -F '#{window_name}' 2>/dev/null)
+  local worktree="$(tmux show -t "$session" -v "$META_WORKTREE" 2>/dev/null)"
+  if [ "$stopped" -gt 0 ]; then
+    echo "#[fg=colour1]● ${worktree:-DEV} ($stopped down)#[default]"
+  else
+    echo "#[fg=colour2]● ${worktree:-DEV}#[default]"
+  fi
+}
+
+case "${1:-}" in
+  start)   shift; start_session "$@" ;;
+  run)     shift; run_command "$@" ;;
+  stop)    shift; stop_session "$@" ;;
+  restart) shift; restart_session "$@" ;;
+  logs)    shift; show_logs "$@" ;;
+  switch)  shift; switch_worktree "$@" ;;
+  status)  shift; [ "${1:-}" = "--short" ] && show_status_short || show_status ;;
+  *)       echo "Usage: dev {start|stop|restart|switch|run|logs|status}"
+           echo ""
+           echo "  start [procfile] [-s NAME]  Start processes (default: \$DEV_PROCFILE)"
+           echo "  run <command>               Run command in procfile dir"
+           echo "  stop                        Kill the session"
+           echo "  restart [process]           Restart all or one process"
+           echo "  switch [N]                  Switch worktree (fzf picker or suffix)"
+           echo "  logs [process] [lines]      Show logs (default: 100 lines)"
+           echo "  status                      Show running processes"
+           exit 1 ;;
+esac

@@ -26,7 +26,10 @@ get_sessions() {
         else
             echo "  $name"
         fi
-    done < <(tmux list-sessions -F "#{session_name}")
+    # Hide dev-managed sessions (those with @dev-procfile set)
+    done < <(tmux list-sessions -F "#{session_name}" | while read -r s; do
+        tmux show -t "$s" -v @dev-procfile 2>/dev/null >/dev/null || echo "$s"
+    done)
 }
 
 create_session() {

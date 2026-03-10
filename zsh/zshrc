@@ -1,4 +1,4 @@
-fpath=(/opt/homebrew/share/zsh-completions $fpath)
+fpath=($HOME/.zsh/completions /opt/homebrew/share/zsh-completions $fpath)
 source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'
