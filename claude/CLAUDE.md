@@ -14,7 +14,7 @@ Be brutally honest — if I'm wrong, say so bluntly. When uncertain, say so — 
 
 ALWAYS load the matching skill BEFORE taking action. Never fall back to built-in behavior.
 - commit — when committing or amending
-- pr — when creating pull requests
+- pr — when creating or editing pull requests
 - reply-to-review — when replying to PR review comments
 - clear-writing — when writing or editing prose for humans
 
