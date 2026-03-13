@@ -50,21 +50,22 @@ resolve_session() {
 }
 
 start_session() {
-  local procfile="${1:-$DEV_PROCFILE}"
-  [ -n "$1" ] && shift
+  local procfile="" session=""
+
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      -s) session="$2"; shift 2 ;;
+      -*) echo "Unknown option: $1"; exit 1 ;;
+      *) procfile="$1"; shift ;;
+    esac
+  done
+
+  procfile="${procfile:-$DEV_PROCFILE}"
   [ -z "$procfile" ] && echo "Usage: dev start [procfile] [-s NAME]" && echo "Or set DEV_PROCFILE in your environment" && exit 1
   [ ! -f "$procfile" ] && echo "Procfile not found: $procfile" && exit 1
 
   procfile="$(cd "$(dirname "$procfile")" && pwd)/$(basename "$procfile")"
   local procdir="$(dirname "$procfile")"
-  local session=""
-
-  while [ $# -gt 0 ]; do
-    case "$1" in
-      -s) session="$2"; shift 2 ;;
-      *) echo "Unknown option: $1"; exit 1 ;;
-    esac
-  done
 
   if [ -z "$session" ]; then
     session="$(basename "$procdir" | tr '[:lower:]' '[:upper:]' | tr . -)"
@@ -125,6 +126,24 @@ stop_session() {
   echo "Stopped $session"
 }
 
+is_stopped() {
+  local session="$1" window="$2"
+  local last_line
+  last_line=$(tmux capture-pane -t "$session:$window" -p | grep -v '^$' | tail -1)
+  echo "$last_line" | grep -q 'press enter to restart'
+}
+
+restart_window() {
+  local session="$1" window="$2"
+  if is_stopped "$session" "$window"; then
+    tmux send-keys -t "$session:$window" Enter
+  else
+    tmux send-keys -t "$session:$window" C-c
+    sleep 0.5
+    tmux send-keys -t "$session:$window" Enter
+  fi
+}
+
 restart_session() {
   local process="$1"
   local session
@@ -132,9 +151,7 @@ restart_session() {
 
   if [ -n "$process" ]; then
     if tmux list-windows -t "$session" -F '#{window_name}' | grep -q "^${process}$"; then
-      tmux send-keys -t "$session:$process" C-c
-      sleep 0.5
-      tmux send-keys -t "$session:$process" Enter
+      restart_window "$session" "$process"
       echo "Restarted $process"
     else
       echo "Process '$process' not found"
@@ -143,14 +160,9 @@ restart_session() {
     return
   fi
 
-  # Restart all: send C-c to each window, then Enter to trigger restart loop
-  tmux list-windows -t "$session" -F '#{window_name}' | while read -r w; do
-    tmux send-keys -t "$session:$w" C-c
-  done
-  sleep 0.5
-  tmux list-windows -t "$session" -F '#{window_name}' | while read -r w; do
-    tmux send-keys -t "$session:$w" Enter
-  done
+  while read -r w; do
+    restart_window "$session" "$w"
+  done < <(tmux list-windows -t "$session" -F '#{window_name}')
   echo "Restarted all processes"
 }
 
@@ -173,7 +185,11 @@ switch_worktree() {
       | grep -v "^${worktree}$" \
       | fzf --header="Switch from $worktree" --reverse) || exit 0
   else
-    new_worktree="${base}-${new_worktree}"
+    if [ "$new_worktree" = "1" ]; then
+      new_worktree="$base"
+    else
+      new_worktree="${base}-${new_worktree}"
+    fi
   fi
 
   stop_session "$session"
@@ -225,9 +241,7 @@ show_status() {
   echo ""
   local has_stopped=false
   while read -r w; do
-    local last_line
-    last_line=$(tmux capture-pane -t "$session:$w" -p | grep -v '^$' | tail -1)
-    if echo "$last_line" | grep -q 'press enter to restart'; then
+    if is_stopped "$session" "$w"; then
       printf '  \033[31m●\033[0m %s (stopped)\n' "$w"
       has_stopped=true
     else
@@ -242,9 +256,7 @@ show_status_short() {
   session="$(resolve_session 2>/dev/null)" || return
   local stopped=0
   while read -r w; do
-    local last_line
-    last_line=$(tmux capture-pane -t "$session:$w" -p | grep -v '^$' | tail -1)
-    echo "$last_line" | grep -q 'press enter to restart' && stopped=$((stopped + 1))
+    is_stopped "$session" "$w" && stopped=$((stopped + 1))
   done < <(tmux list-windows -t "$session" -F '#{window_name}' 2>/dev/null)
   local worktree="$(tmux show -t "$session" -v "$META_WORKTREE" 2>/dev/null)"
   if [ "$stopped" -gt 0 ]; then
