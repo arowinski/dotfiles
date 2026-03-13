@@ -23,3 +23,8 @@ allow npx playwright test
 allow claude-retro
 allow gh-comments
 allow dev
+allow tmux
+allow smug
+allow rubocop
+allow bundle show
+allow bundle info
