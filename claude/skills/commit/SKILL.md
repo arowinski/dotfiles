@@ -10,6 +10,8 @@ Check `git log` for the repo's commit message style and follow it.
 
 If the last commit is unpushed and current changes are related, propose amending. Ask first.
 
+When staged changes match the scope of an existing commit on the branch, use `git absorb --and-rebase` instead of creating a new commit. Ask first.
+
 ## Pre-commit checks
 
 If tests or linter fail, stop and report the failure. Do not commit.
@@ -20,3 +22,4 @@ If tests or linter fail, stop and report the failure. Do not commit.
 - Prefer single-line messages — the diff shows WHAT, the message explains WHY
 - Don't mention tests unless they're the main change
 - Only stage changes relevant to the requested change
+- NEVER add ticket number prefixes (e.g., JIRA-123, GH-456) to commit messages
