@@ -16,8 +16,8 @@ If no argument provided, ask for a topic.
 2. **Frame the debate:**
    - Identify 2-3 distinct positions or approaches worth arguing
    - If positions aren't obvious from the topic, research the codebase first to find realistic options
-   - Present the framing to the user: "I'll set up a debate between: [position A] vs [position B] vs [position C]. Sound right?"
-   - Wait for confirmation before spawning the team
+   - If the user already provided specific positions, skip confirmation and spawn immediately
+   - Otherwise, present the framing: "I'll set up a debate between: [position A] vs [position B] vs [position C]. Sound right?" and wait for confirmation
 
 ## Team
 
@@ -35,7 +35,7 @@ Spawn prompt for each teammate should include:
 - Instruction to actively challenge other teammates' arguments when messaged
 - Instruction to concede points when the evidence is against them
 
-Require plan approval for all teammates so you can review their initial research before the debate begins.
+Do NOT require plan approval — the framing confirmation is sufficient. Let agents start researching immediately.
 
 ## Moderation
 
