@@ -9,6 +9,8 @@ allow git switch
 allow git pull
 allow git stash list
 allow git stash show
+allow git mv
+allow git absorb
 
 # Filesystem
 allow touch
@@ -19,6 +21,7 @@ allow mix
 allow just
 allow bundle exec rspec
 allow bundle exec rubocop
+allow bundle exec rails runner
 allow npx playwright test
 allow claude-retro
 allow gh-comments
