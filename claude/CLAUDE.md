@@ -7,6 +7,7 @@ Be brutally honest — if I'm wrong, say so bluntly. When uncertain, say so — 
 - NEVER test private methods.
 - NEVER comment out code to make tests pass.
 - NEVER add Claude footer, "Generated with Claude Code", or "Co-Authored-By" lines.
+- NEVER run destructive operations without explicit confirmation — this includes deleting files, dropping/truncating data, killing processes, force-pushing, resetting state, or any action that is hard to reverse.
 - When uncertain whether the user wants an action, stop and ask. Never assume — default to doing nothing.
 - Prefer the simplest solution. Don't over-engineer.
 
@@ -25,10 +26,3 @@ Check for a `justfile` in the project root — prefer `just <recipe>` over raw c
 Use dedicated Grep/Glob tools, or `rg`/`fd` when shell is needed. Never use `grep`/`find`.
 Run `git` directly — you're already in the repo. For a different repo, use `cd <path> && git <cmd>`.
 When launching agents, always include: "Run `git` directly. For a different repo use `cd <path> && git <cmd>`."
-
-### Patterns
-
-In ruby:
-
-Use operation pattern when implementing the method class. Use monads if available in the project.
-Avoid unnecessary initialization for small classes, for big ones try to hide it with `def self.call(...) = new(...).call`

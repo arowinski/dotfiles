@@ -22,7 +22,5 @@ When adding a new script to `bin/` or a new command, add a matching `allow` entr
 ## Commits
 
 Prefix matches the primary changed directory: `Claude -`, `TMUX -`, `ZSH -`, `Git -`, `Karabiner -`, `Vim -`, etc.
-Scripts in `bin/` use the script name as prefix: `notify-claude -`, `claude-retro -`.
-
 ALWAYS check `git log` to confirm the convention before committing.
 NEVER introduce a new prefix without asking first.
