@@ -36,3 +36,5 @@
   email = arowinski02@gmail.com
 [interactive]
   diffFilter = delta --color-only
+[include]
+  path = ~/.config/git/config.local
