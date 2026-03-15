@@ -1,74 +1,45 @@
 ---
-description: Spawn an agent team to debate a design question and converge on a recommendation
+description: Spawn an agent team to debate a question and converge on a recommendation
 argument-hint: <question, topic, or Jira URL>
 model: opus
 ---
 
-Accept a design question, pasted requirements, or Jira URL as input.
+Accept a question, pasted requirements, or Jira URL as input.
 If no argument provided, ask for a topic.
 
-## Setup
+If Jira URL: fetch ticket details via Atlassian MCP (if available).
 
-1. **Parse input:**
-   - If Jira URL: fetch ticket details via Atlassian MCP (if available), extract title, description, acceptance criteria
-   - Otherwise: use input as the debate topic
+Frame 2-4 positions or perspectives worth arguing. If the user provided specific positions, use those. Otherwise, present the framing and wait for confirmation.
 
-2. **Frame the debate:**
-   - Identify 2-3 distinct positions or approaches worth arguing
-   - If positions aren't obvious from the topic, research the codebase first to find realistic options
-   - If the user already provided specific positions, skip confirmation and spawn immediately
-   - Otherwise, present the framing: "I'll set up a debate between: [position A] vs [position B] vs [position C]. Sound right?" and wait for confirmation
+## Rules
 
-## Team
-
-You MUST use the TeamCreate and SendMessage tools to create a real agent team. Do NOT simulate the debate in your own context.
-
-Create an agent team with 2-3 teammates. Each teammate:
-- Argues FOR their assigned position and AGAINST the others
-- Is read-only — no file edits, only research and analysis
-- Should be given codebase context relevant to the debate (key file paths, patterns, constraints)
-
-Spawn prompt for each teammate should include:
-- The full debate topic and context (including Jira details if applicable)
-- Their assigned position to argue for
-- Instruction to research the codebase for evidence supporting their position
-- Instruction to actively challenge other teammates' arguments when messaged
-- Instruction to concede points when the evidence is against them
-
-Do NOT require plan approval — the framing confirmation is sufficient. Let agents start researching immediately.
+- Use TeamCreate and SendMessage to create a real agent team. Do NOT simulate the debate.
+- All teammates are read-only — no file edits.
+- Give each teammate the full topic, context, and their assigned position.
+- Teammates must research the codebase for evidence, challenge others, and concede when evidence is against them.
 
 ## Moderation
 
-You are the moderator. After teammates complete initial research:
+1. **Opening arguments** — each teammate presents their case with evidence
+2. **Cross-examination** — direct teammates to challenge specific claims
+3. **Convergence** — ask if any have changed position or want to concede
 
-1. **Opening arguments** — have each teammate present their case with evidence from the codebase
-2. **Cross-examination** — direct teammates to challenge specific claims from other teammates
-3. **Rebuttals** — let teammates respond to challenges
-4. **Convergence** — ask teammates if any have changed their position or want to concede points
-
-Limit to 2-3 rounds of back-and-forth. Cut off unproductive tangents.
+Limit to 4-5 rounds. Cut off unproductive tangents.
 
 ## Output
 
-After the debate, synthesize a recommendation:
+Synthesize a recommendation:
 
-**Topic**
-[The question debated]
+**Topic** — the question debated
 
-**Positions Argued**
-- [Position A]: [core argument + key evidence]
-- [Position B]: [core argument + key evidence]
+**Positions** — each position's core argument + key evidence
 
-**Key Disagreements**
-- [What they couldn't resolve and why]
+**Consensus** — what all sides agreed on
 
-**Consensus Points**
-- [What all sides agreed on]
+**Disagreements** — what they couldn't resolve
 
-**Recommendation**
-[Your synthesis — which position won and why, or a hybrid if warranted]
+**Recommendation** — your synthesis
 
-**Open Questions**
-- [Anything that needs user input or further investigation]
+**Open Questions** — anything needing user input
 
-Present this to the user. Then clean up the team.
+Present to user. Clean up the team.
