@@ -165,14 +165,33 @@ def count_corrections(prompts):
 
 
 def cap_prompts(prompts):
-    """Return first/last N prompts if list is too long, filtering meta prompts."""
+    """Return first/last N prompts if list is too long, filtering meta prompts.
+
+    Always includes correction-matching prompts regardless of position.
+    """
     work_prompts = [p for p in prompts if not is_meta_prompt(p)]
     total = len(work_prompts)
-    if total <= MAX_PROMPTS_SHOWN:
-        return work_prompts, total, count_corrections(work_prompts)
-    half = MAX_PROMPTS_SHOWN // 2
     corrections = count_corrections(work_prompts)
-    capped = work_prompts[:half] + [f"... ({total - MAX_PROMPTS_SHOWN} more) ..."] + work_prompts[-half:]
+    if total <= MAX_PROMPTS_SHOWN:
+        return work_prompts, total, corrections
+    half = MAX_PROMPTS_SHOWN // 2
+    head = set(range(half))
+    tail = set(range(total - half, total))
+    keep = head | tail
+    # Always include correction prompts from the middle
+    for i, p in enumerate(work_prompts):
+        if CORRECTION_PATTERNS.search(p):
+            keep.add(i)
+    capped = []
+    prev = -1
+    for i in sorted(keep):
+        if i > prev + 1:
+            skipped = i - prev - 1
+            capped.append(f"... ({skipped} more) ...")
+        capped.append(work_prompts[i])
+        prev = i
+    if prev < total - 1:
+        capped.append(f"... ({total - prev - 1} more) ...")
     return capped, total, corrections
 
 
@@ -242,8 +261,15 @@ def main():
         capped, work_count, corrections = cap_prompts(info["prompts"])
         meta_count = len(info["prompts"]) - work_count
 
+        # Intent = first non-meta prompt
+        work_prompts = [p for p in info["prompts"] if not is_meta_prompt(p)]
+        intent = work_prompts[0] if work_prompts else None
+        outcome = "committed" if detail.get("commits", 0) > 0 else "no-commit"
+
         s = {
             "id": sid[:8],
+            "intent": intent,
+            "outcome": outcome,
             "prompts": capped,
             "prompt_count": work_count,
             "start": info["start"].strftime("%H:%M"),
