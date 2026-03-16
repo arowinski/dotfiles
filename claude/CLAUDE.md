@@ -10,6 +10,7 @@ Be brutally honest — if I'm wrong, say so bluntly. When uncertain, say so — 
 - NEVER run destructive operations without explicit confirmation — this includes deleting files, dropping/truncating data, killing processes, force-pushing, resetting state, or any action that is hard to reverse.
 - When uncertain whether the user wants an action, stop and ask. Never assume — default to doing nothing.
 - Prefer the simplest solution. Don't over-engineer.
+- After 3 consecutive failures (edits that don't work, approaches that keep breaking), stop, revert to last working state, explain what was tried, and ask for direction.
 
 ### Skills
 

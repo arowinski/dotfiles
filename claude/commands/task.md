@@ -34,7 +34,9 @@ Before starting, check for existing work:
    - Run `git status` to see current branch and uncommitted changes
    - If uncommitted changes exist, warn user
 
-2. **Parse input and fetch Jira details (if applicable):**
+2. **State intent:** Before diving in, verbalize: "I detect [research/implementation/fix/refactor] intent. My approach: [brief plan]." — makes routing visible and correctable before work begins.
+
+3. **Parse input and fetch Jira details (if applicable):**
    - If input contains Jira URL (e.g., https://jira.company.com/browse/ENG-555):
      * Extract ticket ID (e.g., ENG-555)
      * Use Atlassian MCP to fetch ticket details if available
@@ -43,7 +45,7 @@ Before starting, check for existing work:
    - Otherwise: use input as task description directly
    - **Save raw ticket details** (title, description, AC, status) — these will be written to the plan file so context survives session compression
 
-3. **Create branch:**
+4. **Create branch:**
    - "Create new branch? (y/n)"
      * Use lowercase ticket ID as branch name (e.g., `eng-555`), add suffix only if ticket already has branches
      * For non-Jira tasks, derive short kebab-case name from description
@@ -52,7 +54,7 @@ Before starting, check for existing work:
 
 Enter plan mode with EnterPlanMode before researching.
 
-4. **Research codebase (delegate to architect agent):**
+5. **Research codebase (delegate to architect agent):**
 
    Use the Agent tool with `subagent_type: architect` for research.
 
@@ -71,7 +73,7 @@ Enter plan mode with EnterPlanMode before researching.
    - Ask how to proceed before continuing
    - Don't generate a plan based on assumptions
 
-5. **Generate and present plan:**
+6. **Generate and present plan:**
 
    Exit plan mode with ExitPlanMode.
 
@@ -93,7 +95,7 @@ Enter plan mode with EnterPlanMode before researching.
    - "Debate this plan? (y/n)"
      * If no: skip to next step
 
-6. **Debate the plan (optional):**
+7. **Debate the plan (optional):**
 
    Invoke `/debate` with the plan file content and 4 perspectives: Pragmatist (simplest way to ship), Skeptic (what will break), Advocate (why this approach is right), Architect (long-term codebase impact).
 
