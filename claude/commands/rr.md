@@ -32,8 +32,6 @@ Create a team with 3 teammates:
 **verifier-b** (agent:architect)
 - Same task as verifier-a, independently
 
-Require plan approval for the reviewer so you can review their approach before they start.
-
 ## Workflow
 
 ### 1. Review
