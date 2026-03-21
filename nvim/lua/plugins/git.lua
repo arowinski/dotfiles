@@ -7,6 +7,9 @@ return {
       { "<leader>dv", "<CMD>CodeDiff<CR>", desc = "Open diff" },
     },
     opts = {
+      explorer = {
+        width = 30,
+      },
       keymaps = {
         view = {
           next_hunk = "<M-e>",
