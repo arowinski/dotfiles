@@ -24,12 +24,13 @@ allowed-tools: Bash(git fetch:*), Bash(git diff:*), Bash(git log:*), Bash(git br
 
 ### Step 3: Check for PR Template
 
-1. Look for `.github/pull_request_template.md` (or `PULL_REQUEST_TEMPLATE.md`)
+1. Look for `.github/pull_request_template.md` (or `PULL_REQUEST_TEMPLATE.md`) from the repo root — use `git rev-parse --show-toplevel` to find it, don't rely on the current working directory
 2. If found, adapt it — skip UI-related sections if changes don't touch frontend
 3. Content guidelines:
    - Imperative mood, third person ("This adds..." not "I added...")
    - Focus on most important changes, don't mention tests unless they're the main change
    - Use backticks for code references
+   - Don't hard-wrap lines — GitHub renders single newlines as line breaks. Write each paragraph as one continuous line.
 
 ### Step 4: Generate Title and Body
 
