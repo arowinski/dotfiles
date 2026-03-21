@@ -3,6 +3,14 @@
   "permissions": {
     "allow": [
       "Read(~/.local/share/mise/*)",
+      "Read(~/gat/*)",
+      "Grep(~/gat/*)",
+      "Glob(~/gat/*)",
+      "Search(~/gat/*)",
+      "Write(~/.claude/retro-log.md)",
+      "Edit(~/.claude/retro-log.md)",
+      "Write(*/claude/plans/*)",
+      "Edit(*/claude/plans/*)",
       "Bash(ls:*)",
       "Bash(cat:*)",
       "Bash(cut:*)",
@@ -56,11 +64,19 @@
       "Bash(gh-comments:*)",
       "Bash(coderabbit:*)",
       "Bash(just:*)",
+      "Bash(safe-python:*)",
       "Bash(claude-retro:*)",
       "Bash(dev:*)",
       "Bash(tmux:*)",
       "Bash(smug:*)",
       "Bash(rubocop:*)",
+      "Bash(bin/spring:*)",
+      "Bash(spring:*)",
+      "Bash(bin/rails db:migrate:status:*)",
+      "Bash(bin/rails runner:*)",
+      "Bash(bin/packwerk check:*)",
+      "Bash(yarn run:*)",
+      "Bash(yarn test:*)",
       "Bash(npx playwright test:*)",
       "Bash(mix compile:*)",
       "Bash(mix test:*)",
@@ -80,18 +96,20 @@
       "mcp__db_model__*",
       "mcp__atlassian__getJiraIssue",
       "mcp__atlassian__getAccessibleAtlassianResources",
-      "mcp__atlassian__searchJiraIssuesUsingJql",
       "mcp__atlassian__search",
+      "mcp__atlassian__fetch",
       "mcp__atlassian__atlassianUserInfo",
       "mcp__atlassian__getVisibleJiraProjects",
-      "mcp__atlassian__getJiraIssueRemoteIssueLinks",
-      "mcp__atlassian__getJiraIssueTypeMetaWithFields",
-      "mcp__atlassian__getJiraProjectIssueTypesMetadata",
       "mcp__atlassian__getTransitionsForJiraIssue",
-      "mcp__atlassian__jiraRead",
-      "mcp__atlassian__fetch"
+      "mcp__atlassian__getIssueLinkTypes",
+      "mcp__atlassian__lookupJiraAccountId"
     ],
-    "deny": [],
+    "deny": [
+      "Read(~/gat/gat-local/*.env)",
+      "Grep(~/gat/gat-local/*.env)",
+      "Glob(~/gat/gat-local/*.env)",
+      "Search(~/gat/gat-local/*.env)"
+    ],
     "ask": [],
     "defaultMode": "default"
   },
@@ -146,8 +164,7 @@
           }
         ]
       }
-    ],
-    "SessionStart": []
+    ]
   },
   "enabledPlugins": {
     "coderabbit@claude-plugins-official": true

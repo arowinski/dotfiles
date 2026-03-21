@@ -22,7 +22,15 @@ allow just
 allow bundle exec rspec
 allow bundle exec rubocop
 allow bundle exec rails runner
+allow bin/spring
+allow spring
+allow bin/rails db:migrate:status
+allow bin/rails runner
+allow bin/packwerk check
+allow yarn run
+allow yarn test
 allow npx playwright test
+allow safe-python
 allow claude-retro
 allow gh-comments
 allow dev
@@ -31,3 +39,5 @@ allow smug
 allow rubocop
 allow bundle show
 allow bundle info
+
+set log-full
