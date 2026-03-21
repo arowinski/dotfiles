@@ -3,29 +3,21 @@ paths:
   - "**/*_spec.rb"
 ---
 
-# Ruby/RSpec Testing Conventions
-
-## Core Principles
-
-- Test behavior, not implementation. Focus on WHAT the code does, not HOW.
-- Test public interfaces and observable outcomes. **NEVER test private methods.**
-
-## Workflow
+Test behavior, not implementation. Test public interfaces — NEVER test private methods.
 
 Before writing tests:
-1. Search for existing test files: `rg "describe.*ClassName" spec/`
-2. Search for existing factories: `rg "factory.*:model_name" spec/factories/`
-3. If factory exists, read it to understand available traits
+1. Search for existing test files and factories
+2. If factory exists, read it to understand available traits
 
-## Test Structure
+## Structure
 
 Setup → Exercise → Verify. Separate phases with blank lines. No phase comments.
 
 **For new specs:**
 - **NO `let` or `let!`** — define variables directly: `user = build(:user)`
 - **NO `before` or `after` hooks** — use named helper methods instead
-- context naming: start with "when" or "with", nested with "and", max 2 levels deep
-- For classes with only `#call` or `.call`, omit the method describe block
+- context naming: MUST start with "when" or "with". Nested contexts use "and". Max 2 context levels deep — flatten rather than nest further.
+- For classes with a single public method, omit the method describe block
 
 **For existing specs:**
 - Follow the existing file's patterns (`let`, `before`, etc. are okay if already used)
@@ -52,9 +44,8 @@ MyService.call
 expect(UserCreator).to have_received(:create).with(email: "test@example.com")
 ```
 
-## Anti-Patterns (NEVER use)
+## NEVER
 
 - `expect(...).to receive(...)` — use `allow` then `have_received`
 - `allow_any_instance_of` — stub specific instances
-- Testing private methods
-- Phase comments (setup/exercise/verify should be obvious from structure)
+- `.map` / manual iteration when a matcher like `match_array`, `contain_exactly`, `include`, or `hash_including` would work
