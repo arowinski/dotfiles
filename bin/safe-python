@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# Run Python in a network-isolated Docker container.
+# Usage: safe-python -c 'print("hello")'
+#        safe-python script.py
+#        echo '{"key": "value"}' | safe-python -c 'import json,sys; print(json.load(sys.stdin)["key"])'
+
+CONTAINER_NAME="python-sandbox"
+
+# Ensure container is running
+if ! docker inspect "$CONTAINER_NAME" &>/dev/null; then
+  docker run -d \
+    --name "$CONTAINER_NAME" \
+    --network none \
+    --read-only \
+    --tmpfs /tmp \
+    -v "${HOME}/gat:/workspace:ro" \
+    -v "${HOME}/Dev:/dev-workspace:ro" \
+    -w /workspace \
+    python:3-alpine \
+    sleep infinity >/dev/null
+elif [ "$(docker inspect -f '{{.State.Running}}' "$CONTAINER_NAME")" != "true" ]; then
+  docker start "$CONTAINER_NAME" >/dev/null
+fi
+
+# Pass stdin if available, forward all arguments
+if [ -t 0 ]; then
+  docker exec "$CONTAINER_NAME" python3 "$@"
+else
+  docker exec -i "$CONTAINER_NAME" python3 "$@"
+fi
