@@ -23,3 +23,4 @@ If tests or linter fail, stop and report the failure. Do not commit.
 - Don't mention tests unless they're the main change
 - Only stage changes relevant to the requested change
 - NEVER add ticket number prefixes (e.g., JIRA-123, GH-456) to commit messages
+- NEVER use vague process messages like "Address review feedback", "Fix issues", "Update based on suggestions" — describe the actual change
