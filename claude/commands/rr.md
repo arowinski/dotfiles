@@ -11,8 +11,10 @@ Accept a review scope or default to all uncommitted changes (staged + unstaged).
 1. Determine review scope:
    - If argument provided: use it as scope
    - Otherwise: run `git diff` to get all uncommitted changes
-2. Present scope to user: "I'll review [scope]. Sound right?"
-3. Wait for confirmation before spawning the team
+2. Gather context:
+   - Check for a plan file at `<git-common-dir>/claude/plans/<branch-name>.md` — if it exists, extract the Jira ticket link and acceptance criteria
+   - If a Jira ticket is linked, fetch it via Atlassian MCP (if available) — pull title, description, acceptance criteria, and comments
+   - Pass this context to the reviewer so findings can be validated against requirements, not just code quality
 
 ## Team
 
