@@ -30,6 +30,7 @@ allow bin/packwerk check
 allow yarn run
 allow yarn test
 allow npx playwright test
+allow git-commit-context
 allow safe-python
 allow claude-retro
 allow gh-comments

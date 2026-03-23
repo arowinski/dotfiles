@@ -64,6 +64,7 @@
       "Bash(gh-comments:*)",
       "Bash(coderabbit:*)",
       "Bash(just:*)",
+      "Bash(git-commit-context:*)",
       "Bash(safe-python:*)",
       "Bash(claude-retro:*)",
       "Bash(dev:*)",

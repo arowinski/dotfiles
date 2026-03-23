@@ -1,0 +1,25 @@
+#!/bin/bash
+echo "## STATUS"
+git status -s
+
+echo ""
+echo "## STAGED"
+staged=$(git diff --cached)
+if [[ -z "$staged" ]]; then
+  echo "(nothing staged)"
+else
+  echo "$staged"
+fi
+
+echo ""
+echo "## UNSTAGED"
+unstaged=$(git diff --stat)
+if [[ -z "$unstaged" ]]; then
+  echo "(nothing unstaged)"
+else
+  echo "$unstaged"
+fi
+
+echo ""
+echo "## LOG"
+git log --oneline --decorate -10

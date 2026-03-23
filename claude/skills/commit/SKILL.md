@@ -1,12 +1,12 @@
 ---
 name: commit
 description: Creates commits with generated messages following project conventions. Use when asked to commit, amend, or create a commit.
-allowed-tools: Bash(git status:*), Bash(git diff:*), Bash(git log:*), Bash(git add:*), Bash(git commit:*), Bash(git absorb:*), Read, Glob
+allowed-tools: Bash(git-commit-context:*), Bash(git status:*), Bash(git diff:*), Bash(git log:*), Bash(git add:*), Bash(git commit:*), Bash(git absorb:*), Read, Glob
 ---
 
 # Commit
 
-Check `git log` for the repo's commit message style and follow it.
+Start with `git-commit-context` to get status, staged/unstaged diffs, and recent log in one call. Use this to understand what to commit and match the commit message style.
 
 If the last commit is unpushed and current changes are related, propose amending. Ask first.
 
