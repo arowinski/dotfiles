@@ -75,10 +75,20 @@ def clean(body):
     for d in soup.find_all("details"):
         summary = d.find("summary")
         if summary and ("Outside diff range" in summary.get_text() or "Nitpick" in summary.get_text()):
-            protected |= {id(d)} | {id(c) for c in d.find_all("details")}
+            # Protect this block but not "Prompt for AI Agents" children
+            ai_prompt_children = {id(c) for c in d.find_all("details") if c.find("summary") and "Prompt for AI Agents" in c.find("summary").get_text()}
+            protected |= {id(d)} | {id(c) for c in d.find_all("details")} - ai_prompt_children
     for d in soup.find_all("details"):
         if id(d) not in protected:
             d.decompose()
+    # Unwrap protected details/summary/blockquote into plain content
+    for d in soup.find_all("details"):
+        d.unwrap()
+    for s_tag in soup.find_all("summary"):
+        s_tag.string = f"**{s_tag.get_text().strip()}**"
+        s_tag.unwrap()
+    for bq in soup.find_all("blockquote"):
+        bq.unwrap()
     for c in soup.find_all(string=lambda t: isinstance(t, Comment)):
         c.extract()
     for sub in soup.find_all("sub"):
@@ -188,14 +198,14 @@ def ts_submitted: (.submitted_at // "") | if . == "" then "pending" else split("
 def fmt_threads: group_by(.path) | sort_by(.[0].path) | .[] |
   "\n--file path=\(.[0].path)--",
   (group_by(._reply_to // .databaseId) | map(sort_by(.createdAt)) | sort_by(.[0].createdAt) | .[] |
-    (.[0] | "\n--comment id=\(.databaseId) by=\(.author.login) at=\(ts) line=\(.line // "?")--\n\(.body // "")"),
+    (.[0] | "\n--comment id=\(.databaseId) by=\(.author.login) at=\(ts) line=\(.line // "?")\(if $show_resolved and ._resolved then " resolved" else "" end)--\n\(.body // "")"),
     (.[1:] | .[] | "\n  --reply id=\(.databaseId) by=\(.author.login) at=\(ts)--\n\(.body // "")"));
 
 ([$threads[] | .[]] | if $show_resolved then . else [.[] | select(.isResolved | not)] end) as $active_threads |
 
 ([
-  $active_threads[] | .comments.nodes[] |
-  . + {_review_id: (.pullRequestReview.databaseId // null), _reply_to: (.replyTo.databaseId // null)}
+  $active_threads[] | . as $thread | .comments.nodes[] |
+  . + {_review_id: (.pullRequestReview.databaseId // null), _reply_to: (.replyTo.databaseId // null), _resolved: $thread.isResolved}
 ] | map(select(allowed_user))) as $all_inline |
 
 ($all_inline | map(select(._reply_to == null)) | map({(.databaseId | tostring): ._review_id}) | add // {}) as $root_review_map |
