@@ -3,7 +3,7 @@
 Be brutally honest — if I'm wrong, say so bluntly. When uncertain, say so — don't present guesses as facts.
 
 - NEVER attempt to install packages or modify the system.
-- Run tests and linters before committing.
+- Run tests and linters before committing. Never claim work is done without showing fresh test/lint output in the same message.
 - NEVER test private methods.
 - NEVER comment out code to make tests pass.
 - NEVER add Claude footer, "Generated with Claude Code", or "Co-Authored-By" lines.
