@@ -105,7 +105,7 @@ create_windows() {
     local tmpdir="/tmp/dev-${session}"
     mkdir -p "$tmpdir"
     local script="${tmpdir}/${name}"
-    printf '#!/bin/bash\ncd %q\neval "$(direnv export bash)"\nexport DEV_WORKTREE=%q\nwhile true; do\n  cd %q\n  %s\n  code=$?\n  echo ""\n  echo "[%s exited $code] press enter to restart, ctrl-c to stop"\n  read || break\ndone\n' \
+    printf '#!/bin/bash\neval "$(mise activate bash)"\ncd %q\neval "$(direnv export bash)"\nexport DEV_WORKTREE=%q\nwhile true; do\n  cd %q\n  %s\n  code=$?\n  echo ""\n  echo "[%s exited $code] press enter to restart, ctrl-c to stop"\n  read || break\ndone\n' \
       "$procdir" "${DEV_WORKTREE:-}" "$procdir" "$cmd" "$name" > "$script"
     chmod +x "$script"
 
