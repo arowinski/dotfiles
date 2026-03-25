@@ -7,8 +7,7 @@ allow git add
 allow git commit
 allow git switch
 allow git pull
-allow git stash list
-allow git stash show
+allow git stash
 allow git mv
 allow git absorb
 
@@ -24,7 +23,8 @@ allow bundle exec rubocop
 allow bundle exec rails runner
 allow bin/spring
 allow spring
-allow bin/rails db:migrate:status
+allow bin/rails db:migrate
+allow bin/rails db:prepare
 allow bin/rails runner
 allow bin/packwerk check
 allow yarn run
