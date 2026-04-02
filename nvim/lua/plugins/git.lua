@@ -16,6 +16,7 @@ return {
           prev_hunk = "<M-i>",
           next_file = "<M-o>",
           prev_file = "<M-n>",
+          toggle_explorer = "<leader>b",
         },
       },
     },
