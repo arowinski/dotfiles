@@ -12,6 +12,7 @@ Be brutally honest — if I'm wrong, say so bluntly. When uncertain, say so — 
 - Prefer the simplest solution. Don't over-engineer.
 - Before implementing, search for similar existing code and follow the same patterns.
 - After 3 consecutive failures (edits that don't work, approaches that keep breaking), stop, revert to last working state, explain what was tried, and ask for direction.
+- STOP guessing if something is unrelated to the changes — verify first.
 
 ### Skills
 
@@ -29,4 +30,5 @@ Use dedicated Grep/Glob tools, or `rg`/`fd` when shell is needed. Never use `gre
 Run `git` directly — you're already in the repo. For a different repo, use `cd <path> && git <cmd>`.
 Use `git switch` for branch operations, not `git checkout`.
 MUST use `safe-python` instead of `python3` for one-liners and scripts.
+MUST use `safe-ruby` instead of `ruby -e` for one-liners. Use `rails runner` in Rails projects when you need the app environment.
 When launching agents, always include: "Run `git` directly. For a different repo use `cd <path> && git <cmd>`."
