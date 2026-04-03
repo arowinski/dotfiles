@@ -10,6 +10,8 @@ allow git pull
 allow git stash
 allow git mv
 allow git absorb
+allow git rebase
+allow git branch
 
 # Filesystem
 allow touch
@@ -17,7 +19,9 @@ allow mkdir
 
 # Project tools
 allow mix
+allow MIX_ENV=* mix *
 allow just
+allow RAILS_ENV=* just *
 allow bundle exec rspec
 allow bundle exec rubocop
 allow bundle exec rails runner
@@ -26,14 +30,21 @@ allow spring
 allow bin/rails db:migrate
 allow bin/rails db:prepare
 allow bin/rails runner
+allow rails runner
 allow bin/packwerk check
 allow yarn run
 allow yarn test
 allow npx playwright test
 allow git-commit-context
 allow safe-python
+allow safe-ruby
+deny python3 "Use safe-python instead of python3"
+deny ruby "Use safe-ruby for one-liners, rails runner in Rails projects"
 allow claude-retro
 allow gh-comments
+allow gh pr
+allow gh run
+allow gh search
 allow dev
 allow tmux
 allow smug

@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# Run Ruby in a network-isolated Docker container.
+# Usage: safe-ruby -e 'puts "hello"'
+#        safe-ruby script.rb
+#        echo '{"key": "value"}' | safe-ruby -e 'require "json"; puts JSON.parse(STDIN.read)["key"]'
+
+CONTAINER_NAME="ruby-sandbox"
+
+# Ensure container is running
+if ! docker inspect "$CONTAINER_NAME" &>/dev/null; then
+  docker run -d \
+    --name "$CONTAINER_NAME" \
+    --network none \
+    --read-only \
+    --tmpfs /tmp \
+    -v "${HOME}/gat:/workspace:ro" \
+    -v "${HOME}/Dev:/dev-workspace:ro" \
+    -w /workspace \
+    ruby:3-alpine \
+    sleep infinity >/dev/null
+elif [ "$(docker inspect -f '{{.State.Running}}' "$CONTAINER_NAME")" != "true" ]; then
+  docker start "$CONTAINER_NAME" >/dev/null
+fi
+
+# Pass stdin if available, forward all arguments
+if [ -t 0 ]; then
+  docker exec "$CONTAINER_NAME" ruby "$@"
+else
+  docker exec -i "$CONTAINER_NAME" ruby "$@"
+fi
