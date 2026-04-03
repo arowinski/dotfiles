@@ -63,6 +63,7 @@ Enter plan mode with EnterPlanMode before researching.
    - Affected code — files, dependencies, callers
    - Constraints — validations, API contracts, database implications
    - Risks — what could break, edge cases
+   - 2-3 possible approaches with trade-offs, simplest first
 
    Include the full task description and any Jira details. Ask for concrete findings with file paths and evidence, and to clearly flag any blockers or conflicts.
 
@@ -73,7 +74,11 @@ Enter plan mode with EnterPlanMode before researching.
    - Ask how to proceed before continuing
    - Don't generate a plan based on assumptions
 
-6. **Generate and present plan:**
+6. **Present approaches and pick one:**
+
+   Show the architect's 2-3 approaches with trade-offs. Ask the user which direction to take. Generate the plan based on the chosen approach.
+
+7. **Generate and present plan:**
 
    Exit plan mode with ExitPlanMode.
 
@@ -92,16 +97,27 @@ Enter plan mode with EnterPlanMode before researching.
      * Testing strategy
    - Display the plan to user
    - Create a todo task (TaskCreate) for each implementation step
-   - "Debate this plan? (y/n)"
-     * If no: skip to next step
 
-7. **Debate the plan (optional):**
+8. **Verify plan against codebase:**
 
-   Invoke `/debate` with the plan file content and 4 perspectives: Pragmatist (simplest way to ship), Skeptic (what will break), Advocate (why this approach is right), Architect (long-term codebase impact).
+   Dispatch a subagent (architect) to verify the plan's assumptions:
+   - Do all file paths in the plan actually exist and have the expected structure?
+   - Are all acceptance criteria from the ticket covered by implementation steps?
+   - Are there dependencies between steps that aren't declared?
+   - Does the plan assume patterns that don't match the actual code?
+   - YAGNI: could any step be removed without breaking acceptance criteria? Is anything built for hypothetical future requirements?
+
+   If issues found, fix the plan before continuing.
+
+9. **Debate the plan (optional):**
+
+   "Debate this plan? (y/n)" — if yes, invoke `/debate` with the plan file content and 4 perspectives: Pragmatist (simplest way to ship), Skeptic (what will break), Advocate (why this approach is right), Architect (long-term codebase impact).
 
    After debate completes, if changes are warranted, update the plan file and tasks.
 
-Tell the user to run `/work` to start implementing.
+Tell the user to run `/work` or `/team` to start implementing.
+
+**Tip:** If the approach wasn't explored upfront, suggest `/brainstorm` before planning next time.
 
 ## Requirements
 
