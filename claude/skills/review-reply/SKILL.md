@@ -1,5 +1,5 @@
 ---
-name: reply-to-review
+name: review-reply
 description: Reads PR review comments and helps draft and post replies. Use when replying to PR review feedback.
 allowed-tools: Bash(gh-comments:*), Bash(gh api:*), Bash(git diff:*), Bash(git log:*), Bash(git remote:*), Read, Glob, Grep, AskUserQuestion
 ---
