@@ -14,6 +14,7 @@ Frame 2-4 positions or perspectives worth arguing. If the user provided specific
 ## Rules
 
 - Use TeamCreate and SendMessage to create a real agent team. Do NOT simulate the debate.
+- Do NOT use tmux for agent management.
 - All teammates are read-only — no file edits.
 - Give each teammate the full topic, context, and their assigned position.
 - Teammates must research the codebase for evidence, challenge others, and concede when evidence is against them.

@@ -1,6 +1,7 @@
 ---
 description: Review code changes using the code-reviewer agent
 argument-hint: [what to review]
+allowed-tools: Bash(git diff:*), Bash(git rev-parse:*), Read, Glob, Grep, Agent, mcp__atlassian__getJiraIssue
 ---
 
 Use the code-reviewer agent to perform a thorough review.

@@ -23,7 +23,7 @@ You MUST use TeamCreate, Agent, and SendMessage to create a real agent team. Do 
 
 Create a team with TeamCreate. Then spawn each teammate using the Agent tool with `team_name`, `name`, and `run_in_background: true` parameters:
 - **worker** (name: "worker") — general-purpose agent. Implements code, runs tests. Include in its prompt: the project's CLAUDE.md rules, "Run `git` directly", and the step context.
-- **critic** (name: "critic") — general-purpose agent. Read-only: do NOT use Edit, Write, or Bash. Its job is a quick gate check: does this diff match the step requirements, follow project rules, and avoid obvious issues? NOT a full code review — scope to this step only, don't flag work planned for later steps. Must respond with a verdict (approve / request-changes / block) and cite specific file:line references.
+- **critic** (name: "critic") — `code-reviewer` agent (already read-only, already knows to check CLAUDE.md and `.claude/rules/*.md`). Its job is a quick gate check: does this diff match the step requirements, follow project rules, and avoid obvious issues? NOT a full code review — scope to this step only, don't flag work planned for later steps. Must respond with a verdict (approve / request-changes / block) and cite specific file:line references.
 
 Spawn both agents in the background (`run_in_background: true`) so they start concurrently. Do NOT use tmux for agent management.
 
