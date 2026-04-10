@@ -40,7 +40,7 @@ allowed-tools: Bash(git fetch:*), Bash(git diff:*), Bash(git log:*), Bash(git br
    - Use imperative mood ("Add feature", "Fix bug")
    - Focus on primary purpose, not implementation details
 
-2. Generate body:
+2. Generate body (apply clear-writing skill — no AI-sounding prose, no filler, no hype):
    - **Focus on context/motivation/rationale (WHY), not implementation details (WHAT)**
    - If context is unclear, ask user for background before proceeding
    - Use template if found, otherwise create summary emphasizing:
