@@ -12,10 +12,14 @@ allow git mv
 allow git absorb
 allow git rebase
 allow git branch
+allow git checkout
+ask git checkout [!-]* "Use git switch for branch operations"
 
 # Filesystem
 allow touch
 allow mkdir
+allow-redirect /tmp/**
+allow-redirect /private/tmp/**
 
 # Project tools
 allow mix
@@ -29,9 +33,12 @@ allow bin/spring
 allow spring
 allow bin/rails db:migrate
 allow bin/rails db:prepare
+allow bin/rails graphql:schema:json
 allow bin/rails runner
+allow RAILS_ENV=* bin/rails *
 allow rails runner
 allow bin/packwerk check
+allow bin/packwerk validate
 allow yarn run
 allow yarn test
 allow npx playwright test

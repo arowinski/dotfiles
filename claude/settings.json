@@ -1,5 +1,8 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
   "permissions": {
     "allow": [
       "Read(~/.local/share/mise/*)",
@@ -7,8 +10,8 @@
       "Grep(~/gat/*)",
       "Glob(~/gat/*)",
       "Search(~/gat/*)",
-      "Write(~/.claude/retro-log.md)",
-      "Edit(~/.claude/retro-log.md)",
+      "Write(*/.claude/retro-log.md)",
+      "Edit(*/.claude/retro-log.md)",
       "Write(*/claude/plans/*)",
       "Edit(*/claude/plans/*)",
       "Bash(ls:*)",
@@ -75,9 +78,12 @@
       "Bash(spring:*)",
       "Bash(bin/rails db:migrate:*)",
       "Bash(bin/rails db:prepare:*)",
+      "Bash(bin/rails db:migrate:primary:*)",
+      "Bash(bin/rails graphql:schema:json:*)",
       "Bash(bin/rails runner:*)",
       "Bash(rails runner:*)",
       "Bash(bin/packwerk check:*)",
+      "Bash(bin/packwerk validate:*)",
       "Bash(yarn run:*)",
       "Bash(yarn test:*)",
       "Bash(npx playwright test:*)",
@@ -170,15 +176,21 @@
     ]
   },
   "enabledPlugins": {
-    "coderabbit@claude-plugins-official": true
+    "coderabbit@claude-plugins-official": true,
+    "caveman@caveman": true
   },
-  "env": {
-    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  "extraKnownMarketplaces": {
+    "caveman": {
+      "source": {
+        "source": "github",
+        "repo": "JuliusBrussee/caveman"
+      }
+    }
   },
   "sandbox": {
     "enabled": false
   },
   "alwaysThinkingEnabled": true,
-  "autoUpdatesChannel": "latest",
-  "effortLevel": "high"
+  "effortLevel": "high",
+  "autoUpdatesChannel": "latest"
 }
