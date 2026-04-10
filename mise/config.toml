@@ -1,7 +1,7 @@
 [tools]
 direnv = "2.34.0"
 ruby = "3.4"
-node = "22.11.0"
+node = "22"
 elixir = "1.19"
 erlang = "28"
 python = "3.9.12"
