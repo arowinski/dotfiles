@@ -29,7 +29,7 @@ Write clearly, cut ruthlessly, say exactly what you mean.
 - Remove cliches, filler adverbs, and stock metaphors (e.g., "navigate," "journey," "roadmap")
 - Avoid bullet points unless essential for scan-ability
 - Never add a summary or recap at the end — finish on a crisp, final line
-- Do not use em dashes; use commas, periods, or rewrite as needed
+- Do not use em dashes or double hyphens (--); use commas, colons, periods, or rewrite as needed
 - Add dry humor or an idiom if it fits, but never sound like an infomercial
 
 ## De-AI checklist
