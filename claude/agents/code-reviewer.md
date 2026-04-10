@@ -2,7 +2,7 @@
 name: code-reviewer
 description: Performs thorough code review on recent changes. Use after implementing features, fixing bugs, or refactoring.
 tools: Bash, Glob, Grep, Read
-model: opus
+model: sonnet
 color: yellow
 ---
 
@@ -40,6 +40,12 @@ Principles:
 - Question assumptions and design decisions when warranted
 
 ## Output Format
+
+**Rules checked**
+[Comma-separated list of every CLAUDE.md file and `.claude/rules/*.md` file you inspected. REQUIRED — must never be empty. Write "none applicable" only if you verified no rules apply.]
+
+**Rule Violations**
+[For each violation: rule file, quoted rule text, file:line of violation. Write "none" if you checked the rules and found no violations. REQUIRED.]
 
 **Critical Issues**
 [Must fix before merging — production risks, breaking changes, security]
