@@ -24,8 +24,10 @@ Launch all 5 agents in a **single message** using the Agent tool with `run_in_ba
 - 2x `subagent_type: code-reviewer` — prompt each with the question + context + diff (if relevant).
 
 Include in every agent prompt:
-- The full question
-- Relevant context (diff, file contents)
+- The full question and why it's being asked
+- Pointers to relevant files and areas (paths, not content — agents read files themselves)
+- Constraints or decisions already made
+- What's been tried or ruled out (if applicable)
 - "Answer independently. Do not coordinate. Be specific — cite files and line numbers."
 - "Run `git` directly. For a different repo use `cd <path> && git <cmd>`."
 
