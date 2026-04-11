@@ -2,7 +2,7 @@
 name: author
 description: Create or improve Claude Code agent and skill configuration files. Use when creating new agents/skills or reviewing existing ones.
 argument-hint: <path, "all", or description>
-allowed-tools: Read, Glob, Grep, AskUserQuestion
+allowed-tools: Bash(npx claude-rules-doctor:*), Read, Glob, Grep, AskUserQuestion
 ---
 
 # Author
@@ -30,6 +30,7 @@ Create or improve Claude Code agent/skill configuration files.
    - "all": glob `.claude/agents/*.md` + `.claude/skills/*/SKILL.md` (project + `~/.claude/` paths)
 2. Read project + user CLAUDE.md for redundancy comparison (agents/skills inherit CLAUDE.md)
 3. Validate each file against the checklist in [REFERENCE.md](REFERENCE.md)
+4. For rules files with `paths:` globs, run `npx claude-rules-doctor check --root .` to verify globs match actual files. Flag any dead rules.
 4. For "all", also check cross-cutting issues:
    - Overlapping descriptions that could confuse agent routing
    - Inconsistent patterns across agents/skills (naming, style, structure)
