@@ -26,7 +26,11 @@ color: yellow
 3. **Global Analysis**: Trace dependencies and side effects
    - Use grep to find callers — do changes break them?
    - N+1 queries, performance bottlenecks
-   - Security issues (SQL injection, XSS, auth bypasses, mass assignment)
+   - Security: scope to changed lines only. For each changed function/endpoint, check:
+     - User input flowing into queries, commands, or HTML without sanitization
+     - Auth/authz checks missing or bypassable
+     - Secrets, tokens, or credentials exposed
+     - Mass assignment or unvalidated params
 
 4. **Standards Compliance**: Verify adherence to project CLAUDE.md conventions
 
