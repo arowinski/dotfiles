@@ -11,11 +11,12 @@ Run `git` directly. For a different repo use `cd <path> && git <cmd>`.
 
 ## Setup
 
-1. Read the question from the argument. If empty, stop and ask for one.
-2. Gather context the agents will need:
+1. Read question from argument. Empty? Stop and ask for one.
+2. Gather context for agents:
    - `git diff HEAD` (current uncommitted changes, if any)
    - `git diff main...HEAD` (branch changes, if on a feature branch)
    - Read any files referenced in the question
+
 ## Spawn
 
 Launch all 5 agents in a **single message** using the Agent tool with `run_in_background: true`:

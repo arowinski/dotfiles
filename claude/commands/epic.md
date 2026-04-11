@@ -4,14 +4,13 @@ argument-hint: <Jira URL, epic description, or pasted tickets>
 model: opus
 ---
 
-Accept a Jira URL, pasted epic/ticket details, or a description as input.
-If no argument provided, ask for the epic details.
+Accept a Jira URL, pasted epic/ticket details, or a description as input. No argument? Ask for epic details.
 
 ## Setup
 
 1. **Parse input:**
-   - If Jira URL: fetch epic and child ticket details via Atlassian MCP (if available), extract titles, descriptions, acceptance criteria
-   - Otherwise: use input as the epic description and ticket list
+   - Jira URL: fetch epic + child tickets via Atlassian MCP (if available), extract titles, descriptions, acceptance criteria
+   - Otherwise: use input as epic description and ticket list
 
 2. **Frame the analysis:**
    - Summarize the epic scope and list the tickets you'll analyze
@@ -20,9 +19,9 @@ If no argument provided, ask for the epic details.
 
 ## Team
 
-You MUST use the TeamCreate and SendMessage tools to create a real agent team. Do NOT simulate the analysis in your own context.
+Use TeamCreate + SendMessage for a real agent team. NEVER simulate the analysis in your own context.
 
-Create a team with 3 teammates. All teammates are read-only — no file edits, only research and analysis.
+Create a team with 3 teammates. All read-only — research and analysis only, no file edits.
 
 Run `git` directly. For a different repo use `cd <path> && git <cmd>`.
 
@@ -32,10 +31,10 @@ Prompt must include:
 - Full epic context and ticket list
 - Role: analyze the ticket split and scoping
 - Research the codebase to understand the domain and validate scope
-- Evaluate each ticket: is it independently deliverable? Right-sized? Well-scoped?
+- Evaluate each ticket: independently deliverable? Right-sized? Well-scoped?
 - Flag tickets that are too large, too vague, or tightly coupled to others
 - Propose re-splits, merges, or missing tickets if warranted
-- Map dependencies between tickets — which can be parallel, which are sequential
+- Map dependencies between tickets — which are parallel, which are sequential
 
 ### 2. Technical Analyst
 
@@ -43,7 +42,7 @@ Prompt must include:
 - Full epic context and ticket list
 - Role: assess technical feasibility and codebase fit
 - Research relevant code: existing patterns, abstractions, models, APIs
-- For each ticket: what code needs to change, estimated complexity (S/M/L), what patterns to follow
+- For each ticket: what code needs to change, complexity (S/M/L), patterns to follow
 - Identify shared infrastructure work (migrations, new abstractions) that cuts across tickets
 - Flag technical debt or architectural concerns the epic touches
 
@@ -56,15 +55,15 @@ Prompt must include:
 - For each ticket: what could go wrong, what's underspecified, what assumptions are being made
 - Identify external dependencies (APIs, services, teams)
 - Flag missing acceptance criteria or untestable requirements
-- Check if any ticket requires a spike or proof-of-concept first
+- Check if any ticket needs a spike or PoC first
 
-Require plan approval for all teammates so you can review their research approach before they begin.
+Require plan approval on all teammates — review their research approach before they begin.
 
 ## Cross-Examination
 
-After teammates complete their initial analysis:
+After teammates complete initial analysis:
 
-1. **Present findings** — have each teammate summarize their analysis
+1. **Present findings** — each teammate summarizes their analysis
 2. **Challenge round** — direct teammates to challenge each other:
    - Risk Assessor challenges Decomposer's independence claims with specific coupling evidence
    - Technical Analyst flags complexity that Decomposer underestimated

@@ -31,7 +31,7 @@ Use grep/glob to find relevant code and document findings:
 - **Dependencies:** Find what touches related models/APIs. Example: `rg "UserNotification" --type ruby` to see notification usage
 - **Architecture:** Check for Packwerk boundaries, package.yml files, module structure
 - **Tech debt:** Look for TODOs, deprecated patterns, performance bottlenecks
-- **Database schema:** If the task involves data changes, query the database (mcp__db tools, if available) to understand table structure, indexes, and relationships
+- **Database schema:** If the task involves data changes, query the database (mcp__db tools, if available) for table structure, indexes, and relationships
 - **Error monitoring:** If the task is a bug fix, check Sentry (mcp__sentry tools, if available) for relevant error events, stack traces, and frequency
 - **Library docs:** If the task involves unfamiliar external libraries or APIs, fetch current docs via context7 (if available)
 
@@ -41,7 +41,7 @@ Use grep/glob to find relevant code and document findings:
 
 ### 3. RECOMMEND
 
-Adapt or omit sections as appropriate for the task. Present your recommendation using this structure:
+Adapt or omit sections as needed. Use this structure:
 
 **Recommendation**
 - Pattern: [which architectural pattern and why]

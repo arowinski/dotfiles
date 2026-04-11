@@ -16,21 +16,21 @@ Create or improve Claude Code agent/skill configuration files.
 
 ## Creating
 
-1. Determine agent vs skill — see decision criteria in [REFERENCE.md](REFERENCE.md)
-2. Ask clarifying questions if needed: purpose, triggers, read-only vs read-write, model preference
-3. Read [REFERENCE.md](REFERENCE.md) for frontmatter fields, prompt structure, and examples
-4. Generate the file following the guidelines and examples
-5. Self-review: validate the generated file against the checklist in [REFERENCE.md](REFERENCE.md) — fix any issues before presenting
+1. Decide agent vs skill — see criteria in [REFERENCE.md](REFERENCE.md)
+2. Ask clarifying questions if needed: purpose, triggers, read-only vs read-write, model
+3. Read [REFERENCE.md](REFERENCE.md) for frontmatter, prompt structure, examples
+4. Generate file per guidelines and examples
+5. Self-review against checklist in [REFERENCE.md](REFERENCE.md) — fix issues before presenting
 6. Present to user for confirmation
 
 ## Checking
 
 1. Read the target file(s)
    - Single file: read it directly
-   - "all": glob for `.claude/agents/*.md` and `.claude/skills/*/SKILL.md` (check both project and `~/.claude/` paths)
-2. Read the project and user CLAUDE.md for redundancy comparison (agents/skills inherit CLAUDE.md)
+   - "all": glob `.claude/agents/*.md` + `.claude/skills/*/SKILL.md` (project + `~/.claude/` paths)
+2. Read project + user CLAUDE.md for redundancy comparison (agents/skills inherit CLAUDE.md)
 3. Validate each file against the checklist in [REFERENCE.md](REFERENCE.md)
-4. When checking "all", also look for cross-cutting issues:
+4. For "all", also check cross-cutting issues:
    - Overlapping descriptions that could confuse agent routing
    - Inconsistent patterns across agents/skills (naming, style, structure)
    - Gaps in the workflow pipeline

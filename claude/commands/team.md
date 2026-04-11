@@ -8,7 +8,7 @@ allowed-tools: Bash, Read, Write, Edit, Glob, Grep, Skill, Agent, TeamCreate, Te
 
 Execute a plan through adversarial worker-critic cycles. You are the orchestrator — you coordinate, you don't write code.
 
-You MUST use TeamCreate, Agent, and SendMessage to create a real agent team. Do NOT simulate the worker or critic in your own context.
+You MUST use TeamCreate, Agent, and SendMessage to create a real agent team. NEVER simulate the worker or critic in your own context.
 
 **Does NOT:** push to remote, or change the overall approach/goals without user approval. May adjust individual steps based on what was learned.
 

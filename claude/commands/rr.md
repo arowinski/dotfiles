@@ -18,7 +18,7 @@ Accept a review scope or default to all uncommitted changes (staged + unstaged).
 
 ## Team
 
-You MUST use the TeamCreate and SendMessage tools to create a real agent team. Do NOT simulate in your own context.
+You MUST use TeamCreate + SendMessage to create a real agent team. NEVER simulate in your own context.
 
 Create a team with 3 teammates:
 
