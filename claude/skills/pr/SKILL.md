@@ -8,54 +8,53 @@ allowed-tools: Bash(git fetch:*), Bash(git diff:*), Bash(git log:*), Bash(git br
 
 ## Workflow
 
-### Step 1: Analyze Changes
+### Step 1: Analyze changes
 
-1. Run `git diff origin/<base>...HEAD` to examine all changes
-2. Run `git log origin/<base>..HEAD` to see commit history
-3. **Identify the single most important change** - what's the primary purpose of this PR?
-4. Understand scope: frontend, backend, infrastructure, tests, etc.
+1. `git diff origin/<base>...HEAD` — all changes
+2. `git log origin/<base>..HEAD` — commit history
+3. **Identify single most important change** — primary purpose?
+4. Identify scope: frontend, backend, infra, tests, etc.
 
-### Step 2: Detect Title Pattern
+### Step 2: Detect title pattern
 
-1. Run `gh pr list --limit 10 --json title` to examine recent PRs
-2. Identify common prefix/ticket patterns and extract ticket number from branch name
-3. If pattern detected but ticket number not found in branch name, ask user for it
-4. If ticket number found, use the Jira ticket for full context on motivation/rationale
+1. `gh pr list --limit 10 --json title` — recent PRs
+2. Identify prefix/ticket patterns, extract ticket from branch name
+3. Pattern found but no ticket in branch? Ask user.
+4. Ticket found? Fetch Jira for motivation/rationale.
 
-### Step 3: Check for PR Template
+### Step 3: Check for PR template
 
-1. Look for `.github/pull_request_template.md` (or `PULL_REQUEST_TEMPLATE.md`) from the repo root — use `git rev-parse --show-toplevel` to find it, don't rely on the current working directory
-2. If found, adapt it — skip UI-related sections if changes don't touch frontend
-3. Content guidelines:
-   - Imperative mood, third person ("This adds..." not "I added...")
-   - Focus on most important changes, don't mention tests unless they're the main change
-   - Use backticks for code references
-   - Don't hard-wrap lines — GitHub renders single newlines as line breaks. Write each paragraph as one continuous line.
+1. Check `.github/pull_request_template.md` (or `PULL_REQUEST_TEMPLATE.md`) from repo root — use `git rev-parse --show-toplevel`, don't rely on cwd.
+2. Found? Adapt — skip UI sections if no frontend changes.
+3. Content:
+   - Imperative mood, third person ("This adds...", not "I added...")
+   - Focus on most important changes; don't mention tests unless main change
+   - Backticks for code refs
+   - Don't hard-wrap — GitHub renders single newlines as breaks. One paragraph = one line.
 
-### Step 4: Generate Title and Body
+### Step 4: Generate title and body
 
-1. Craft title following detected pattern:
-   - **Title must mention the single most important thing in the PR**
-   - Apply ticket number prefix if pattern exists
-   - Use imperative mood ("Add feature", "Fix bug")
-   - Focus on primary purpose, not implementation details
+1. Title (follow detected pattern):
+   - **Mention single most important thing in PR**
+   - Apply ticket prefix if pattern exists
+   - Imperative mood ("Add feature", "Fix bug")
+   - Primary purpose, not implementation details
 
-2. Generate body (apply clear-writing skill — no AI-sounding prose, no filler, no hype):
-   - **Focus on context/motivation/rationale (WHY), not implementation details (WHAT)**
-   - If context is unclear, ask user for background before proceeding
-   - Use template if found, otherwise create summary emphasizing:
-     - Why the change is needed
+2. Body (apply clear-writing skill — no AI prose, no filler, no hype):
+   - **Focus on WHY (motivation/rationale), not WHAT (implementation)**
+   - Context unclear? Ask user first.
+   - Use template if found, else summary covering:
+     - Why change needed
      - What problem it solves
-     - Any relevant context or constraints
-   - Use third person to describe motivation/context/rationale
+     - Relevant context/constraints
+   - Third person for motivation/context/rationale
 
-### Step 5: Interactive Confirmation (REQUIRED - DO NOT SKIP)
+### Step 5: Interactive confirmation (REQUIRED — DO NOT SKIP)
 
-**STOP. Do NOT create the PR yet.**
+**STOP. Do NOT create PR yet.**
 
-1. Display the generated PR title and body
-
-2. **MUST use AskUserQuestion tool** (do NOT ask conversationally, do NOT proceed to Step 6 without this). Use this exact structure:
+1. Display generated title and body.
+2. **MUST use AskUserQuestion tool** (not conversational, don't skip to Step 6). Structure:
    - header: "Next step"
    - question: "What would you like to do?"
    - options (exactly 3):
@@ -63,20 +62,19 @@ allowed-tools: Bash(git fetch:*), Bash(git diff:*), Bash(git log:*), Bash(git br
      2. label: "Edit title", description: "Modify the PR title"
      3. label: "Edit body", description: "Modify the PR body"
    - multiSelect: false
-
 3. Handle response:
-   - "Create PR" → NOW proceed to Step 6
-   - "Edit title" → user provides new title via "Other", apply it, show updated PR, return to step 2
-   - "Edit body" → user provides new body via "Other", apply it, show updated PR, return to step 2
-   - "Other" text → treat as edited content for whichever edit option user intended
+   - "Create PR" → proceed to Step 6
+   - "Edit title" → user provides via "Other", apply, show updated PR, return to 2
+   - "Edit body" → user provides via "Other", apply, show updated PR, return to 2
+   - "Other" → ask which field to edit if unclear
 
-### Step 6: Create Draft PR (WAIT FOR STEP 5 TO BE EXPLICITLY CONFIRMED, DON'T ACCEPT EMPTY RESPONSES)
+### Step 6: Create draft PR (WAIT for Step 5 explicit confirmation — DO NOT accept empty responses)
 
-**Only execute this step after user selected "Create PR" in Step 5.**
+**Only after user selected "Create PR" in Step 5.**
 
-1. Push branch to remote with `-u` flag if not tracking remote
-2. Run `gh pr create` with:
-   - `--title` (generated title)
-   - `--body` (generated or template-based body)
+1. Push branch with `-u` if not tracking remote.
+2. `gh pr create`:
+   - `--title` (generated)
+   - `--body` (generated or template)
    - `--assignee @me`
    - `--draft`

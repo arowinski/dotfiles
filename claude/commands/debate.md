@@ -4,19 +4,18 @@ argument-hint: <question, topic, or Jira URL>
 model: opus
 ---
 
-Accept a question, pasted requirements, or Jira URL as input.
-If no argument provided, ask for a topic.
+Accept a question, pasted requirements, or Jira URL as input. No argument? Ask for a topic.
 
 If Jira URL: fetch ticket details via Atlassian MCP (if available).
 
-Frame 2-4 positions or perspectives worth arguing. If the user provided specific positions, use those. Otherwise, present the framing and wait for confirmation.
+Frame 2-4 positions or perspectives worth arguing. User provided specifics? Use those. Otherwise present the framing and wait for confirmation.
 
 ## Rules
 
-- Use TeamCreate and SendMessage to create a real agent team. Do NOT simulate the debate.
+- Use TeamCreate + SendMessage for a real agent team. NEVER simulate the debate.
 - Do NOT use tmux for agent management.
 - All teammates are read-only — no file edits.
-- Give each teammate the full topic, context, and their assigned position.
+- Give each teammate the full topic, context, and assigned position.
 - Teammates must research the codebase for evidence, challenge others, and concede when evidence is against them.
 
 ## Moderation

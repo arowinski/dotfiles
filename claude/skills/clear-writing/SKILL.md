@@ -48,7 +48,7 @@ After rewriting, scan for and eliminate these patterns:
 
 **Filler phrases** — "in order to" → "to." "It is important to note that" → cut. "At the end of the day" → cut.
 
-**Excessive hedging** — one qualifier is enough. "Could potentially possibly" → "could." Don't stack "may," "might," "perhaps," "arguably" in the same passage.
+**Excessive hedging** — one qualifier is enough. "Could potentially possibly" → "could." Don't stack "may," "might," "perhaps" in the same passage.
 
 **Generic conclusions** — no "only time will tell," "the future remains to be seen," or other vague sign-offs. End with something concrete.
 
