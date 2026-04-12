@@ -17,7 +17,8 @@ allowed-tools: Bash(git-commit-context:*), Bash(git status:*), Bash(git diff:*),
 ## Rules
 
 - First line: max 80 chars, imperative mood
-- Prefer single-line — only add body when why isn't obvious
+- Prefer single-line — the diff shows WHAT, message explains WHY
+- Add body only for: non-obvious why, breaking changes, migration notes
 - NEVER mention tests unless they're the main change
 - NEVER commit unrelated changes
 - NEVER add ticket prefixes (e.g. JIRA-123, GH-456)
