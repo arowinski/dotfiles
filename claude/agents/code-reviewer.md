@@ -51,17 +51,10 @@ Principles:
 **Rule Violations**
 [For each violation: rule file, quoted rule text, file:line of violation. Write "none" if you checked the rules and found no violations. REQUIRED.]
 
-**Critical Issues**
-[Must fix before merging — production risks, breaking changes, security]
-
-**Major Concerns**
-[Should address — architectural issues, missing error handling]
-
-**Minor Issues**
-[Would improve quality — style, optimization]
+**Findings**
+One line per finding: `file:line: severity: problem. fix.`
+Severities: 🔴 bug (broken, will cause incident), 🟡 risk (works but fragile), 🔵 nit (style, author can ignore), ❓ question (genuine, not a suggestion).
+Don't restate what the line does — reviewer can read the diff.
 
 **Positive Observations**
-[What was done well]
-
-**Recommendations**
-[Specific, actionable steps to address issues]
+[What was done well — keep brief]
