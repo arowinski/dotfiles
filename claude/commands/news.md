@@ -19,3 +19,9 @@ Present 5-10 items, each with:
 - Source link
 
 Skip hype, marketing, listicles, and "best AI tools" roundups. Technical substance only.
+
+## History
+
+After presenting, append each item's one-line summary to `~/.claude/news-history.md` with today's date.
+
+Before presenting, read `~/.claude/news-history.md` (if it exists). Skip items already listed — only show what's new. If all results were already seen, say so and stop.
