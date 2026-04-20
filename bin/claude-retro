@@ -3,6 +3,7 @@
 
 import json
 import re
+import subprocess
 import sys
 from collections import defaultdict
 from datetime import date, datetime, timedelta
@@ -71,7 +72,7 @@ def is_agent_session(sid, project):
     return False, None, None
 
 
-def extract_commit_message(cmd):
+def extract_commit_message(cmd, project=None):
     """Extract commit message from a git commit command."""
     # Match heredoc style: git commit -m "$(cat <<'EOF'\nmessage\nEOF\n)"
     m = re.search(r"<<'?EOF'?\n(.+?)\n\s*EOF", cmd, re.DOTALL)
@@ -80,22 +81,46 @@ def extract_commit_message(cmd):
         # Remove Co-Authored-By lines
         msg = re.sub(r"\n\s*Co-Authored-By:.*", "", msg).strip()
         return msg
-    # Match simple: git commit -m "message"
-    m = re.search(r'git commit\s+-m\s+["\'](.+?)["\']', cmd)
+    # Match simple: git commit -m "message" (including multiline messages)
+    m = re.search(r'git commit\s+-m\s+"((?:[^"\\]|\\.)*)"', cmd, re.DOTALL)
+    if not m:
+        m = re.search(r"git commit\s+-m\s+'((?:[^'\\]|\\.)*)'", cmd, re.DOTALL)
     if m:
         return m.group(1).strip()
+    # Match reuse: git commit -C <sha> — resolve via git log in the project repo
+    m = re.search(r"git commit\s+(?:[^|;&]*\s)?-C\s+([0-9a-f]{4,40})", cmd)
+    if m and project:
+        sha = m.group(1)
+        try:
+            out = subprocess.run(
+                ["git", "-C", project, "log", "--format=%s", "-1", sha],
+                capture_output=True, text=True, timeout=2,
+            )
+            if out.returncode == 0 and out.stdout.strip():
+                return out.stdout.strip()
+        except (subprocess.SubprocessError, OSError):
+            pass
+        return f"(reuse {sha[:8]})"
+    # Match fixup/squash: git commit --fixup <ref> or --squash <ref>
+    m = re.search(r"git commit\s+(?:[^|;&]*\s)?--(fixup|squash)\s+(\S+)", cmd)
+    if m:
+        return f"({m.group(1)} {m.group(2)})"
     return None
 
 
-def count_net_commits(commands):
+def count_net_commits(commands, project=None):
     """Count net commits and extract messages."""
     commits = []
     resets = 0
+    # Only match `git commit` at a command-clause boundary (start of line or after && / ; / |)
+    # to avoid false positives from commands that mention "git commit" inside quoted args.
+    commit_at_boundary = re.compile(r"(?:^|\n|;|&&|\|\|)\s*git commit\b")
+    reset_at_boundary = re.compile(r"(?:^|\n|;|&&|\|\|)\s*git reset\b")
     for cmd in commands:
-        if re.search(r"git commit\b", cmd) and "--amend" not in cmd:
-            msg = extract_commit_message(cmd)
+        if commit_at_boundary.search(cmd) and "--amend" not in cmd:
+            msg = extract_commit_message(cmd, project)
             commits.append(msg or "(message not parsed)")
-        elif re.search(r"git reset\b", cmd) and re.search(r"HEAD~(\d+)", cmd):
+        elif reset_at_boundary.search(cmd) and re.search(r"HEAD~(\d+)", cmd):
             resets += int(re.search(r"HEAD~(\d+)", cmd).group(1))
     # Resets undo the most recent commits
     if resets > 0:
@@ -142,7 +167,7 @@ def analyze_session(sid, project):
                     if isinstance(block, dict) and block.get("is_error"):
                         tool_errors.append(block.get("text", "")[:200])
 
-    commit_messages = count_net_commits(git_commands)
+    commit_messages = count_net_commits(git_commands, project)
     return {
         "tools": dict(tools),
         "tool_errors": tool_errors[:10],
