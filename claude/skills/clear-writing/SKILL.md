@@ -1,6 +1,6 @@
 ---
 name: clear-writing
-description: Use when writing or editing any prose humans will read — documentation, commit messages, error messages, UI text, reports, or explanations. Also use when user says "write clearly", "clear writing", or "improve writing".
+description: Use when writing or editing any prose humans will read — documentation, module docs, docstrings, @moduledoc, @doc, README, code comments, commit messages, PR descriptions, error messages, UI text, reports, or explanations. Also use when user says "write clearly", "clear writing", "improve writing", "write a doc", or "write module doc".
 ---
 
 # Clear Writing
