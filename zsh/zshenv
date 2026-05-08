@@ -16,3 +16,6 @@ export CLICOLOR=1
 export DIRENV_LOG_FORMAT=
 
 eval "$(mise activate zsh)"
+
+# mise activate prepends ~/.local/bin; re-prepend ~/.bin so our shims win.
+export PATH="$HOME/.bin:$PATH"

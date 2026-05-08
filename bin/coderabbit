@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Wrapper that redirects CodeRabbit CLI's `git config --global` writes
+# (machineId, etc.) into ~/.config/git/config.local so the tracked
+# dotfiles gitconfig stays clean.
+exec env GIT_CONFIG_GLOBAL="$HOME/.config/git/config.local" \
+  "$HOME/.local/bin/coderabbit" "$@"
