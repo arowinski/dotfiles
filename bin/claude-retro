@@ -101,8 +101,8 @@ def extract_commit_message(cmd, project=None):
         except (subprocess.SubprocessError, OSError):
             pass
         return f"(reuse {sha[:8]})"
-    # Match fixup/squash: git commit --fixup <ref> or --squash <ref>
-    m = re.search(r"git commit\s+(?:[^|;&]*\s)?--(fixup|squash)\s+(\S+)", cmd)
+    # Match fixup/squash: git commit --fixup <ref>, --fixup=<ref>, --squash <ref>, --squash=<ref>
+    m = re.search(r"git commit\s+(?:[^|;&]*\s)?--(fixup|squash)[=\s]+(\S+)", cmd)
     if m:
         return f"({m.group(1)} {m.group(2)})"
     return None
@@ -114,31 +114,38 @@ def count_net_commits(commands, project=None):
     resets = 0
     # Only match `git commit` at a command-clause boundary (start of line or after && / ; / |)
     # to avoid false positives from commands that mention "git commit" inside quoted args.
+    # Strip quoted substrings first so `git commit` inside single/double-quoted args (e.g.,
+    # grep/jq patterns) doesn't trigger a match.
     commit_at_boundary = re.compile(r"(?:^|\n|;|&&|\|\|)\s*git commit\b")
     reset_at_boundary = re.compile(r"(?:^|\n|;|&&|\|\|)\s*git reset\b")
+    quoted = re.compile(r"'(?:[^'\\]|\\.)*'|\"(?:[^\"\\]|\\.)*\"", re.DOTALL)
     for cmd in commands:
-        if commit_at_boundary.search(cmd) and "--amend" not in cmd:
+        stripped = quoted.sub("", cmd)
+        if commit_at_boundary.search(stripped) and "--amend" not in stripped:
             msg = extract_commit_message(cmd, project)
             commits.append(msg or "(message not parsed)")
-        elif reset_at_boundary.search(cmd) and re.search(r"HEAD~(\d+)", cmd):
-            resets += int(re.search(r"HEAD~(\d+)", cmd).group(1))
+        elif reset_at_boundary.search(stripped) and re.search(r"HEAD~(\d+)", stripped):
+            resets += int(re.search(r"HEAD~(\d+)", stripped).group(1))
     # Resets undo the most recent commits
     if resets > 0:
         commits = commits[:-resets] if resets < len(commits) else []
     return commits
 
 
-def analyze_session(sid, project):
+def analyze_session(sid, project, target_date=None):
     encoded = project.replace("/", "-")
     path = PROJECTS / encoded / f"{sid}.jsonl"
     if not path.exists():
         return {}
+    target_prefix = str(target_date) if target_date else None
 
     tools = defaultdict(int)
     tool_errors = []
     models = defaultdict(int)
     teams = set()
     git_commands = []
+    last_edit = None  # most recent Edit/Write tool_use info
+    overact_signals = []  # [(file, complaint_excerpt), ...]
 
     with open(path) as f:
         for line in f:
@@ -157,10 +164,27 @@ def analyze_session(sid, project):
             if msg.get("role") == "assistant" and isinstance(msg.get("content"), list):
                 for block in msg["content"]:
                     if isinstance(block, dict) and block.get("type") == "tool_use":
-                        tools[block.get("name", "?")] += 1
+                        name = block.get("name", "?")
+                        tools[name] += 1
                         cmd = block.get("input", {}).get("command", "")
                         if re.search(r"git (commit|reset)\b", cmd):
                             git_commands.append(cmd)
+                        if name in ("Edit", "Write"):
+                            fp = block.get("input", {}).get("file_path", "?")
+                            last_edit = fp.split("/")[-1] if fp else "?"
+
+            if msg.get("role") == "user" and last_edit:
+                content = msg.get("content")
+                # Real user prompts are strings; array-content user messages are
+                # tool_result entries from the harness, not prompts. Skip those.
+                if isinstance(content, str) and content:
+                    on_target_date = (
+                        not target_prefix
+                        or (e.get("timestamp", "")).startswith(target_prefix)
+                    )
+                    if on_target_date and OVERACT_PATTERNS.search(content):
+                        overact_signals.append((last_edit, content[:120].replace("\n", " ")))
+                    last_edit = None
 
             if msg.get("role") == "tool" and isinstance(msg.get("content"), list):
                 for block in msg["content"]:
@@ -175,11 +199,22 @@ def analyze_session(sid, project):
         "teams": sorted(teams),
         "commits": len(commit_messages),
         "commit_messages": commit_messages,
+        "overact_signals": overact_signals,
     }
 
 
 CORRECTION_PATTERNS = re.compile(
     r"^(no[,.]\s|stop[,.]\s|stop$|don'?t do |don'?t use |i said |i meant |that'?s not |wrong[,.]\s|not what )",
+    re.IGNORECASE,
+)
+
+# Patterns where the user objects to something Claude just did unprompted.
+# Used to detect Edit/Write actions immediately followed by an "over-act" complaint.
+OVERACT_PATTERNS = re.compile(
+    r"i didn'?t ask|did i (tell|ask)|why (u|did u|did you) |"
+    r"don'?t do (that|stuff)|who asked|not what i asked|wasn'?t asked|"
+    r"why use |why update|why add|why change|why move|why rewrite|"
+    r"why wrap|why do |i asked.*not",
     re.IGNORECASE,
 )
 
@@ -277,10 +312,12 @@ def main():
     short_sessions = 0
     user_session_count = 0
     agent_session_count = 0
+    total_overact = 0
+    overact_samples = []
 
     for sid, info in sessions.items():
         is_agent, agent_name, team_name = is_agent_session(sid, info["project"])
-        detail = analyze_session(sid, info["project"])
+        detail = analyze_session(sid, info["project"], target_date=target)
         dur = round((info["end"] - info["start"]).total_seconds() / 60, 1)
 
         capped, work_count, corrections = cap_prompts(info["prompts"])
@@ -290,6 +327,8 @@ def main():
         work_prompts = [p for p in info["prompts"] if not is_meta_prompt(p)]
         intent = work_prompts[0] if work_prompts else None
         outcome = "committed" if detail.get("commits", 0) > 0 else "no-commit"
+
+        signals = detail.pop("overact_signals", [])
 
         s = {
             "id": sid[:8],
@@ -306,6 +345,15 @@ def main():
             s["meta_prompts_filtered"] = meta_count
         if corrections:
             s["corrections"] = corrections
+        if signals:
+            s["overact_signals"] = len(signals)
+            total_overact += len(signals)
+            for sig in signals:
+                overact_samples.append({
+                    "session": sid[:8],
+                    "file": sig[0],
+                    "complaint": sig[1],
+                })
         if work_count:
             model_calls = sum(detail.get("models", {}).values())
             s["model_calls_per_prompt"] = round(model_calls / work_count, 1)
@@ -352,9 +400,12 @@ def main():
             "models": dict(all_models),
             "top_tools": dict(sorted(all_tools.items(), key=lambda x: -x[1])[:10]),
             "teams": sorted(all_teams),
+            "overact_signals": total_overact,
         },
         "projects": {},
     }
+    if overact_samples:
+        output["overact_samples"] = overact_samples[:20]
 
     for project, buckets in sorted(by_project.items()):
         user_sessions = buckets["user"]
