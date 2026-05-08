@@ -11,6 +11,9 @@ allow git stash
 allow git mv
 allow git absorb
 allow git rebase
+allow GIT_SEQUENCE_EDITOR=* git rebase *
+allow GIT_EDITOR=* git rebase *
+allow GIT_SEQUENCE_EDITOR=* GIT_EDITOR=* git rebase *
 allow git branch
 allow git checkout
 ask git checkout [!-]* "Use git switch for branch operations"
@@ -24,8 +27,11 @@ allow-redirect /private/tmp/**
 # Project tools
 allow mix
 allow MIX_ENV=* mix *
+allow PATH=* mix *
+allow POSTGRES_DBNAME=* mix *
 allow just
 allow RAILS_ENV=* just *
+allow CI=* just *
 allow bundle exec rspec
 allow bundle exec rubocop
 allow bundle exec rails runner
@@ -33,6 +39,7 @@ allow bundle exec rails db:prepare
 allow bundle exec rails db:migrate
 allow RAILS_ENV=test bundle exec rails db:drop
 allow RAILS_ENV=test bundle exec rails db:prepare
+allow RAILS_ENV=* bundle exec rails db:schema:dump
 deny bundle exec rails db:create "Use db:prepare instead"
 deny bundle exec rails db:schema:load "Use db:prepare instead"
 allow bin/spring
@@ -47,15 +54,44 @@ allow bin/packwerk check
 allow bin/packwerk validate
 allow yarn run
 allow yarn test
+allow pg_dump
+allow psql
+ask psql *CREATE * "Confirm: psql DDL (CREATE)"
+ask psql *DROP * "Confirm: psql DDL (DROP)"
+ask psql *DELETE * "Confirm: psql DML write (DELETE)"
+ask psql *TRUNCATE * "Confirm: psql DDL (TRUNCATE)"
+ask psql *ALTER * "Confirm: psql DDL (ALTER)"
+ask psql *-f * "Confirm: psql executes file — verify contents"
+ask psql *--file * "Confirm: psql executes file — verify contents"
+ask psql *--file=* "Confirm: psql executes file — verify contents"
 allow npx playwright test
 allow git-commit-context
 allow safe-python
 allow safe-ruby
 deny python3 "Use safe-python instead of python3"
 deny ruby "Use safe-ruby for one-liners, rails runner in Rails projects"
+deny elixir -e "Use mix run -e for project context, or iex -S mix"
+ask sed *-i* "Use Edit tool for file modifications; sed -i bypasses diff review"
+ask sed *--in-place* "Use Edit tool for file modifications; sed --in-place bypasses diff review"
 allow claude-retro
 allow gh-comments
-allow gh pr
+allow gh pr view
+allow gh pr checks
+allow gh pr list
+allow gh pr diff
+allow gh pr create
+allow gh pr ready
+allow gh api
+ask gh api *--method * "Confirm: gh api mutating request — verify endpoint and payload"
+ask gh api *-X * "Confirm: gh api mutating request — verify endpoint and payload"
+ask gh api *-f * "Confirm: gh api mutating request (implicit POST via -f) — verify endpoint and payload"
+ask gh api *-F * "Confirm: gh api mutating request (implicit POST via -F) — verify endpoint and payload"
+ask gh api *--field * "Confirm: gh api mutating request (implicit POST via --field) — verify endpoint and payload"
+ask gh api *--field=* "Confirm: gh api mutating request (implicit POST via --field=) — verify endpoint and payload"
+ask gh api *--raw-field * "Confirm: gh api mutating request (implicit POST via --raw-field) — verify endpoint and payload"
+ask gh api *--raw-field=* "Confirm: gh api mutating request (implicit POST via --raw-field=) — verify endpoint and payload"
+ask gh api *--input * "Confirm: gh api mutating request (body from file) — verify endpoint and payload"
+ask gh api *--input=* "Confirm: gh api mutating request (body from file) — verify endpoint and payload"
 allow gh run
 allow gh search
 allow dev
