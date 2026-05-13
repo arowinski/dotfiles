@@ -1,7 +1,7 @@
 ---
 name: pr
 description: Creates or edits pull requests with automatic title/template formatting. Use when asked to create or edit a PR.
-allowed-tools: Bash(git fetch:*), Bash(git diff:*), Bash(git log:*), Bash(git branch:*), Bash(git remote:*), Bash(git push:*), Bash(git symbolic-ref:*), Bash(git rev-parse:*), Bash(gh pr create:*), Bash(gh pr edit:*), Bash(gh pr list:*), Bash(gh pr view:*), Read, Glob, AskUserQuestion, mcp__atlassian__getJiraIssue, mcp__atlassian__getAccessibleAtlassianResources
+allowed-tools: Bash(git fetch:*), Bash(git diff:*), Bash(git log:*), Bash(git branch:*), Bash(git remote:*), Bash(git push:*), Bash(git symbolic-ref:*), Bash(git rev-parse:*), Bash(gh pr create:*), Bash(gh pr edit:*), Bash(gh pr list:*), Bash(gh pr view:*), Read, Glob, AskUserQuestion, Skill, mcp__atlassian__getJiraIssue, mcp__atlassian__getAccessibleAtlassianResources
 ---
 
 # PR
@@ -40,7 +40,7 @@ allowed-tools: Bash(git fetch:*), Bash(git diff:*), Bash(git log:*), Bash(git br
    - Imperative mood ("Add feature", "Fix bug")
    - Primary purpose, not implementation details
 
-2. Body (apply clear-writing skill — no AI prose, no filler, no hype):
+2. Body — **invoke `Skill(clear-writing)` before drafting**. Body must follow its rules (no AI prose, no filler, no hype, no banned vocabulary):
    - **Focus on WHY (motivation/rationale), not WHAT (implementation)**
    - Context unclear? Ask user first.
    - Use template if found, else summary covering:

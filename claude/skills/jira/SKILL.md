@@ -53,6 +53,12 @@ One clear sentence. Say what needs to happen, not how important it is.
 
 Skip sections that don't apply. Small bug fix? Just describe the bug and expected behavior.
 
+### Risks (only if asked or required by template)
+
+Risks = security exposure, PII/data leakage, compliance, customer-visible product effects, irreversible operations, downtime. NOT implementation choices, test coverage gaps, refactor scope, or code quality concerns — those belong in the description or AC.
+
+If nothing meets that bar, write "None identified" rather than inventing impl-level risks.
+
 ### Bugs
 
 - **Steps to reproduce** — numbered, specific
