@@ -137,11 +137,15 @@ restart_window() {
   local session="$1" window="$2"
   if is_stopped "$session" "$window"; then
     tmux send-keys -t "$session:$window" Enter
-  else
-    tmux send-keys -t "$session:$window" C-c
-    sleep 0.5
-    tmux send-keys -t "$session:$window" Enter
+    return
   fi
+  tmux send-keys -t "$session:$window" C-c
+  sleep 0.5
+  if tmux capture-pane -t "$session:$window" -p | tail -5 | grep -q 'BREAK: '; then
+    tmux send-keys -t "$session:$window" "a" Enter
+    sleep 0.5
+  fi
+  tmux send-keys -t "$session:$window" Enter
 }
 
 restart_session() {
