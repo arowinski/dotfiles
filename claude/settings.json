@@ -10,11 +10,11 @@
       "Grep(~/gat/*)",
       "Glob(~/gat/*)",
       "Search(~/gat/*)",
-      "Write(*/.claude/retro-log.md)",
-      "Edit(*/.claude/retro-log.md)",
-      "Write(*/.claude/news-history.md)",
-      "Edit(*/.claude/news-history.md)",
-      "Read(*/.claude/news-history.md)",
+      "Write(~/.claude/retro-log.md)",
+      "Edit(~/.claude/retro-log.md)",
+      "Write(~/.claude/news-history.md)",
+      "Edit(~/.claude/news-history.md)",
+      "Read(~/.claude/news-history.md)",
       "Write(*/claude/plans/*)",
       "Edit(*/claude/plans/*)",
       "Bash(ls:*)",
@@ -95,6 +95,7 @@
       "Bash(psql:*)",
       "Bash(npx playwright test:*)",
       "Bash(git rebase:*)",
+      "Bash(git absorb:*)",
       "Bash(mix:*)",
       "Bash(MIX_ENV=* mix:*)",
       "Bash(PATH=* mix:*)",
@@ -112,6 +113,7 @@
       "Skill(*)",
       "mcp__context7__*",
       "mcp__tidewave__*",
+      "mcp__tidewave-web__*",
       "mcp__sentry__*",
       "mcp__db__*",
       "mcp__db_hive__*",
@@ -186,6 +188,15 @@
             "command": "dippy"
           }
         ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/adam/.claude/hooks/rtk-rewrite.sh"
+          }
+        ]
       }
     ]
   },
@@ -205,6 +216,6 @@
     "enabled": false
   },
   "alwaysThinkingEnabled": true,
-  "effortLevel": "high",
-  "autoUpdatesChannel": "latest"
+  "autoUpdatesChannel": "latest",
+  "teammateMode": "in-process"
 }
