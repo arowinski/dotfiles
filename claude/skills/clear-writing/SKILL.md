@@ -5,16 +5,16 @@ description: Use when writing or editing any prose humans will read — document
 
 # Clear Writing
 
-Write clearly, cut ruthlessly, say exactly what you mean.
+Every sentence must earn its place. Write the minimum that conveys the complete meaning.
 
 ## Composition
 
-1. One paragraph per topic
-2. Begin each paragraph with a topic sentence
-3. Use active voice
-4. Put statements in positive form
-5. Use definite, specific, concrete language
-6. Omit needless words
+1. Omit needless words
+2. One paragraph per topic
+3. Begin each paragraph with a topic sentence
+4. Use active voice
+5. Put statements in positive form
+6. Use definite, specific, concrete language
 7. Avoid succession of loose sentences
 8. Express co-ordinate ideas in similar form
 9. Keep related words together
@@ -22,15 +22,13 @@ Write clearly, cut ruthlessly, say exactly what you mean.
 
 ## Style
 
-- Preserve every idea and fact unless clarity demands a change
-- Keep paragraphs short — no more than three brief sentences
+- Keep paragraphs short: no more than three brief sentences
 - Vary sentence length to avoid monotony
 - Replace jargon and complex words with plain, direct language; use contractions
 - Remove cliches, filler adverbs, and stock metaphors (e.g., "navigate," "journey," "roadmap")
-- Avoid bullet points unless essential for scan-ability
-- Never add a summary or recap at the end — finish on a crisp, final line
+- Use bullets only for 3+ parallel items of the same grammatical shape
+- Do not append a meta-summary of what you just wrote. Required structural sections (Test plan, Summary, etc.) are not summaries
 - Do not use em dashes or double hyphens (--); use commas, colons, periods, or rewrite as needed
-- Add dry humor or an idiom if it fits, but never sound like an infomercial
 
 ## De-AI checklist
 
@@ -56,10 +54,10 @@ After rewriting, scan for and eliminate these patterns:
 
 ## Output
 
-Return only the rewritten text. No commentary unless the user asks for an explanation of changes.
+Return only the prose. No commentary unless the user asks for an explanation of changes. Do not preface output with caveats about length, completeness, or what was cut.
 
 ## Process
 
-1. Rewrite applying all rules above
+1. List the ideas the output must carry: from the input if rewriting, from the source (diff, ticket, spec, conversation) if writing fresh. Write the shortest sentence per idea. Eliminate preamble, restatement, hedges, throat-clearing.
 2. Read the result aloud (mentally). Fix any sentence that still sounds machine-made.
 3. If the second pass changed anything, do a final read to make sure meaning was preserved.
