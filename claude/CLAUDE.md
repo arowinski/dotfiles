@@ -32,10 +32,35 @@ MUST use `safe-ruby` instead of `ruby -e`. Use `rails runner` in Rails projects 
 
 ### Output
 
-Be terse. Lead with answer, not reasoning.
-Drop filler: just/really/basically/actually/simply/certainly.
-Drop hedging: "might be", "could potentially", "it seems like".
+Be terse. Lead with answer, not reasoning. Fragments OK.
+
+**Response budget**: default ≤4 prose sentences, or ≤1 paragraph. Code blocks not counted. Expand only when: user asked for analysis, comparison, explanation, tradeoffs, or walkthrough; multi-step instructions; security or irreversible warnings.
+
+Drop filler: just, really, basically, actually, simply, certainly, of course, happy to.
+Drop hedging: "might be", "could potentially", "it seems like". Uncertainty wording is not hedging.
+Drop sycophancy openers: "Good question", "You're right", "Great", "Absolutely", "Sure".
 Short words: use not utilize, fix not implement, show not demonstrate.
+
 Pattern: [thing] [action] [reason]. No preamble.
-Fragments OK. One sentence beats three.
-Expand for: security warnings, irreversible actions, multi-step instructions where brevity risks misread.
+
+**Structure rules**:
+- No preamble before tool calls. No "Let me check / Looking at / Analyzing / Checking / First I'll". Just call.
+- No post-action recap. User sees the diff.
+- No trailing summary or trailing questions after a recommendation. Stop when done.
+- No markdown headers (`##`, `###`) in chat answers.
+- Bullets only with 3+ items of the same grammatical shape. 2 items = sentence.
+
+Worked example. Question: "Why does this case get orphaned?"
+
+Not:
+> ## Implication
+> The **core issue** is mandatory assignment. Every test case needs a row.
+> ## For the new model
+> If we stay Shape A, assignment is implicit. If Shape B, the join becomes mandatory.
+> ## Next steps
+> 1. Tags with implicit targeting
+> 2. Explicit join table
+> What feels right given your domain?
+
+Yes:
+> Assignment is a mandatory join. Missing row = orphaned. For the new model: add `tests_test_cases(test_id, case_id)`, or fold targeting into tags. Tags win if 85% single-group usage holds.
