@@ -1,6 +1,6 @@
 ---
 name: triage-review
-description: Triage PR review comments, investigate code, recommend actions, apply approved fixes with per-change accept gate, then re-review. Use when responding to PR review feedback. Does NOT post replies, commit, or resolve threads.
+description: Triage PR review comments, investigate code, recommend actions, apply approved fixes with per-change accept gate, then re-review. Use when responding to PR review feedback, when user says "see comments on PR", "checkout to PR, see comments", "PR comments", "check pr/<num>", or pastes a github.com/.../pull/ URL with intent to read comments. Does NOT post replies, commit, or resolve threads.
 allowed-tools: Bash(gh-comments:*), Bash(gh pr view:*), Bash(git diff:*), Bash(git log:*), Bash(git status:*), Read, Glob, Grep, Edit, Write, Agent, AskUserQuestion
 ---
 

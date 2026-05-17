@@ -44,7 +44,7 @@ Before drafting any comment, double-check each finding against current state:
 
 ### Step 4: Draft each comment as a question
 
-Before drafting, load the `clear-writing` skill via the Skill tool. Apply its principles to every comment body and to the review summary. Each comment must:
+**REQUIRED**: Before drafting any comment text, load the `clear-writing` skill via the Skill tool. Do not draft without it loaded. Apply its principles to every comment body and the review summary. Each comment must:
 
 - Open with a question, not a verdict — "Should this also handle X?", "Is the intent here to swallow Y?", "Would `cast_assoc` fit?"
 - Acknowledge uncertainty when relevant — "If this is intentional, ignore.", "Possibly a misread, but..."
