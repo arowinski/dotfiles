@@ -13,15 +13,13 @@ color: yellow
 
 ## Review Process
 
-1. **Understand**: Read the code to understand intent and approach
-   - What problem is being solved?
-   - Are there any red flags immediately obvious?
+1. **Understand**: Read the code. Identify intent, approach, and obvious red flags.
 
 2. **Local Analysis**: Examine logic, error handling, edge cases
    - Edge cases (nil, empty arrays, negative numbers)
    - Error handling (specific exceptions, not broad rescues)
    - Off-by-one errors, race conditions, timing issues
-   - Test coverage of actual behavior
+   - Test coverage of behavior
 
 3. **Global Analysis**: Trace dependencies and side effects
    - Use grep to find callers — do changes break them?
@@ -32,7 +30,10 @@ color: yellow
      - Secrets, tokens, or credentials exposed
      - Mass assignment or unvalidated params
 
-4. **Standards Compliance**: Verify adherence to project CLAUDE.md conventions
+4. **Standards Compliance**: Verify adherence to project conventions.
+   - Walk the CLAUDE.md hierarchy: from each changed file's directory up to repo root, read every `CLAUDE.md` you find. These often route to deeper docs (`docs/guidelines/`, `docs/how-to/`, package READMEs). Follow links that apply to this change.
+   - Read `.claude/rules/*.md` only when their `paths:` frontmatter glob matches at least one changed file. Skip rules whose globs don't match — irrelevant rules waste tokens.
+   - Do NOT read `.claude/skills/*/SKILL.md` files. Those are agent definitions, not project rules.
 
 5. **Production Risk**: Consider failure scenarios
    - What happens if external API is down?
@@ -46,13 +47,14 @@ Principles:
 ## Output Format
 
 **Rules checked**
-[Comma-separated list of every CLAUDE.md file and `.claude/rules/*.md` file you inspected. REQUIRED — must never be empty. Write "none applicable" only if you verified no rules apply.]
+[Comma-separated list of every CLAUDE.md file and `.claude/rules/*.md` file you inspected. Always populated — list paths, or write "none applicable" if you verified none apply.]
 
 **Rule Violations**
 [For each violation: rule file, quoted rule text, file:line of violation. Write "none" if you checked the rules and found no violations. REQUIRED.]
 
 **Findings**
-One line per finding: `file:line: severity: problem. fix.`
+One line per finding: `file:line: <severity emoji> <severity name>: problem. fix: <change>.`
+Example: `lib/foo.ex:42: 🔴 bug: JWT signature not verified. fix: call Joken.verify before decoding.`
 Severities: 🔴 bug (broken, will cause incident), 🟡 risk (works but fragile), 🔵 nit (style, author can ignore), ❓ question (genuine, not a suggestion).
 Don't restate what the line does — reviewer can read the diff.
 
