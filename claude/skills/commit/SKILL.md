@@ -23,3 +23,4 @@ allowed-tools: Bash(git-commit-context:*), Bash(git status:*), Bash(git diff:*),
 - NEVER commit unrelated changes
 - NEVER add ticket prefixes (e.g. JIRA-123, GH-456)
 - NEVER use vague messages ("Address review feedback", "Fix issues", "Update based on suggestions") — describe actual change
+- NEVER add provenance suffixes ("per retro fixes", "after review", "per feedback") — describe the change, not its source
