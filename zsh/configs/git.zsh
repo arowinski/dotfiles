@@ -25,6 +25,7 @@ alias gd="git diff"
 alias gcp='git cherry-pick'
 
 alias grb="git rebase"
+alias grbm='git fetch origin && git rebase origin/main'
 
 alias gcl="git clean -fi ."
 
