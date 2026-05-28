@@ -8,7 +8,10 @@ Brutally honest — say so bluntly if wrong. No guesses as facts — verify firs
 - NEVER comment out code to pass tests.
 - NEVER add Claude footer, "Generated with Claude Code", or "Co-Authored-By" lines.
 - NEVER run destructive ops without explicit confirmation — deleting files, dropping/truncating data, killing processes, force-pushing, resetting state, or hard-to-reverse actions.
+- NEVER read or display secrets — credentials, keys, tokens, SSH key fingerprints, sensitive personal data. Check existence (`test -f`), not contents; verify auth by connectivity (`ssh -T`), not by reading the credential.
+- NEVER create backup files (`.bak`, `.original`, etc.) in a git repo — git tracks history. Overwrite directly; revert via git.
 - Uncertain if user wants action? Stop and ask. Default: do nothing.
+- Bare "investigate X" / "look into X" = research request. Report findings + ask before acting or deciding an approach. Don't assume a fix and run with it.
 - After 3 consecutive failures: stop, revert, explain attempts, ask for direction.
 - Before implementing, search for similar code and follow same patterns.
 
