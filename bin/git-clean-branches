@@ -1,0 +1,110 @@
+#!/bin/bash
+#
+# git-clean-branches — prune local branches that are merged or not yours.
+#
+# Two categories, shown before anything is deleted:
+#   merged   — local branches already merged into the main branch (safe: `-d`)
+#   not-mine — branches whose tip commit author isn't you (uses `-D`, may be unmerged)
+#
+# Always protected: the current branch, main/master, and any branch checked out
+# in another worktree. Asks once before deleting unless --yes is given.
+#
+#   git-clean-branches            # show + confirm, then delete
+#   git-clean-branches --dry-run  # show only, delete nothing
+#   git-clean-branches --yes      # skip the confirmation prompt
+#   git-clean-branches --merged   # only the merged category (skip not-mine)
+#
+set -euo pipefail
+
+dry_run=false
+assume_yes=false
+merged_only=false
+for arg in "$@"; do
+  case "$arg" in
+    --dry-run) dry_run=true ;;
+    --yes|-y) assume_yes=true ;;
+    --merged) merged_only=true ;;
+    -h|--help) sed -n '2,18p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    *) echo "unknown arg: $arg" >&2; exit 2 ;;
+  esac
+done
+
+git rev-parse --git-dir >/dev/null 2>&1 || { echo "not a git repo" >&2; exit 1; }
+
+main=""
+for cand in main master; do
+  if git show-ref --verify --quiet "refs/heads/$cand"; then main="$cand"; break; fi
+done
+[ -z "$main" ] && { echo "no main/master branch found" >&2; exit 1; }
+
+me="$(git config user.email)"
+current="$(git rev-parse --abbrev-ref HEAD)"
+
+echo "Fetching + pruning origin..."
+git fetch --prune --quiet origin || true
+
+# Branches checked out in any worktree (can't be deleted).
+worktree_branches="$(git worktree list --porcelain | awk '/^branch /{sub("refs/heads/","",$2); print $2}')"
+
+protected() {
+  local b="$1"
+  [ "$b" = "$main" ] && return 0
+  [ "$b" = "master" ] && return 0
+  [ "$b" = "main" ] && return 0
+  [ "$b" = "$current" ] && return 0
+  grep -qxF "$b" <<<"$worktree_branches" && return 0
+  return 1
+}
+
+merged=()
+while IFS= read -r b; do
+  b="${b#"${b%%[![:space:]]*}"}"   # ltrim
+  [ -z "$b" ] && continue
+  protected "$b" && continue
+  merged+=("$b")
+done < <(git branch --merged "$main" --format='%(refname:short)')
+
+not_mine=()
+if ! $merged_only; then
+  while IFS= read -r b; do
+    [ -z "$b" ] && continue
+    protected "$b" && continue
+    # skip ones already in merged list
+    printf '%s\n' "${merged[@]:-}" | grep -qxF "$b" && continue
+    author="$(git log -1 --format='%ae' "$b")"
+    [ "$author" != "$me" ] && not_mine+=("$b")
+  done < <(git branch --format='%(refname:short)')
+fi
+
+if [ ${#merged[@]} -eq 0 ] && [ ${#not_mine[@]} -eq 0 ]; then
+  echo "Nothing to clean. ✨"
+  exit 0
+fi
+
+if [ ${#merged[@]} -gt 0 ]; then
+  echo
+  echo "Merged into $main (will use git branch -d):"
+  printf '  %s\n' "${merged[@]}"
+fi
+if [ ${#not_mine[@]} -gt 0 ]; then
+  echo
+  echo "Not authored by you (will use git branch -D — may be unmerged):"
+  for b in "${not_mine[@]}"; do
+    printf '  %s  (%s)\n' "$b" "$(git log -1 --format='%an' "$b")"
+  done
+fi
+
+if $dry_run; then
+  echo
+  echo "(dry-run — nothing deleted)"
+  exit 0
+fi
+
+if ! $assume_yes; then
+  echo
+  read -r -p "Delete these? [y/N] " reply
+  case "$reply" in y|Y|yes|YES) ;; *) echo "aborted"; exit 0 ;; esac
+fi
+
+for b in "${merged[@]}"; do git branch -d "$b"; done
+for b in "${not_mine[@]:-}"; do [ -n "$b" ] && git branch -D "$b"; done

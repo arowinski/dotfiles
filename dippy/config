@@ -94,6 +94,12 @@ ask gh api *--input * "Confirm: gh api mutating request (body from file) — ver
 ask gh api *--input=* "Confirm: gh api mutating request (body from file) — verify endpoint and payload"
 allow gh run
 allow gh search
+allow git-clean-branches
+allow mise ls
+allow mise ls-remote
+allow mise current
+allow mise which
+allow mise where
 allow dev
 allow tmux
 allow smug
