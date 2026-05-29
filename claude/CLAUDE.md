@@ -15,13 +15,7 @@ Brutally honest — say so bluntly if wrong. No guesses as facts — verify firs
 - After 3 consecutive failures: stop, revert, explain attempts, ask for direction.
 - Before implementing, search for similar code and follow same patterns.
 
-### Skills
-
-ALWAYS load matching skill BEFORE acting. Never fall back to built-in behavior.
-- commit — committing or amending
-- pr — creating or editing PRs
-- review-reply — replying to PR review comments
-- clear-writing — writing or editing prose for humans
+Skills auto-trigger from their description; load the match before acting — don't fall back to built-in behavior.
 
 ### Tools
 
