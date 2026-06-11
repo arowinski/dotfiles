@@ -1,15 +1,26 @@
 ---
 name: doc
-description: Generate Elixir documentation with required structure — `@moduledoc`, `@doc`, `@spec`, `@type`, and doctests. Use when writing module docs for a new or undocumented module, when asked to add/draft/write/generate `@moduledoc` or `@doc`, or when a module is missing its doc. For improving existing prose style, use clear-writing instead.
+description: |
+  Write and review Elixir documentation against one standard — `@moduledoc`, `@doc`, `@spec`, `@type`, and doctests.
+  TRIGGER (user prompt match): "document this", "add doc", "write moduledoc", "draft moduledoc", "module is missing a doc", "run docs through /doc", "review the docs", "cut fluff from docs", "trim docs", "go over docs/comments", or asks to write/add/generate/review `@moduledoc`/`@doc`.
+  SELF-RULE (during code work): invoke proactively when about to create a new `.ex` file with `defmodule` in `lib/`, add `@moduledoc` to a bare-or-`false` file, or add `@doc`/`@spec`/`@typedoc` to a public function. DON'T write inline — stop and invoke.
+  For non-Elixir prose, use clear-writing.
 allowed-tools: Bash(git:*), Bash(rg:*), Read, Glob, Grep, Edit, Write, AskUserQuestion, mcp__tidewave__get_source_location, mcp__tidewave__get_ecto_schemas
 argument-hint: [path to .ex file, or empty if context is clear]
 ---
 
 # Doc
 
-Generate Elixir documentation that explains WHY a module exists, who it works with, what's non-obvious, and what real usage looks like. Refuses to write tautological "Module for X functionality" docs.
+Documentation explains WHY a module exists, who it works with, what's non-obvious, and what real usage looks like. One standard, applied in both directions: writing docs means writing to it; reviewing existing docs means diffing them against it — run the same workflow, fix wrong claims first, delete every sentence that fails the gates.
+
+Core principle: **document only what the code can't say.** If a reader sees it by glancing at the signature, the `schema` block, the `use` line, or the function body, don't write it in prose. Every sentence must add something the code doesn't show: intent, invariant, collaborator, gotcha, or real usage.
 
 **You do NOT:** document private functions, invent fictional examples, or write docs without first classifying the module type.
+
+Scope: the given file(s). When asked to go over the branch's docs, collect changed files via
+`git diff $(git merge-base HEAD origin/main)... --name-only` (`.ex`/`.exs` only; swap `origin/main` for the
+repo's default branch) and run every touched `@moduledoc`, `@doc`, `@typedoc`, and code comment through the
+workflow.
 
 ## Workflow
 
@@ -58,6 +69,11 @@ For every other module, answer in working memory (not necessarily as visible sec
 
 If you can't answer 1 + 2, stop and ask the user. Don't fabricate.
 
+Then check sibling modules (same directory, same role — other wizard steps, other workers) for convention:
+whether they carry `@moduledoc`/`@doc`/`@spec` on the same constructs, and how they phrase them. Convention
+beats minimalism — if siblings consistently document a function, document (or keep) it and align wording to
+theirs; if no sibling documents it, adding one is noise, not a gap to backfill.
+
 ### 4. Write `@moduledoc` in this order
 
 Inside the `@moduledoc """ ... """` heredoc, in this order:
@@ -68,7 +84,6 @@ Inside the `@moduledoc """ ... """` heredoc, in this order:
 - `## <Concept>` H2 section per major idea (model, API, operations, ...)
 - `## Examples` or `## Configuration` with a real snippet from the codebase
 - Use plain-caps callouts (`IMPORTANT:`, `WARNING:`, `NOTE:`) for non-obvious constraints. Drop `**bold**`: visible asterisks in source.
-- `## Related modules` with bulleted backticked module names + one-line purpose each
 
 Length: 200-2000 words depending on surface area. Single-purpose helpers can be 1-2 sentences. Context modules and Oban workers usually need 200-500 words.
 
@@ -147,7 +162,7 @@ Different module types need different content. Force these in addition to the un
 
 ### `@doc` per public function
 
-Every public function gets `@doc`:
+Every public function gets `@doc` (unless sibling convention says otherwise — step 3):
 - First line: one-sentence summary in active voice
 - Then: preconditions, returns, edge cases
 - `## Examples` block when the function is pure and a doctest would compile
@@ -159,7 +174,7 @@ Never:
 
 ### `@spec` per public function
 
-Every public function gets `@spec`:
+Every public function gets `@spec` (unless sibling convention says otherwise — step 3):
 - Match actual arity
 - Reflect nil-ability honestly
 - Avoid ceremonial `any() -> any()` — that's worse than no spec
@@ -186,6 +201,12 @@ Never doctest:
 
 For context/worker/LiveView/plug functions, use plain code blocks with `# => result` comments.
 
+### Code comments
+
+A comment earns its place only by stating a constraint the code can't show (WHY). Comments explaining WHAT
+the code does get deleted — the non-obvious test applies to comments exactly as to docs. Typical offenders:
+restating a data shape, walking through function clauses, `# adds two numbers` over `add/2`.
+
 ## Quality gates
 
 ### Forbidden openings
@@ -202,24 +223,50 @@ Start with what the module IS in domain terms.
 
 ### Banned content
 
+- Anything the reader sees in the code itself — field lists the `schema` block shows, behavior the function
+  name states, the queue name when it's on the `use Oban.Worker` line two lines down, "takes a changeset and
+  returns a tuple" when the `@spec` says exactly that. The per-type rules above ("don't restate fields",
+  "don't document every assign") are instances of this; apply it to every module type
+- Visual/layout description in LiveView docs (dividers, cards, headings — all visible in the render)
+- Implementation details in `@moduledoc` — it documents the contract; the body documents itself
+- "Used by X" / caller-enumeration notes in `@doc` (grep answers that); collaborators belong in the
+  moduledoc's mental-model sentence only when they explain WHY
+- Legacy/migration history, ticket references, names of prior or external systems (Zephyr, TestRail) —
+  unless the constraint they explain is still live
 - Bare lists of exports as the only body (the `Audit` failure mode — looks like documentation, isn't)
 - "See external doc" without an inline summary
 - Synthetic examples with fake module names (`MyApp.Foo.bar/1`)
-- Comments stating the obvious (`# adds two numbers` over `add/2`)
+
+### Prose style
+
+Apply the clear-writing skill's rules to every sentence of generated doc. The ones that matter most here:
+
+- Active voice, short sentences, omit needless words
+- No AI vocabulary: "leverage", "robust", "seamless", "comprehensive", "crucial", "delve", "facilitate",
+  "utilize" and the rest of the de-AI banlist
+- No copula hiding: "is", not "serves as" / "acts as" / "functions as"
+- No "not just X, it's Y" constructions; state the point directly
+- No filler: "in order to" → "to"; "it is important to note that" → cut
+- One qualifier max; don't stack "may" / "might" / "can potentially"
+- No em dashes in generated docs; use commas, colons, or separate sentences
 
 ### Verify before emit
 
 Before showing the doc to the user:
+- Every factual claim (referenced behavior, constraints, collaborators) matches the current code — wrong
+  beats fluffy as a problem; fix stale claims before style work
 - Every backticked module reference resolves to a real module (`rg "defmodule <Name>"`)
 - `@spec` arities match the actual function arities
 - `@type t` fields match `defstruct` or `schema` fields
 - Doctests can run without setup
 - No private functions have `@doc` (Elixir will warn)
+- Redundancy pass: for each sentence, ask "does the code already show this?" — delete it if yes
+- Prose pass: scan for banned vocabulary, copula hiding, filler, and em dashes (see Prose style)
 
 ## Preview gate
 
-Show the proposed doc inline. Use `AskUserQuestion` with Apply / Edit / Skip before writing to the file.
+Show the proposed doc inline; for changes to existing docs, show a per-file diff. Use `AskUserQuestion` with Apply / Edit / Skip before writing to the file.
 
 ## Stop
 
-End with the file path of the modified module and a one-line note on what was added (moduledoc, N @doc, N @spec, N @type). No commit.
+End with the file path of the modified module and a one-line note on what was added or trimmed (moduledoc, N @doc, N @spec, N @type). No commit.
