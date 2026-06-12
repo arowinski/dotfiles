@@ -25,12 +25,7 @@ allowed-tools: Bash(git fetch:*), Bash(git diff:*), Bash(git log:*), Bash(git br
 ### Step 3: Check for PR template
 
 1. Check `.github/pull_request_template.md` (or `PULL_REQUEST_TEMPLATE.md`) from repo root — use `git rev-parse --show-toplevel`, don't rely on cwd.
-2. Found? Adapt — skip UI sections if no frontend changes.
-3. Content:
-   - Imperative mood, third person ("This adds...", not "I added...")
-   - Focus on most important changes; don't mention tests unless main change
-   - Backticks for code refs
-   - Don't hard-wrap — GitHub renders single newlines as breaks. One paragraph = one line.
+2. Found? Adapt — fill sections tersely, delete sections that don't apply (e.g. UI sections with no frontend changes).
 
 ### Step 4: Generate title and body
 
@@ -40,14 +35,31 @@ allowed-tools: Bash(git fetch:*), Bash(git diff:*), Bash(git log:*), Bash(git br
    - Imperative mood ("Add feature", "Fix bug")
    - Primary purpose, not implementation details
 
-2. Body — **invoke `Skill(clear-writing)` before drafting**. Body must follow its rules (no AI prose, no filler, no hype, no banned vocabulary):
-   - **Focus on WHY (motivation/rationale), not WHAT (implementation)**
-   - Context unclear? Ask user first.
-   - Use template if found, else summary covering:
-     - Why change needed
-     - What problem it solves
-     - Relevant context/constraints
-   - Third person for motivation/context/rationale
+2. Body — **invoke `Skill(clear-writing)` and `Skill(human-writing)` before drafting**. Body must follow both: clear-writing for sentence-level quality (no AI prose, no filler, no hype, no banned vocabulary), human-writing for voice (reads like a colleague wrote it, not an AI). Context unclear? Ask user first.
+
+   The body exists to make review faster and to answer WHY when someone reaches this PR via git blame later. The diff shows WHAT — the body may contain only what the diff can't show:
+   - The problem and why now (mandatory, 1-3 sentences; this opens the body)
+   - An approach decision and its tradeoff
+   - Breaking change + migration path
+   - Deliberate non-goals ("X deferred to follow-up")
+   - For big diffs, a reading guide ("the real change is `foo.ex`; the rest is mechanical rename")
+
+   Banned:
+   - File-by-file change inventories, restating the diff, implementation narration ("first extracted, then...")
+   - "Also updates tests/formatting" — never mention tests unless they're the main change
+   - Meta-headers that address the reviewer ("Worth a reviewer's eye", "Note for reviewers", "Please pay attention to"). State the decision directly; whether it deserves attention is the reviewer's call. The reading guide is the one exception, and it reads best as a plain fact (as phrased in the reading-guide bullet above), never as a heading aimed at the reviewer.
+
+   Example:
+   - Not: "This PR adds FooWorker, updates the schema, refactors bar.ex, and adds tests."
+   - Yes: "Events stuck in the outbox after deploys because the drain job died with the pod. This moves draining to FooWorker (Oban, unique per aggregate) so retries survive restarts. Schema change is additive; safe to roll back."
+
+   Form:
+   - Default ~100 words; exceed only for breaking changes, migration notes, or the reading guide
+   - Bullets only when 3+ of the facts above exist; otherwise prose
+   - Third person, present tense ("This adds...", not "I added...")
+   - Backticks for code refs
+   - Don't hard-wrap — GitHub renders single newlines as breaks. One paragraph = one line.
+   - Jira fetched? Don't restate the ticket — the link carries it. The body adds what the ticket doesn't say: the chosen approach and any deviation from it.
 
 ### Step 5: Interactive confirmation (REQUIRED — DO NOT SKIP)
 
