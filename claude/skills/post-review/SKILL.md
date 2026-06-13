@@ -42,11 +42,36 @@ Before drafting any comment, double-check each finding against current state:
 3. Confirm the cited code actually says what the finding claims (no off-by-one, no misread)
 4. Drop findings that don't survive this check. False positives erode trust faster than missing comments add value.
 
+### Step 3.5: Value filter (REQUIRED)
+
+For each surviving finding, ask: would the PR author thank you for this comment, or sigh?
+
+Drop:
+- Stylistic nits without a rule backing (naming preferences, line breaks, comment placement)
+- Formatting changes a formatter would handle
+- "Could be slightly clearer" with no correctness/perf/security impact
+- Suggestions that duplicate what existing tests/types already guarantee
+- "Consider refactoring" / "this could be cleaner" without a concrete change
+
+Keep:
+- Correctness, security, perf, contract violations, missing edge cases
+- Bugs (off-by-one, nil handling, race conditions)
+- Missing tests for new public behavior
+- Breaking changes / API regressions
+- Concrete suggestions tied to a specific failure mode
+
+If you can't write the comment in one sentence that the author can act on, drop it. Better to post 2 strong findings than 8 mixed ones.
+
 ### Step 4: Draft each comment as a question
 
-**REQUIRED**: Before drafting any comment text, load the `clear-writing` skill via the Skill tool. Do not draft without it loaded. Apply its principles to every comment body and the review summary. Each comment must:
+**REQUIRED**: Before drafting any comment text, load BOTH the `clear-writing` skill AND the `human-writing` skill via the Skill tool. Do not draft without them loaded. clear-writing tightens sentences; human-writing strips LLM tells (no "It would be advisable", "I would suggest", "Consider..." openers, etc.) and adds peer voice. Apply both to every comment body and the review summary. Each comment must:
 
-- Open with a question, not a verdict — "Should this also handle X?", "Is the intent here to swallow Y?", "Would `cast_assoc` fit?"
+- Default shape: question first, then a sentence on WHY you're asking. The question is the prompt for the author; the why grounds it in concrete evidence so they can engage with the actual concern. Examples:
+  - "Should this also handle nil? `customer.plan` is nullable per schema L12 — `.price` would crash."
+  - "Is swallowing the error intentional? Caller at `lib/api.ex:88` checks `{:error, _}` and would silently get `nil` here."
+  - "Would `cast_assoc` fit? Manual `put_assoc` skips validation; the parent changeset's `validate_required` won't see missing children."
+  - Pure-question comments (no why) are OK only when the question itself is unambiguous from the cited code.
+- **Stop at the why.** Do NOT propose solutions, list alternatives, run tests inside the comment, paste analysis paragraphs, or recommend specific code. Investigation belongs in the plausibility check phase, not in the comment body. The reviewer asks; the author decides. A draft that includes "Consider X, Y, or Z" or "I ran the test suite and..." or a proposed code snippet is overreach — trim to the question + one why sentence.
 - Acknowledge uncertainty when relevant — "If this is intentional, ignore.", "Possibly a misread, but..."
 - Reference concrete code with backticks; line numbers only when not obvious from inline placement
 - Keep to 1–3 sentences unless the rationale genuinely needs more

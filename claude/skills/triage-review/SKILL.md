@@ -1,7 +1,7 @@
 ---
 name: triage-review
 description: Triage PR review comments, investigate code, recommend actions, apply approved fixes with per-change accept gate, then re-review. Use when responding to PR review feedback, when user says "see comments on PR", "checkout to PR, see comments", "PR comments", "check pr/<num>", or pastes a github.com/.../pull/ URL with intent to read comments. Does NOT post replies, commit, or resolve threads.
-allowed-tools: Bash(gh-comments:*), Bash(gh pr view:*), Bash(git diff:*), Bash(git log:*), Bash(git status:*), Read, Glob, Grep, Edit, Write, Agent, AskUserQuestion
+allowed-tools: Bash(gh-comments:*), Bash(gh pr view:*), Bash(git diff:*), Bash(git log:*), Bash(git status:*), Read, Glob, Grep, Edit, Write, Agent, AskUserQuestion, Skill
 ---
 
 # Triage Review
@@ -41,6 +41,8 @@ Per actionable comment, pick one:
 - **Clarify** — comment is ambiguous; needs a question back to the reviewer
 
 Only **Fix** produces action in this skill. Push back and Clarify are recommendations the user acts on outside it.
+
+**Reviewer-facing text** — before writing any push-back/clarify reasoning, or any reply draft the user asks for mid-flow, load `Skill(clear-writing)` + `Skill(human-writing)` first: peer voice, question-shaped, no AI tells. This skill still never *posts* — it only drafts the text for the user.
 
 ### 5. Present the action plan
 
