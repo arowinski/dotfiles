@@ -1,13 +1,13 @@
 ---
 name: post-review
-description: Posts code-review findings to a GitHub PR as a single review with inline comments. Use when reviewing someone else's PR after /review or /rr produces findings, or when fresh review needs to land on the PR. Comments are phrased as questions, not verdicts.
+description: Filters code-review findings to the ones worth posting, drafts each as a question, previews, then posts to a GitHub PR as a single review with inline comments. Use after /review or /rr produces findings on someone else's PR, or for a fresh review landing on the PR. Also on "which are worth posting?", "filter findings", "be pragmatic about comments", "what's worth posting?" — previews and posts only on explicit confirmation (reply `skip` to draft without publishing). Comments are phrased as questions, not verdicts.
 argument-hint: [pr-number-or-url]
-allowed-tools: Bash(gh-comments:*), Bash(gh api:*), Bash(gh pr view:*), Bash(gh pr diff:*), Bash(git diff:*), Bash(git log:*), Read, Glob, Grep, Skill
+allowed-tools: Bash(gh-comments:*), Bash(gh api:*), Bash(gh pr view:*), Bash(gh pr diff:*), Bash(git diff:*), Bash(git log:*), Read, Glob, Grep, AskUserQuestion, Skill
 ---
 
 # Post Review
 
-Post code-review findings to a PR as a single review with inline comments.
+Filter code-review findings to the ones worth posting, draft each as a question, preview, then post to a PR as a single review with inline comments. The preview doubles as a dry run — reply `skip` and nothing publishes.
 
 **You do NOT:** post unsolicited reviews, post separate comment-per-finding, or post without an explicit user "post" confirmation.
 
@@ -29,7 +29,7 @@ Source priority:
 1. If the conversation has prior `/review` or `/rr` output, use those findings as input
 2. Otherwise, gather context: `gh pr view <pr>`, `gh pr diff <pr>`, read changed files, then produce findings
 
-For each finding capture: file path, line number on the PR head ref, severity (blocker / major / nit / info), the claim, the suggested change or question.
+For each finding capture: file path, line number on the PR head ref, category (security / bug / perf / etc., per Step 4) and severity (blocker / major / nit / info), the claim, the suggested change or question.
 
 `/rr` produces structured findings (Claim / Evidence / Reasoning / Severity / Fix). Use Evidence and Reasoning to inform the comment body — they're the raw material for a clear question.
 
@@ -37,32 +37,44 @@ For each finding capture: file path, line number on the PR head ref, severity (b
 
 Before drafting any comment, double-check each finding against current state:
 
-1. `gh pr diff <pr>` — confirm the line is actually in the diff and on the side you expect (RIGHT for added/modified, LEFT for deleted)
+1. Confirm the line is actually in the diff and on the side you expect (RIGHT for added/modified, LEFT for deleted) — reuse the `gh pr diff` from Step 2 if already fetched
 2. Read the full file at the cited path — confirm the surrounding context doesn't already address the concern
 3. Confirm the cited code actually says what the finding claims (no off-by-one, no misread)
 4. Drop findings that don't survive this check. False positives erode trust faster than missing comments add value.
 
-### Step 3.5: Value filter (REQUIRED)
+### Step 4: Value filter (REQUIRED)
 
-For each surviving finding, ask: would the PR author thank you for this comment, or sigh?
+For each surviving finding, ask: would the PR author thank you for this comment, or sigh? Categorize:
 
-Drop:
-- Stylistic nits without a rule backing (naming preferences, line breaks, comment placement)
-- Formatting changes a formatter would handle
-- "Could be slightly clearer" with no correctness/perf/security impact
-- Suggestions that duplicate what existing tests/types already guarantee
-- "Consider refactoring" / "this could be cleaner" without a concrete change
-
-Keep:
-- Correctness, security, perf, contract violations, missing edge cases
-- Bugs (off-by-one, nil handling, race conditions)
+**KEEP** (real concerns — post these):
+- Security: auth bypass, injection, secret exposure, SSRF, deserialization
+- Correctness: logic that doesn't match stated behavior, contract violations, missing edge cases
+- Bugs: off-by-one, nil/undefined access, race conditions, missing error handling on real failure paths
+- Performance: N+1 queries, blocking I/O in hot paths, unbounded loops
+- Architecture: cross-layer violations, broken abstractions, public API changes / regressions
+- Accessibility: a11y violations (ARIA missing/wrong, contrast, semantic HTML gone wrong)
+- Framework: React key-prop / hook-rule warnings, DOM API misuse
 - Missing tests for new public behavior
-- Breaking changes / API regressions
-- Concrete suggestions tied to a specific failure mode
 
-If you can't write the comment in one sentence that the author can act on, drop it. Better to post 2 strong findings than 8 mixed ones.
+**DROP** (pure nits — author can ignore safely):
+- Style/formatting a formatter (`mix format`, `rubocop`, `prettier`) would fix anyway
+- Naming preference without a project-convention violation
+- "Could use X instead" when both X and current work
+- Optional refactors ("worth extracting" without a third caller)
+- Personal preference (prefer `case` over `cond`, `Map.get` over `[]`)
+- Suggestions that duplicate what existing tests/types already guarantee
+- "Consider refactoring" / "could be cleaner" with no concrete change
 
-### Step 4: Draft each comment as a question
+**FLAG** (ambiguous — ask before deciding):
+- Could be real or nit depending on team norms
+- Borderline (naming slightly off but not rule-violating)
+- Performance that may or may not matter at expected scale
+
+For FLAG items, use `AskUserQuestion` (Keep / Drop / Skip) before drafting.
+
+If you can't write the comment in one sentence the author can act on, drop it. Better to post 2 strong findings than 8 mixed ones.
+
+### Step 5: Draft each comment as a question
 
 **REQUIRED**: Before drafting any comment text, load BOTH the `clear-writing` skill AND the `human-writing` skill via the Skill tool. Do not draft without them loaded. clear-writing tightens sentences; human-writing strips LLM tells (no "It would be advisable", "I would suggest", "Consider..." openers, etc.) and adds peer voice. Apply both to every comment body and the review summary. Each comment must:
 
@@ -78,7 +90,7 @@ If you can't write the comment in one sentence that the author can act on, drop 
 
 Avoid imperatives ("you should", "this must"), praise filler ("nice, but..."), and preambles before the question.
 
-### Step 5: Build the review payload
+### Step 6: Build the review payload
 
 One payload, one POST. Not one POST per comment.
 
@@ -95,26 +107,26 @@ One payload, one POST. Not one POST per comment.
 
 `line` refers to the line on the PR head ref (RIGHT side, default). Set `"side": "LEFT"` only when commenting on a deleted line.
 
-### Step 6: Preview (REQUIRED — STOP HERE)
+### Step 7: Preview (REQUIRED — STOP HERE)
 
-Print the review in chat in this shape:
+Print the review in chat in this shape, ordered highest-severity first:
 
 **Summary:** `<body or "(none)">`
 
 **Inline comments:**
 
-- `lib/foo.ex:42` — `<full body>`
-- `lib/bar.ex:17` (LEFT) — `<full body>`
+- **[security]** `lib/foo.ex:42` — `<full body>`
+- **[bug]** `lib/bar.ex:17` (LEFT) — `<full body>`
 
 Then stop. The user replies one of:
 
 - `post` — submit as shown
 - `edit` — user revises specific comments or the summary
-- `skip` — discard without posting
+- `skip` — don't post; the drafted comments above stay in the conversation as a dry run
 
 Do not POST until the reply is `post`.
 
-### Step 7: Post
+### Step 8: Post
 
 Pipe the JSON payload via heredoc and extract the review URL:
 
