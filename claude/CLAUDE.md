@@ -21,7 +21,8 @@ Skills auto-trigger from their description; load the match before acting — don
 
 `gh-comments <pr-number>` for PR comments (conversation + inline reviews).
 Check for `justfile` in project root — prefer `just <recipe>` over raw commands.
-Prefer built-in Grep/Glob tools. In shell, use `rg`/`fd` not `grep`/`find`.
+Prefer built-in Grep/Glob tools (no shell needed). If you must shell out, `grep`/`find` are auto-allowed.
+Bare command names only — no absolute paths (`/opt/homebrew/bin/foo`), escapes (`\git`), or `command`/`unalias` prefixes.
 Run `git` directly. Different repo: `cd <path> && git <cmd>`. Include this in agent prompts.
 `git switch` for branches, not `git checkout`.
 MUST use `safe-python` instead of `python3`.
