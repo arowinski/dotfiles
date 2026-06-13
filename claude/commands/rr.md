@@ -157,8 +157,12 @@ Severity sections (Blockers, Major, Nits, Info) hold Strong findings grouped by 
 
 ## Handoff
 
+End with a single-letter menu. The user types the bracketed key as their next message to pick; keys sit on the Colemak home row (`t` = left index, `n` = right index).
+
 - **No findings**: no handoff.
 - **Someone else's PR** (PR in scope AND `gh pr view <pr> --json author -q .author.login` differs from `gh api user -q .login`):
-  > Run `/post-review` to publish findings, or `/quorum "verify these findings"` to gut-check before posting.
+  > Next: `[t]` /post-review to publish findings · `[n]` /quorum "verify these findings" to gut-check first
 - **Anything else** (your own PR, uncommitted changes, or a path arg):
-  > Run `/quorum "verify these findings"` to gut-check before acting on them.
+  > Next: `[n]` /quorum "verify these findings" to gut-check before acting
+
+On the user's next message, map the key: `t` → run `/post-review`; `n` → run `/quorum "verify these findings"`. A typed action word (e.g. "post", "quorum") works too.
