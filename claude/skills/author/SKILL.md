@@ -1,8 +1,8 @@
 ---
 name: author
 description: Create or improve Claude Code agent and skill configuration files. Use when creating new agents/skills or reviewing existing ones.
-argument-hint: <path, "all", or description>
-allowed-tools: Bash(npx claude-rules-doctor:*), Read, Glob, Grep, AskUserQuestion
+argument-hint: [path, "all", or description]
+allowed-tools: Read, Glob, Grep, AskUserQuestion
 ---
 
 # Author
@@ -27,16 +27,16 @@ Create or improve Claude Code agent/skill configuration files.
 
 1. Read the target file(s)
    - Single file: read it directly
-   - "all": glob `.claude/agents/*.md` + `.claude/skills/*/SKILL.md` (project + `~/.claude/` paths)
+   - "all": glob `.claude/agents/*.md` + `.claude/skills/*/SKILL.md` + `.claude/commands/*.md` (project + `~/.claude/` paths)
 2. Read project + user CLAUDE.md for redundancy comparison (agents/skills inherit CLAUDE.md)
 3. Validate each file against the checklist in [REFERENCE.md](REFERENCE.md)
-4. For rules files with `paths:` globs, run `npx claude-rules-doctor check --root .` to verify globs match actual files. Flag any dead rules.
-4. For "all", also check cross-cutting issues:
+4. For rules files with `paths:` globs, Glob each pattern against the tree and flag any that match no files (dead rules)
+5. For "all", also check cross-cutting issues:
    - Overlapping descriptions that could confuse agent routing
    - Inconsistent patterns across agents/skills (naming, style, structure)
    - Gaps in the workflow pipeline
-5. Before presenting, reconsider each proposed change:
+6. Before presenting, reconsider each proposed change:
    - Does the "redundant" text actually carry a different meaning than what it appears to duplicate?
    - Would removing it lose a behavioral nudge the model wouldn't do unprompted?
    - Is the file still coherent with all proposed cuts applied together?
-6. Present findings: **Must fix** → **Should fix** → **Consider** → **Good**
+7. Present findings: **Must fix** → **Should fix** → **Consider** → **Good**
