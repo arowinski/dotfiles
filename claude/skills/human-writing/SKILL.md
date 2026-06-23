@@ -13,15 +13,13 @@ Reject and rewrite if the draft contains:
 
 - "It would be advisable to..."
 - "I would suggest..."
-- "It is important to note that..."
 - "This appears to..."
 - "Consider..." as an opener
 - "It might be worth..."
 - "Please ensure..."
-- Hedging stacks ("could potentially possibly", "may perhaps")
-- Robotic transitions ("Furthermore", "Moreover", "Additionally")
-- "I hope this helps", "Let me know if you have questions"
-- Sophisticated vocabulary when plain works: utilize → use, implement → build/add/fix, demonstrate → show, facilitate → help, leverage → use, ascertain → check, subsequent → next, prior to → before, commence → start, terminate → stop, instantiate → create, invoke → call, execute → run, perform → do. Fancy words read machine-generated; plain words read peer.
+- "Let me know if you have questions"
+- Sophisticated vocabulary when plain works: utilize → use, implement → build/add/fix, demonstrate → show, facilitate → help, ascertain → check, subsequent → next, prior to → before, commence → start, terminate → stop, instantiate → create, invoke → call, execute → run, perform → do. Fancy words read machine-generated; plain words read peer.
+- Corporate deflection — "the team", "stakeholders", or other abstractions standing in for the person who made the call. Write as the dev: "we" or a subjectless imperative ("Revisit when Rails retires the feature"). "The team will revisit..." reads like a press release.
 
 ## Permitted human voice
 
@@ -31,7 +29,10 @@ Reject and rewrite if the draft contains:
 - Direct verdicts ("blocker", "nit", "ship it", "lgtm")
 - Casual openers when appropriate ("Hmm, intentional?", "Wait, what if...", "Yeah, you're right")
 - Backticked code references inline (`func/2` reads more peer than "the func function")
-- Reference via link or anchor. GitHub auto-renders short SHAs (`a3f8b7d`) and PR/issue numbers (`#1234`); file paths do NOT auto-link. When linking to code, point at the specific line or range — append `#L42` or `#L42-L50` (or use a SHA-pinned URL for stability: `https://github.com/owner/repo/blob/<sha>/file.ex#L42-L50`). Prefer a caption that describes WHAT the link points to (`[the nil guard](url)`, `[the failing test](url)`) over bare paths (`[lib/foo.ex L42](url)`) — captions read peer, paths read mechanical. Use bare path only when the path is the point (comparing two specific spots, or signaling location-not-behavior). Or (better still) post as an inline review comment on the line so the path is implicit. Use backticks for code identifiers (`func/2`) instead of paraphrasing ("the auth module" → `lib/auth.ex`)
+- GitHub auto-links short SHAs (`a3f8b7d`) and `#1234`; file paths don't — append `#L42` or `#L42-L50`, and SHA-pin the URL for stability (`.../blob/<sha>/file.ex#L42-L50`).
+- Caption by what the link points to (`[the nil guard]`, `[the failing test]`), not the bare path; bare path only when the location itself is the point.
+- Better still: post it as an inline review comment on the line, so the path is implicit.
+- Backticks for code identifiers (`func/2`), not paraphrase — `lib/auth.ex`, not "the auth module".
 
 ## Bad-vs-good examples
 
@@ -65,3 +66,5 @@ human-writing is voice. clear-writing is structure. For peer comms, load both:
 - human-writing strips LLM tells, allows fragments, adds peer voice
 
 Don't replace clear-writing. The two work together: clear-writing's edits keep sentences tight; human-writing's edits make them sound like a colleague.
+
+clear-writing already bans hedging stacks, sycophancy closers ("I hope this helps"), and inflated vocab (`leverage`, the `furthermore`/`moreover` transitions) — don't re-list those here; this skill keeps only the peer-voice tells clear-writing doesn't cover.
