@@ -9,7 +9,7 @@ allowed-tools: Bash(git-commit-context:*), Bash(git status:*), Bash(git diff:*),
 ## Workflow
 
 1. Run `git-commit-context` — gets status, diffs, log in one call. Understand what to commit, match message style.
-2. Verify tests green, lint clean, formatter applied. Stop and report on failure.
+2. Confirm formatter applied; if the pre-commit gate (tests/lint) failed, stop and report — don't commit.
 3. Consider amend or absorb (ask first):
    - Last commit unpushed + related? Amend.
    - Staged changes match scope of existing branch commit? `git absorb --and-rebase`.
@@ -22,5 +22,7 @@ allowed-tools: Bash(git-commit-context:*), Bash(git status:*), Bash(git diff:*),
 - NEVER mention tests unless they're the main change
 - NEVER commit unrelated changes
 - NEVER add ticket prefixes (e.g. JIRA-123, GH-456)
+- NEVER add a conventional-commit or scope prefix (`feat(...)`, `fix(scope):`, `area(scope):`) — plain action-verb imperative only
+- Plain ASCII only — no Unicode (e.g. arrows `→`); use a word ("to") or punctuation (`>`)
 - NEVER use vague messages ("Address review feedback", "Fix issues", "Update based on suggestions") — describe actual change
 - NEVER add provenance suffixes ("per retro fixes", "after review", "per feedback") — describe the change, not its source
