@@ -1,7 +1,7 @@
 ---
 name: debug
 description: Debug a bug from error to root cause to regression test. Use when given a stack trace, traceback, test failure, error message, crash, 500/503, Sentry URL, or "X doesn't work" / "X is broken" report. Also use when user says debug, diagnose, troubleshoot, or investigate.
-allowed-tools: Bash(git:*), Bash(dev:*), Bash(rg:*), Bash(grep:*), Bash(mix:*), Bash(MIX_ENV=* mix:*), Bash(bin/spring:*), Bash(yarn test:*), Bash(yarn run:*), Read, Glob, Grep, Edit, Write, Agent, AskUserQuestion, mcp__tidewave__*, mcp__tidewave-web__*, mcp__sentry__*, mcp__atlassian__getJiraIssue
+allowed-tools: Bash(git:*), Bash(ws:*), Bash(rg:*), Bash(grep:*), Bash(mix:*), Bash(MIX_ENV=* mix:*), Bash(bin/spring:*), Bash(yarn test:*), Bash(yarn run:*), Read, Glob, Grep, Edit, Write, AskUserQuestion, mcp__tidewave__*, mcp__tidewave-web__*, mcp__sentry__*, mcp__atlassian__getJiraIssue
 argument-hint: [stack trace, error message, Sentry URL, or bug description]
 ---
 
@@ -22,8 +22,8 @@ Walk a bug from "what's happening" to "fixed and regression-tested" in six phase
 
 Goal: see the bug happen on demand.
 
-1. Run `dev status` first. If a process is stopped or in a crash loop, investigate it first — likely the cause or a symptom.
-2. Capture the error surface: stack trace (paste from user), error message, browser console, or `dev logs <process> 200`. Use `dev logs <process> 500` for more scrollback.
+1. Confirm the dev environment is up; if a process is stopped or in a crash loop, investigate that first — likely the cause or a symptom.
+2. Capture the error surface: stack trace (paste from user), error message, browser console, or the relevant process logs.
 3. If the input is a Sentry URL, fetch the event via `mcp__sentry__*` for stack trace, breadcrumbs, frequency, and recent occurrences.
 4. If reproduction steps aren't obvious, ask the user. Don't guess.
 
@@ -35,7 +35,7 @@ Goal: narrow the bug to a specific code path.
 
 1. Trace the failing call from the stack trace to the offending function. Read those files.
 2. Check `git log -n 10 -- <file>` for recent changes that could have introduced the bug.
-3. For Phoenix projects, use Tidewave:
+3. For Phoenix projects, if Tidewave is connected:
    - `mcp__tidewave__get_source_location` to jump to function definitions
    - `mcp__tidewave__get_ecto_schemas` to confirm schema shape matches code assumptions
    - `mcp__tidewave__execute_sql_query` to check actual data state
@@ -72,7 +72,7 @@ Goal: apply the smallest change that makes the failing test pass.
 3. On Apply, edit the code. On Edit, take the user's revision and re-show the diff.
 4. Run the failing test from Phase 4. It must pass.
 5. Run nearby tests (same file, same module) to catch regressions.
-6. After a dependency or migration fix: `dev restart <process>`.
+6. After a dependency or migration fix, restart the affected service.
 
 Never batch fixes. Never apply without confirmation.
 
@@ -81,7 +81,7 @@ Never batch fixes. Never apply without confirmation.
 Goal: confirm no new breaks.
 
 1. Run a broader test suite if relevant (`mix test`, `bundle exec rspec`, `yarn test`). Scope: the package containing the fix.
-2. Re-run `dev status` to confirm no processes crashed during testing.
+2. Confirm no service crashed during testing.
 3. If the bug was in Sentry, note the Sentry issue ID so the user can close it after deploying.
 
 ## Stop
