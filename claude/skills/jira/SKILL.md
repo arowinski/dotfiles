@@ -11,7 +11,7 @@ Create Jira tickets via Atlassian MCP. Apply clear-writing skill to all ticket t
 ## Before creating
 
 1. Ask for **project key** — never assume
-2. Ask for **issue type** (Story, Task, Bug, Epic, Subtask) if not specified
+2. **Issue type** — default to **Task** if not specified (most feature/infra/cleanup work is a Task; reserve Story for larger POC/epic-ish items, Bug for defects)
 3. Validate project with `mcp__atlassian__getVisibleJiraProjects` if unsure
 
 ## Creating tickets
@@ -35,29 +35,27 @@ Unsure about format? Check fields with `mcp__atlassian__getJiraIssueTypeMetaWith
 
 ### Summary
 
-One clear sentence. Say what needs to happen, not how important it is.
+Short imperative, action-verb first. Say what needs to happen, not how important it is. No parenthetical glosses (`(GRE)`-style acronyms).
 
 - Good: "Add rate limiting to /api/auth/login endpoint"
 - Bad: "Implement crucial security enhancement for authentication system"
 
 ### Description structure
 
-**Context** — why this work exists. 1-2 sentences linking to the problem or goal.
+`###` headers, in this order, skip what doesn't apply:
 
-**What** — what needs to change. Specific about behavior, not implementation unless it matters.
+**`### Context`** — 1-3 prose sentences: why this exists, link the driver ticket/PR.
 
-**Acceptance criteria** — concrete, testable conditions. Numbered list:
-1. Rate limiting returns 429 after 5 failed attempts in 15 minutes
-2. Blocked users see a clear error message with retry time
-3. Existing sessions are not affected
+**`### Acceptance criteria`** — `*` bullets (NOT numbered), terse fragments, backticked identifiers (module/field/flag names). Each bullet is one concrete, testable assertion:
+* `RateLimiter` returns 429 after 5 failed `/api/auth/login` attempts in 15 min
+* blocked users get a clear error with retry time
+* existing sessions unaffected
 
-Skip sections that don't apply. Small bug fix? Just describe the bug and expected behavior.
+**`### Risks`** — usually just "None identified". List a risk only if it clears the bar: security exposure, PII/data leakage, compliance, customer-visible effects, irreversible ops, downtime. NOT impl choices, test gaps, refactor scope, or code quality (those go in Context/AC).
 
-### Risks (only if asked or required by template)
+**`### Notes`** (optional) — deferred/out-of-scope bits, "decide during implementation" caveats.
 
-Risks = security exposure, PII/data leakage, compliance, customer-visible product effects, irreversible operations, downtime. NOT implementation choices, test coverage gaps, refactor scope, or code quality concerns — those belong in the description or AC.
-
-If nothing meets that bar, write "None identified" rather than inventing impl-level risks.
+Reference PRs inline as `#310`, tickets as `ENG-994`; link follow-ups with a Relates issue link. No bold `**callouts**` in ticket bodies. Skip sections that don't apply — a small bug fix uses the Bugs structure below instead.
 
 ### Bugs
 
