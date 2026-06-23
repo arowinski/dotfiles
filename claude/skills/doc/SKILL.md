@@ -5,7 +5,7 @@ description: |
   TRIGGER (user prompt match): "document this", "add doc", "write moduledoc", "draft moduledoc", "module is missing a doc", "run docs through /doc", "review the docs", "cut fluff from docs", "trim docs", "go over docs/comments", or asks to write/add/generate/review `@moduledoc`/`@doc`.
   SELF-RULE (during code work): invoke proactively when about to create a new `.ex` file with `defmodule` in `lib/`, add `@moduledoc` to a bare-or-`false` file, or add `@doc`/`@spec`/`@typedoc` to a public function. DON'T write inline — stop and invoke.
   For non-Elixir prose, use clear-writing.
-allowed-tools: Bash(git:*), Bash(rg:*), Read, Glob, Grep, Edit, Write, AskUserQuestion, mcp__tidewave__get_source_location, mcp__tidewave__get_ecto_schemas
+allowed-tools: Bash(git:*), Read, Glob, Grep, AskUserQuestion, Skill, Edit, Write, mcp__tidewave__get_source_location, mcp__tidewave__get_ecto_schemas
 argument-hint: [path to .ex file, or empty if context is clear]
 ---
 
@@ -63,7 +63,7 @@ Don't invent prose for these. `@moduledoc false` is the correct answer.
 For every other module, answer in working memory (not necessarily as visible sections in the output):
 
 1. **Why does this module exist, in domain terms?** Not "Oban worker" — "drains the event outbox so downstream systems receive published events." One sentence. No "Module for X" / "Provides functionality" openings.
-2. **Who calls it, what does it call?** Use `rg "alias <Module>"` and `rg "<Module>\\."` to find callers. Note the major collaborators.
+2. **Who calls it, what does it call?** Grep for `alias <Module>` and `<Module>.` to find callers. Note the major collaborators.
 3. **What surprising constraint or invariant must a reader know?** Concurrency rules, idempotency, side effects you can't undo, fail-loud invariants, scope/auth assumptions, retry semantics, ordering. If you can't name one, the module is genuinely simple — note that and move on.
 4. **What does real usage look like?** A config snippet, a router pipeline line, an `import` + call, a real function invocation from a caller. Never synthetic placeholders.
 
@@ -83,7 +83,7 @@ Inside the `@moduledoc """ ... """` heredoc, in this order:
 - Mental model / how it fits with collaborators
 - `## <Concept>` H2 section per major idea (model, API, operations, ...)
 - `## Examples` or `## Configuration` with a real snippet from the codebase
-- Use plain-caps callouts (`IMPORTANT:`, `WARNING:`, `NOTE:`) for non-obvious constraints. Drop `**bold**`: visible asterisks in source.
+- Use plain-caps callouts (`IMPORTANT:`, `WARNING:`, `NOTE:`) for non-obvious constraints. Drop `**bold**`: visible asterisks in source. (This is for `@moduledoc`/`@doc`; bold for emphasis is fine in plain Markdown docs and READMEs, don't flag it there.)
 
 Length: 200-2000 words depending on surface area. Single-purpose helpers can be 1-2 sentences. Context modules and Oban workers usually need 200-500 words.
 
@@ -236,32 +236,36 @@ Start with what the module IS in domain terms.
 - Bare lists of exports as the only body (the `Audit` failure mode — looks like documentation, isn't)
 - "See external doc" without an inline summary
 - Synthetic examples with fake module names (`MyApp.Foo.bar/1`)
+- Test mentions in `@moduledoc`/`@doc` — a test-file reference isn't the module's contract
+- Mislabeling a fixture/golden test as a "canary" — a canary runs against a live external system; a test pinning hardcoded fixtures proves output matches a reference, it can't detect upstream change
 
 ### Prose style
 
-Apply the clear-writing skill's rules to every sentence of generated doc. The ones that matter most here:
+Every sentence of generated doc must pass clear-writing's rules: active voice, the de-AI vocabulary banlist,
+copula hiding, filler, hedging, no em dashes. Invoke the clear-writing skill for the full checklist rather
+than restating its word-list here. The rule specific to docs:
 
-- Active voice, short sentences, omit needless words
-- No AI vocabulary: "leverage", "robust", "seamless", "comprehensive", "crucial", "delve", "facilitate",
-  "utilize" and the rest of the de-AI banlist
-- No copula hiding: "is", not "serves as" / "acts as" / "functions as"
-- No "not just X, it's Y" constructions; state the point directly
-- No filler: "in order to" → "to"; "it is important to note that" → cut
-- One qualifier max; don't stack "may" / "might" / "can potentially"
-- No em dashes in generated docs; use commas, colons, or separate sentences
+- Express the idea, not the code. A doc reads like prose, not like the source restated in backticks. Inline a
+  symbol only when the reader needs the exact identifier — to grep it, call it, or match a signature; otherwise
+  it's noise that's harder to read. "Blocks when the limit is reached" beats "uses `block_limit`" — name the
+  behavior, not the variable
+- No hand-wavy "use this from X" advice unless it names a concrete alternative to contrast with; otherwise cut
+  the sentence (it looks authoritative but answers no question)
+- Spell out project-internal abbreviations in prose and keep canonical casing. Industry acronyms (URL, HTTP,
+  SPA) stay; lowercase forms that are literal file or function names stay as code references
 
 ### Verify before emit
 
 Before showing the doc to the user:
 - Every factual claim (referenced behavior, constraints, collaborators) matches the current code — wrong
   beats fluffy as a problem; fix stale claims before style work
-- Every backticked module reference resolves to a real module (`rg "defmodule <Name>"`)
+- Every backticked module reference resolves to a real `defmodule <Name>` (Grep)
 - `@spec` arities match the actual function arities
 - `@type t` fields match `defstruct` or `schema` fields
 - Doctests can run without setup
 - No private functions have `@doc` (Elixir will warn)
 - Redundancy pass: for each sentence, ask "does the code already show this?" — delete it if yes
-- Prose pass: scan for banned vocabulary, copula hiding, filler, and em dashes (see Prose style)
+- Prose pass: scan for banned vocabulary, copula hiding, filler, and em dashes (clear-writing's de-AI checklist)
 
 ## Preview gate
 
