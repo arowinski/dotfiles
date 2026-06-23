@@ -1,7 +1,7 @@
 ---
 name: pr
 description: Creates or edits pull requests with automatic title/template formatting. Use when asked to create or edit a PR.
-allowed-tools: Bash(git fetch:*), Bash(git diff:*), Bash(git log:*), Bash(git branch:*), Bash(git remote:*), Bash(git push:*), Bash(git symbolic-ref:*), Bash(git rev-parse:*), Bash(gh pr create:*), Bash(gh pr edit:*), Bash(gh pr list:*), Bash(gh pr view:*), Read, Glob, AskUserQuestion, Skill, mcp__atlassian__getJiraIssue, mcp__atlassian__getAccessibleAtlassianResources
+allowed-tools: Bash(git fetch:*), Bash(git diff:*), Bash(git log:*), Bash(git branch:*), Bash(git remote:*), Bash(git push:*), Bash(git symbolic-ref:*), Bash(git rev-parse:*), Bash(gh pr create:*), Bash(gh pr edit:*), Bash(gh pr list:*), Bash(gh pr view:*), Bash(gh repo view:*), Read, Glob, AskUserQuestion, Skill, mcp__atlassian__getJiraIssue, mcp__atlassian__getAccessibleAtlassianResources
 ---
 
 # PR
@@ -10,10 +10,11 @@ allowed-tools: Bash(git fetch:*), Bash(git diff:*), Bash(git log:*), Bash(git br
 
 ### Step 1: Analyze changes
 
-1. `git diff origin/<base>...HEAD` — all changes
-2. `git log origin/<base>..HEAD` — commit history
-3. **Identify single most important change** — primary purpose?
-4. Identify scope: frontend, backend, infra, tests, etc.
+1. Resolve `<base>` — the branch this PR targets. Repo default: `git symbolic-ref --short refs/remotes/origin/HEAD` (strip the `origin/` prefix); if that ref is unset, `gh repo view --json defaultBranchRef -q .defaultBranchRef.name`. If the PR stacks on another branch, ask the user for the target (AskUserQuestion). Reuse this `<base>` in the diff/log below and in Step 6.
+2. `git diff origin/<base>...HEAD` — all changes
+3. `git log origin/<base>..HEAD` — commit history
+4. **Identify single most important change** — primary purpose?
+5. Identify scope: frontend, backend, infra, tests, etc.
 
 ### Step 2: Detect title pattern
 
@@ -33,6 +34,7 @@ allowed-tools: Bash(git fetch:*), Bash(git diff:*), Bash(git log:*), Bash(git br
    - **Mention single most important thing in PR**
    - Apply ticket prefix if pattern exists
    - Imperative mood ("Add feature", "Fix bug")
+   - No code identifiers — file paths, atoms, module/function names, snake_case, backtick tokens. Paraphrase to prose (`:retry_outbox` → "the outbox retry flag"); code tokens belong in the body where context exists
    - Primary purpose, not implementation details
 
 2. Body — **invoke `Skill(clear-writing)` and `Skill(human-writing)` before drafting**. Body must follow both: clear-writing for sentence-level quality (no AI prose, no filler, no hype, no banned vocabulary), human-writing for voice (reads like a colleague wrote it, not an AI). Context unclear? Ask user first.
@@ -41,13 +43,16 @@ allowed-tools: Bash(git fetch:*), Bash(git diff:*), Bash(git log:*), Bash(git br
    - The problem and why now (mandatory, 1-3 sentences; this opens the body)
    - An approach decision and its tradeoff
    - Breaking change + migration path
-   - Deliberate non-goals ("X deferred to follow-up")
+   - Deliberate non-goals ("X deferred to follow-up") — but only a design choice a reader would be surprised by from the diff; "not built yet" / placeholders are scope the diff already shows, cut them
    - For big diffs, a reading guide ("the real change is `foo.ex`; the rest is mechanical rename")
 
    Banned:
    - File-by-file change inventories, restating the diff, implementation narration ("first extracted, then...")
    - "Also updates tests/formatting" — never mention tests unless they're the main change
    - Meta-headers that address the reviewer ("Worth a reviewer's eye", "Note for reviewers", "Please pay attention to"). State the decision directly; whether it deserves attention is the reviewer's call. The reading guide is the one exception, and it reads best as a plain fact (as phrased in the reading-guide bullet above), never as a heading aimed at the reviewer.
+   - A leading H1 (`# Title`) that repeats the PR title — GitHub renders the title already; open with the first real section
+   - "Part N / roadmap" sequencing ("Part 2 adds X, Part 3 wires it in") and "Stacked on #N" / base-branch plumbing — name the concrete consumer instead ("the importer will map them to…"); stacking goes in `--base`, not the body
+   - Private/local/spike branch names reviewers can't see — describe the design without anchoring it to the branch
 
    Example:
    - Not: "This PR adds FooWorker, updates the schema, refactors bar.ex, and adds tests."
@@ -88,5 +93,6 @@ allowed-tools: Bash(git fetch:*), Bash(git diff:*), Bash(git log:*), Bash(git br
 2. `gh pr create`:
    - `--title` (generated)
    - `--body` (generated or template)
+   - `--base <base>` only if `<base>` differs from the repo default (a stacked PR); omit otherwise so gh defaults correctly
    - `--assignee @me`
    - `--draft`
