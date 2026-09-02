@@ -1,6 +1,6 @@
 ---
 name: post-review
-description: Filters code-review findings to the ones worth posting, drafts each as a question, previews, then posts to a GitHub PR as a single review with inline comments. Use after /review or /rr produces findings on someone else's PR, or for a fresh review landing on the PR. Also on "which are worth posting?", "filter findings", "be pragmatic about comments", "what's worth posting?" — previews and posts only on explicit confirmation (reply `skip` to draft without publishing). Comments are phrased as questions, not verdicts.
+description: Filters code-review findings to the ones worth posting, drafts each as a question, previews, then posts to a GitHub PR as a single review with inline comments. Use after /review or /rr produces findings on someone else's PR, or for a fresh review landing on the PR. Also on "which are worth posting?", "filter findings", "be pragmatic about comments", "what's worth posting?", "what worth commenting?", "what's worth commenting on?" — previews and posts only on explicit confirmation (reply `skip` to draft without publishing). Comments are phrased as questions, not verdicts.
 argument-hint: [pr-number-or-url]
 allowed-tools: Bash(gh-comments:*), Bash(gh api:*), Bash(gh pr view:*), Bash(gh pr diff:*), Bash(git diff:*), Bash(git log:*), Read, Glob, Grep, AskUserQuestion, Skill
 ---
@@ -17,10 +17,10 @@ Filter code-review findings to the ones worth posting, draft each as a question,
 
 If $ARGUMENTS contains a PR number or URL, use that. Otherwise:
 
-1. `gh pr view <pr-or-empty> --json number,url,baseRepository -q '"\(.baseRepository.owner.login) \(.baseRepository.name) \(.number) \(.url)"'`
+1. `gh pr view <pr-or-empty> --json number,url -q '"\(.url | split("/") | .[3]) \(.url | split("/") | .[4]) \(.number) \(.url)"'`
 2. If no PR is associated with the current branch and no arg given, stop and ask the user which PR
 
-Capture: `{owner}`, `{repo}`, PR number from `baseRepository` (NOT `headRepository` — for cross-fork PRs the head repo is the fork; the review API needs the base repo).
+Capture: `{owner}`, `{repo}`, PR number. Owner and repo come out of the PR URL, which always names the base repo. Don't reach for `headRepository` — on a cross-fork PR the head repo is the fork, and the review API needs the base. (`gh pr view --json` has no `baseRepository` field.)
 
 ### Step 2: Gather findings
 
@@ -76,7 +76,11 @@ If you can't write the comment in one sentence the author can act on, drop it. B
 
 ### Step 5: Draft each comment as a question
 
-**REQUIRED**: Before drafting any comment text, load BOTH the `clear-writing` skill AND the `human-writing` skill via the Skill tool. Do not draft without them loaded. clear-writing tightens sentences; human-writing strips LLM tells (no "It would be advisable", "I would suggest", "Consider..." openers, etc.) and adds peer voice. Apply both to every comment body and the review summary. Each comment must:
+**REQUIRED**: Before drafting any comment text, load BOTH the `clear-writing` skill AND the `human-writing` skill via the Skill tool. clear-writing tightens sentences; human-writing strips LLM tells and adds peer voice. Apply both to every comment body and the review summary. Do not draft without them loaded.
+
+**Every redraft goes through the same check.** "Make it more concise", "drop the summary", "shorter" and every other revision request is a change of length, never a license to drop the rules. Before showing a revised draft, walk the loaded checklists over it again — in particular human-writing's rule on file paths and links, the one this skill's drafts break most often. If the rules scrolled out of context, reload the skills rather than working from memory of them.
+
+Each comment must:
 
 - Default shape: question first, then a sentence on WHY you're asking. The question is the prompt for the author; the why grounds it in concrete evidence so they can engage with the actual concern. Examples:
   - "Should this also handle nil? `customer.plan` is nullable per schema L12 — `.price` would crash."
