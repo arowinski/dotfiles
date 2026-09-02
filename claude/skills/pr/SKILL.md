@@ -1,12 +1,25 @@
 ---
 name: pr
-description: Creates or edits pull requests with automatic title/template formatting. Use when asked to create or edit a PR.
+description: Creates or edits pull requests with automatic title/template formatting. Use when asked to create or edit a PR — "create a PR", "let's have a PR", "open/draft a PR", "make a PR for this", "create drafts for the others" — or to change an existing one — "update the PR desc/title/body", "rework the description".
 allowed-tools: Bash(git fetch:*), Bash(git diff:*), Bash(git log:*), Bash(git branch:*), Bash(git remote:*), Bash(git push:*), Bash(git symbolic-ref:*), Bash(git rev-parse:*), Bash(gh pr create:*), Bash(gh pr edit:*), Bash(gh pr list:*), Bash(gh pr view:*), Bash(gh repo view:*), Read, Glob, AskUserQuestion, Skill, mcp__atlassian__getJiraIssue, mcp__atlassian__getAccessibleAtlassianResources
 ---
 
 # PR
 
 ## Workflow
+
+### Step 0: Create or edit?
+
+`gh pr view --json number,state,title,body,url` on the current branch.
+
+- Errors, or `state` is `MERGED`/`CLOSED` → **create mode**. Steps 1-6. `gh pr view` returns the branch's
+  most recent PR whatever its state, so a merged one must not route to edit — check `state`, not just
+  whether the call succeeded.
+- `state` is `OPEN` → **edit mode**. Capture the number and the current title and body, then steps 1-6. Read
+  the existing body before regenerating: it may hold template sections or reviewer-facing notes a human
+  wrote, and those survive unless the user says otherwise.
+
+An explicit PR number or URL in the request overrides this — edit that one.
 
 ### Step 1: Analyze changes
 
@@ -64,31 +77,35 @@ allowed-tools: Bash(git fetch:*), Bash(git diff:*), Bash(git log:*), Bash(git br
    - Third person, present tense ("This adds...", not "I added...")
    - Backticks for code refs
    - Don't hard-wrap — GitHub renders single newlines as breaks. One paragraph = one line.
-   - Jira fetched? Don't restate the ticket — the link carries it. The body adds what the ticket doesn't say: the chosen approach and any deviation from it.
+   - Jira fetched? Don't restate the ticket — the link carries it. Describe what the diff actually did and why, not what the ticket assumed would be done: when the implementation diverged from the ticket's planned approach or ACs, the body follows the diff, not the ticket.
 
 ### Step 5: Interactive confirmation (REQUIRED — DO NOT SKIP)
 
-**STOP. Do NOT create PR yet.**
+**STOP. Do NOT create or edit the PR yet.** This gate applies to `gh pr edit` exactly as to
+`gh pr create` — an updated body is a new draft and needs its own confirmation.
 
-1. Display generated title and body.
+1. Display generated title and body. When editing an existing PR, show the full proposed body
+   (not a description of the changes).
 2. **MUST use AskUserQuestion tool** (not conversational, don't skip to Step 6). Structure:
    - header: "Next step"
    - question: "What would you like to do?"
    - options (exactly 3):
-     1. label: "Create PR", description: "Create the PR as shown above"
+     1. create mode — label: "Create PR", description: "Create the PR as shown above"
+        edit mode — label: "Update PR", description: "Update the PR with the title and body above"
      2. label: "Edit title", description: "Modify the PR title"
      3. label: "Edit body", description: "Modify the PR body"
    - multiSelect: false
 3. Handle response:
-   - "Create PR" → proceed to Step 6
+   - "Create PR" / "Update PR" → proceed to Step 6
    - "Edit title" → user provides via "Other", apply, show updated PR, return to 2
    - "Edit body" → user provides via "Other", apply, show updated PR, return to 2
    - "Other" → ask which field to edit if unclear
 
-### Step 6: Create draft PR (WAIT for Step 5 explicit confirmation — DO NOT accept empty responses)
+### Step 6: Create or update the PR (WAIT for Step 5 explicit confirmation — DO NOT accept empty responses)
 
-**Only after user selected "Create PR" in Step 5.**
+**Only after user selected "Create PR" / "Update PR" in Step 5.**
 
+Creating:
 1. Push branch with `-u` if not tracking remote.
 2. `gh pr create`:
    - `--title` (generated)
@@ -96,3 +113,6 @@ allowed-tools: Bash(git fetch:*), Bash(git diff:*), Bash(git log:*), Bash(git br
    - `--base <base>` only if `<base>` differs from the repo default (a stacked PR); omit otherwise so gh defaults correctly
    - `--assignee @me`
    - `--draft`
+
+Editing: `gh pr edit <number> --title/--body` with the confirmed values only, using the number captured in
+Step 0. Pass only the fields that changed.
