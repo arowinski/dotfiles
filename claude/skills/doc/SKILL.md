@@ -5,28 +5,32 @@ description: |
   TRIGGER (user prompt match): "document this", "add doc", "write moduledoc", "draft moduledoc", "module is missing a doc", "run docs through /doc", "review the docs", "cut fluff from docs", "trim docs", "go over docs/comments", or asks to write/add/generate/review `@moduledoc`/`@doc`.
   SELF-RULE (during code work): invoke proactively when about to create a new `.ex` file with `defmodule` in `lib/`, add `@moduledoc` to a bare-or-`false` file, or add `@doc`/`@spec`/`@typedoc` to a public function. DON'T write inline — stop and invoke.
   For non-Elixir prose, use clear-writing.
-allowed-tools: Bash(git:*), Read, Glob, Grep, AskUserQuestion, Skill, Edit, Write, mcp__tidewave__get_source_location, mcp__tidewave__get_ecto_schemas
+allowed-tools: Bash(git diff:*), Read, Glob, Grep, AskUserQuestion, Skill, Edit, Write, mcp__tidewave__get_source_location, mcp__tidewave__get_ecto_schemas
 argument-hint: [path to .ex file, or empty if context is clear]
 ---
 
 # Doc
 
-Documentation explains WHY a module exists, who it works with, what's non-obvious, and what real usage looks like. One standard, applied in both directions: writing docs means writing to it; reviewing existing docs means diffing them against it — run the same workflow, fix wrong claims first, delete every sentence that fails the gates.
+Docs explain WHY a module exists, who it works with, what's non-obvious, and what real usage looks like.
+One standard, both directions: writing means writing to it; reviewing means diffing against it — fix wrong
+claims first, delete every sentence that fails the gates.
 
-Core principle: **document only what the code can't say.** If a reader sees it by glancing at the signature, the `schema` block, the `use` line, or the function body, don't write it in prose. Every sentence must add something the code doesn't show: intent, invariant, collaborator, gotcha, or real usage.
+Core rule: **document only what the code can't say.** If the signature, `schema` block, `use` line, or
+function body shows it, MUST NOT restate it in prose. Every sentence MUST add intent, invariant,
+collaborator, gotcha, or real usage.
 
-**You do NOT:** document private functions, invent fictional examples, or write docs without first classifying the module type.
+MUST NOT: document private functions, invent fictional examples, write before classifying the module
+(step 1), or show a draft without invoking clear-writing (step 6).
 
-Scope: the given file(s). When asked to go over the branch's docs, collect changed files via
-`git diff $(git merge-base HEAD origin/main)... --name-only` (`.ex`/`.exs` only; swap `origin/main` for the
-repo's default branch) and run every touched `@moduledoc`, `@doc`, `@typedoc`, and code comment through the
-workflow.
+Scope: the given file(s). For a branch review, collect changed files via
+`git diff origin/main... --name-only` (`.ex`/`.exs` only; swap `origin/main` for the default branch) and run
+every touched `@moduledoc`, `@doc`, `@spec`, `@typedoc`, and comment through the workflow.
 
 ## Workflow
 
 ### 1. Classify the module
 
-Read the target file. Identify its type from these signals:
+Read the target file, match its type:
 
 | signal | type |
 |---|---|
@@ -35,242 +39,162 @@ Read the target file. Identify its type from these signals:
 | `use Oban.Worker` | Oban worker |
 | `use Ecto.Schema` (top-level) | Schema |
 | `use Ecto.Schema` + `embedded_schema` | Embedded schema / changeset |
-| `use Plug.Builder` / `defmodule ... do def call(conn, _)` | Plug |
+| `use Plug.Builder` / `def call(conn, _)` | Plug |
 | `use GenServer` | GenServer |
 | `use Supervisor` | Supervisor |
 | `use Application` | Application |
 | `defprotocol` | Protocol |
 | `defimpl` | Protocol implementation |
+| `@callback` declarations | Behaviour definition |
 | `@behaviour` declaration | Behaviour implementation |
-| Top-level facade re-exporting submodules via `defdelegate` | Context module |
+| Top-level facade re-exporting via `defdelegate` | Context module |
 | Mix.Task | Mix task |
 | None of the above + pure functions | Pure functional / helper |
 
-Use `mcp__tidewave__get_source_location` if available to verify symbols; otherwise read directly.
+Verify symbols with `mcp__tidewave__get_source_location` and schema fields with
+`mcp__tidewave__get_ecto_schemas` if available; otherwise read directly.
 
-### 2. Short-circuit for trivial modules
+### 2. Short-circuit trivial modules
 
-Emit `@moduledoc false` and STOP for:
-- Protocol implementations (`defimpl`) unless the implementation has surprising semantics
-- Internal helpers used only within the same context, never aliased from outside
-- Generated modules (from macros)
-- Tiny modules (≤ 10 lines of meaningful code) that are self-explanatory from their name and usage
+MUST emit `@moduledoc false` and STOP for: `defimpl` (unless the implementation has surprising semantics),
+internal helpers never aliased outside their context, macro-generated modules, tiny (≤10 meaningful lines)
+self-explanatory modules. NEVER invent prose for these.
 
-Don't invent prose for these. `@moduledoc false` is the correct answer.
+This wins over step 3's sibling-convention rule. Convention decides whether a *construct* inside a documented
+module gets `@doc`/`@spec`; it never promotes a trivial module out of `@moduledoc false`.
 
 ### 3. Answer four questions before writing
 
-For every other module, answer in working memory (not necessarily as visible sections in the output):
+Answer in working memory (not as visible output sections):
 
-1. **Why does this module exist, in domain terms?** Not "Oban worker" — "drains the event outbox so downstream systems receive published events." One sentence. No "Module for X" / "Provides functionality" openings.
-2. **Who calls it, what does it call?** Grep for `alias <Module>` and `<Module>.` to find callers. Note the major collaborators.
-3. **What surprising constraint or invariant must a reader know?** Concurrency rules, idempotency, side effects you can't undo, fail-loud invariants, scope/auth assumptions, retry semantics, ordering. If you can't name one, the module is genuinely simple — note that and move on.
-4. **What does real usage look like?** A config snippet, a router pipeline line, an `import` + call, a real function invocation from a caller. Never synthetic placeholders.
+1. **WHY, in domain terms?** Not "Oban worker" — "drains the event outbox so downstream systems receive
+   published events." One sentence.
+2. **Who calls it, what does it call?** Grep `alias <Module>` and `<Module>.`.
+3. **What surprising constraint or invariant?** Concurrency, idempotency, irreversible side effects,
+   auth/scope assumptions, retry semantics, ordering. None nameable = genuinely simple; move on.
+4. **What does real usage look like?** A real snippet from the codebase — config, router line, call site.
+   NEVER synthetic placeholders.
 
-If you can't answer 1 + 2, stop and ask the user. Don't fabricate.
+Can't answer 1 + 2 → MUST stop and ask the user. NEVER fabricate.
 
-Then check sibling modules (same directory, same role — other wizard steps, other workers) for convention:
-whether they carry `@moduledoc`/`@doc`/`@spec` on the same constructs, and how they phrase them. Convention
-beats minimalism — if siblings consistently document a function, document (or keep) it and align wording to
-theirs; if no sibling documents it, adding one is noise, not a gap to backfill.
+Then check sibling modules (same directory, same role) for convention — convention beats minimalism.
+Siblings document a construct → document it and match their wording. No sibling does → adding one is noise.
 
 ### 4. Write `@moduledoc` in this order
 
-Inside the `@moduledoc """ ... """` heredoc, in this order:
+1. One-sentence summary (ExDoc indexes it; no period if single-clause)
+2. 1-3 sentences on WHY in domain terms
+3. Mental model / how it fits with collaborators
+4. `## <Concept>` H2 per major idea
+5. `## Examples` or `## Configuration` with a real snippet
 
-- One-sentence summary (ExDoc indexes this — keep tight, no period if single-clause)
-- 1-3 sentences on WHY in domain terms
-- Mental model / how it fits with collaborators
-- `## <Concept>` H2 section per major idea (model, API, operations, ...)
-- `## Examples` or `## Configuration` with a real snippet from the codebase
-- Use plain-caps callouts (`IMPORTANT:`, `WARNING:`, `NOTE:`) for non-obvious constraints. Drop `**bold**`: visible asterisks in source. (This is for `@moduledoc`/`@doc`; bold for emphasis is fine in plain Markdown docs and READMEs, don't flag it there.)
+Callouts: plain-caps `IMPORTANT:` / `WARNING:` / `NOTE:`. No `**bold**` in `@moduledoc`/`@doc` — visible
+asterisks in source (bold is fine in plain Markdown docs and READMEs).
 
-Length: 200-2000 words depending on surface area. Single-purpose helpers can be 1-2 sentences. Context modules and Oban workers usually need 200-500 words.
+Length is an outcome, not a target: the fewest sentences that answer the four questions and the per-type
+fields. A helper SHOULD be 1-2 sentences; even a context module rarely earns more than ~300 words.
+MUST NOT pad toward a length.
 
-Format: hard cap at 120 chars per line. Within that, wrap where it reads best — short sentences can stay on one line; longer ones break at clause boundaries. If a sentence runs near or over 120 and reads awkward, rephrase it to read better rather than stretch.
+Format: hard cap 120 chars/line; break at clause boundaries; rephrase sentences that wrap awkwardly.
 
-### 5. Apply per-module-type required fields
+### 5. Cover per-type required fields
 
-Different module types need different content. Force these in addition to the universal four:
+MUST cover these — woven into prose, not a filled-in form. "Queue: default / Retries: 3" bullets fail;
+write "Runs on the `default` queue with 3 attempts." Bullets only for 3+ genuinely parallel items.
 
-**Context module** (top-level facade like `MyApp.Accounts`):
-- Domain ownership ("Owns customers and their lifecycle in the app")
-- Public API list (functions exposed via `defdelegate`)
-- Submodule map (which internal modules implement what)
+- **Context module** — domain ownership, public API (the `defdelegate` surface), submodule map
+- **Schema** — entity sentence in domain terms; `@type t` (mandatory); non-obvious config (`@derive`,
+  soft-delete, audit hooks, denormalized fields). MUST NOT restate fields — the `schema` block shows them
+- **Embedded schema / changeset** — what payload/form it represents; normalization rules (trimming, casing,
+  blanks-as-nil); `@type t` + `@spec` on changeset/apply
+- **LiveView** — route, `on_mount` hooks (policy, auth), tabs/modes it switches between, non-obvious socket
+  state (timers, PubSub, accumulators), URL params. MUST NOT document every assign
+- **Oban worker** — queue, `max_attempts`, retry/idempotency contract, side-effect/rollback policy on
+  partial failure, unique keys, `## Configuration` with the `config :app, Mod, …` snippet
+- **Plug** — what it gates, what it raises or halts on, `## Options` (required + optional), router pipeline
+  example, assigns read and written
+- **GenServer** — why it's a process (what state or serialization it owns), state shape, registration
+  (named singleton vs per-entity), client API vs callback split, crash/restart consequences
+- **Protocol** — the contract implementations must satisfy, fail-loud invariants (raise vs default),
+  fallback policy (`@fallback_to_any` or explicit "no fallback"), reference implementations
+- **Behaviour definition** (declares `@callback`s) — narrative intro, full typical-implementation example,
+  one-liner per callback (`@doc` per `@callback` carries the detail), `## Anti-patterns` if relevant
+- **Supervisor** — children with one-line purpose each, restart strategy and why, parent supervisor,
+  start-arg shape, non-obvious init (dynamic or env-conditional children)
+- **Application** — top-level children (the spine), test/dev/prod differences, start phases, non-default
+  stop callback, notable `Application.get_env/2` consumers
 
-**Schema** (top-level Ecto.Schema):
-- Entity sentence in domain terms ("A user of the platform")
-- `@type t` (mandatory)
-- Non-obvious config: `@derive` for Flop/encoders, soft-delete, audit hooks, denormalized fields
-- Don't restate fields prose-style; the `schema` block is self-documenting
+Types without a bullet (Controller, Mix task, pure helper, behaviour implementation): the universal four
+questions suffice. A behaviour *implementation* documents why this implementation exists and what it does
+differently — the callback contract belongs in the module that defines it.
 
-**Embedded schema / changeset** (like `Search.Filter`):
-- One paragraph: what payload/form it represents
-- Normalization rules (trimming, casing, blanks-as-nil)
-- `@type t` + `@spec` on changeset/0,1,2 and apply/1
+### 6. Prose pass — invoke clear-writing
 
-**LiveView**:
-- URL / route
-- `on_mount` hooks (policy, auth)
-- Tabs, modes, or views the LV switches between
-- Non-obvious socket state (timers, PubSub subscriptions, accumulators)
-- URL params accepted
-- Don't document every assign
-
-**Oban worker**:
-- Queue name
-- `max_attempts`
-- Retry / idempotency contract
-- Side-effect / rollback policy (what happens on partial failure)
-- Unique key constraints
-- `## Configuration` block with the `config :app, Mod, …` snippet
-
-**Plug**:
-- What it gates (auth, rate limit, request shaping)
-- What it raises or halts on
-- `## Options` listing required + optional opts
-- `## Example` with router pipeline snippet
-- Assigns it reads and writes
-
-**Protocol** (`defprotocol`):
-- The contract (what implementations must satisfy)
-- Fail-loud invariants (raise on unknown vs return default)
-- Fallback policy (`@fallback_to_any`, or explicit "no fallback")
-- Reference implementations
-
-**Behaviour module** (`@behaviour` declaring callbacks):
-- Narrative intro
-- Full example showing typical implementation
-- Callbacks listed with one-liner each (the actual `@doc` per `@callback` does the heavy lifting)
-- `## Anti-patterns` section if relevant
-
-**Supervisor**:
-- Children supervised, each with a one-line purpose
-- Restart strategy (`:one_for_one` / `:rest_for_one` / `:one_for_all`) and why
-- Where it's started from (parent supervisor)
-- Start arg shape (`:ok` / config map / etc.)
-- Non-obvious init logic (dynamic children, env-conditional children)
-
-**Application** (Mix application module):
-- Top-level supervisor children — the spine of the app
-- Environment-specific differences (test vs dev vs prod)
-- Start phases (if used)
-- Stop callback (if non-default)
-- Mix application env (`Application.get_env/2` consumers worth noting)
+After drafting (steps 4-5 and the per-construct rules below), MUST invoke the clear-writing skill via the
+Skill tool — not from memory — and run every drafted sentence through its full checklist. Its rules are inherited, not restated here; skipping the invocation means
+skipping the rules.
 
 ## Per-construct rules
 
-### `@doc` per public function
-
-Every public function gets `@doc` (unless sibling convention says otherwise — step 3):
-- First line: one-sentence summary in active voice
-- Then: preconditions, returns, edge cases
-- `## Examples` block when the function is pure and a doctest would compile
-
-Never:
-- `@doc` on private functions (Elixir warns)
-- Restate the function signature in prose
-- Generic "Returns the X" tautologies
-
-### `@spec` per public function
-
-Every public function gets `@spec` (unless sibling convention says otherwise — step 3):
-- Match actual arity
-- Reflect nil-ability honestly
-- Avoid ceremonial `any() -> any()` — that's worse than no spec
-- Use `@type` aliases for repeated shapes
-
-### `@type t` per struct
-
-Every `defstruct` or `embedded_schema` gets `@type t`:
-- Match struct fields exactly
-- Use `String.t() | nil` not `any()` for optional fields
-- `@typedoc` for non-obvious types
-
-### Doctests
-
-Add `## Examples` with `iex>` doctests ONLY when:
-- Function is pure (no DB, no PubSub, no Oban, no time, no PIDs)
-- Output is deterministic
-- Example is small and obvious
-
-Never doctest:
-- Anything touching `Repo`, `Oban`, `Phoenix.PubSub`, `DateTime.utc_now`, `:rand`
-- Functions that return PIDs or refs
-- Output longer than ~5 lines (use plain code blocks instead)
-
-For context/worker/LiveView/plug functions, use plain code blocks with `# => result` comments.
-
-### Code comments
-
-A comment earns its place only by stating a constraint the code can't show (WHY). Comments explaining WHAT
-the code does get deleted — the non-obvious test applies to comments exactly as to docs. Typical offenders:
-restating a data shape, walking through function clauses, `# adds two numbers` over `add/2`.
+- **`@doc`** on every public function (unless sibling convention says otherwise): one-sentence active-voice
+  summary, then preconditions, returns, edge cases. NEVER on private functions (Elixir warns), NEVER
+  restate the signature, NEVER "Returns the X" tautologies.
+- **`@spec`** on every public function (unless sibling convention says otherwise): match actual arity,
+  honest nil-ability, `@type` aliases for repeated shapes. `any() -> any()` is worse than no spec.
+- **`@type t`** on every `defstruct`/`embedded_schema`: fields match exactly, `String.t() | nil` not
+  `any()`, `@typedoc` for non-obvious types.
+- **Doctests** (`## Examples` with `iex>`) ONLY for pure, deterministic, small functions. NEVER for
+  anything touching `Repo`, Oban, PubSub, `DateTime.utc_now`, `:rand`, PIDs/refs, or output over ~5 lines
+  — those get plain code blocks with `# => result`.
+- **Code comments** MUST state a constraint the code can't show (WHY). Delete WHAT-comments: restated data
+  shapes, clause walkthroughs, `# adds two numbers` over `add/2`.
 
 ## Quality gates
 
-### Forbidden openings
+**Forbidden openings** — MUST rewrite drafts starting with "Module for", "Provides functionality for",
+"Helper module that", "Wrapper around", "Contains functions to", "This module". Start with what the module
+IS in domain terms.
 
-Reject and rewrite if the draft starts with:
-- "Module for ..."
-- "Provides functionality for ..."
-- "Helper module that ..."
-- "Wrapper around ..."
-- "Contains functions to ..."
-- "This module ..."
+**Banned content**:
 
-Start with what the module IS in domain terms.
-
-### Banned content
-
-- Anything the reader sees in the code itself — field lists the `schema` block shows, behavior the function
-  name states, the queue name when it's on the `use Oban.Worker` line two lines down, "takes a changeset and
-  returns a tuple" when the `@spec` says exactly that. The per-type rules above ("don't restate fields",
-  "don't document every assign") are instances of this; apply it to every module type
-- Visual/layout description in LiveView docs (dividers, cards, headings — all visible in the render)
-- Implementation details in `@moduledoc` — it documents the contract; the body documents itself
-- "Used by X" / caller-enumeration notes in `@doc` (grep answers that); collaborators belong in the
-  moduledoc's mental-model sentence only when they explain WHY
-- Legacy/migration history, ticket references, names of prior or external systems (Zephyr, TestRail) —
-  unless the constraint they explain is still live
-- Bare lists of exports as the only body (the `Audit` failure mode — looks like documentation, isn't)
+- Anything the reader sees in the code — schema fields, behavior the function name states, the queue name
+  on the `use` line, "takes a changeset and returns a tuple" when the `@spec` says so
+- Visual/layout description in LiveView docs (visible in the render)
+- Implementation details in `@moduledoc` — it documents the contract
+- "Used by X" caller lists in `@doc` (grep answers that); collaborators belong in the moduledoc mental
+  model only when they explain WHY
+- Legacy/migration history, tickets, prior/external system names — unless the constraint is still live
+- Bare export lists as the only body
 - "See external doc" without an inline summary
 - Synthetic examples with fake module names (`MyApp.Foo.bar/1`)
-- Test mentions in `@moduledoc`/`@doc` — a test-file reference isn't the module's contract
-- Mislabeling a fixture/golden test as a "canary" — a canary runs against a live external system; a test pinning hardcoded fixtures proves output matches a reference, it can't detect upstream change
+- Test mentions in `@moduledoc`/`@doc`
+- Mislabeling a fixture/golden test as a "canary" — a canary runs against a live external system
 
-### Prose style
+**Prose style** — every sentence MUST pass clear-writing (loaded at step 6, never applied from memory).
+Doc-specific rules:
 
-Every sentence of generated doc must pass clear-writing's rules: active voice, the de-AI vocabulary banlist,
-copula hiding, filler, hedging, no em dashes. Invoke the clear-writing skill for the full checklist rather
-than restating its word-list here. The rule specific to docs:
+- Express the idea, not the code. Backtick a symbol only when the reader needs the exact identifier — to
+  grep, call, or match it. "Blocks when the limit is reached" beats "uses `block_limit`"
+- No "use this from X" advice without a concrete alternative to contrast with — otherwise cut the sentence
+- Spell out project-internal abbreviations, keep canonical casing. Industry acronyms (URL, HTTP, SPA) stay;
+  lowercase literal file/function names stay as code references
 
-- Express the idea, not the code. A doc reads like prose, not like the source restated in backticks. Inline a
-  symbol only when the reader needs the exact identifier — to grep it, call it, or match a signature; otherwise
-  it's noise that's harder to read. "Blocks when the limit is reached" beats "uses `block_limit`" — name the
-  behavior, not the variable
-- No hand-wavy "use this from X" advice unless it names a concrete alternative to contrast with; otherwise cut
-  the sentence (it looks authoritative but answers no question)
-- Spell out project-internal abbreviations in prose and keep canonical casing. Industry acronyms (URL, HTTP,
-  SPA) stay; lowercase forms that are literal file or function names stay as code references
+## Verify before emit
 
-### Verify before emit
+MUST check, in order:
 
-Before showing the doc to the user:
-- Every factual claim (referenced behavior, constraints, collaborators) matches the current code — wrong
-  beats fluffy as a problem; fix stale claims before style work
-- Every backticked module reference resolves to a real `defmodule <Name>` (Grep)
-- `@spec` arities match the actual function arities
-- `@type t` fields match `defstruct` or `schema` fields
-- Doctests can run without setup
-- No private functions have `@doc` (Elixir will warn)
-- Redundancy pass: for each sentence, ask "does the code already show this?" — delete it if yes
-- Prose pass: scan for banned vocabulary, copula hiding, filler, and em dashes (clear-writing's de-AI checklist)
+1. Every factual claim matches current code — wrong beats fluffy; fix stale claims before style work
+2. Every backticked module resolves to a real `defmodule` (Grep)
+3. `@spec` arities match; `@type t` fields match the struct/schema
+4. Doctests run without setup; no `@doc` on private functions
+5. Redundancy pass: per sentence, "does the code already show this?" — delete if yes
+6. Prose pass: clear-writing's full checklist, plus idea-not-code and shortest-that-answers
 
 ## Preview gate
 
-Show the proposed doc inline; for changes to existing docs, show a per-file diff. Use `AskUserQuestion` with Apply / Edit / Skip before writing to the file.
+Show the proposed doc inline; diff for existing docs. MUST get Apply / Edit / Skip via `AskUserQuestion`
+before writing.
 
 ## Stop
 
-End with the file path of the modified module and a one-line note on what was added or trimmed (moduledoc, N @doc, N @spec, N @type). No commit.
+End with the file path and one line on what changed (moduledoc, N @doc, N @spec, N @type). No commit.
