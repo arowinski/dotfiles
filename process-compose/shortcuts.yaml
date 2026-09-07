@@ -1,0 +1,15 @@
+# process-compose TUI shortcuts — remap F-keys to letters (no F-row on this
+# keyboard). On macOS auto-loaded from ~/Library/Application Support/
+# process-compose/ (Go os.UserConfigDir), not ~/.config — dotbot symlinks both.
+# Action names per process-compose src/tui/actions.go.
+shortcuts:
+  process_start:
+    shortcut: t
+  process_restart:
+    shortcut: r
+  process_stop:
+    shortcut: s
+  log_follow:
+    shortcut: l
+  quit:
+    shortcut: q

@@ -17,5 +17,13 @@ export DIRENV_LOG_FORMAT=
 
 eval "$(mise activate zsh)"
 
+# Workspace tooling (ws, ws-popup, ensure-docker) ships in the workspace repo's bin/;
+# see $WS_LOCAL/docs/workspaces.md. Root overridable per machine, guarded when absent.
+export WS_LOCAL="${WS_LOCAL:-$HOME/gat/gat-local}"
+[ -d "$WS_LOCAL/bin" ] && export PATH="$WS_LOCAL/bin:$PATH"
+
 # mise activate prepends ~/.local/bin; re-prepend ~/.bin so our shims win.
 export PATH="$HOME/.bin:$PATH"
+
+# Per-workspace env (ports, DB) is not loaded here: each worktree's mise.toml does it,
+# via `mise activate` above. See $WS_LOCAL/docs/claude/dev-session.md, "Workspace env".

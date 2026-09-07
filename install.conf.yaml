@@ -11,6 +11,10 @@
     ~/.Brewfile: Brewfile
     ~/.bin: bin
     ~/.config/karabiner: karabiner
+    ~/.config/process-compose: process-compose
+    # macOS config home for process-compose (it reads here, not ~/.config) —
+    # so TUI shortcuts (incl. `attach`) actually load.
+    "~/Library/Application Support/process-compose": process-compose
     ~/.config/nvim: nvim
     ~/.config/git/config: git/gitconfig
     ~/.gitignore: git/gitignore

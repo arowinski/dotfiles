@@ -1,0 +1,3 @@
+# process-compose TUI settings. Auto-loaded from ~/Library/Application Support/
+# process-compose/ (Go os.UserConfigDir) and ~/.config/ — dotbot symlinks both.
+disable_exit_confirmation: true
