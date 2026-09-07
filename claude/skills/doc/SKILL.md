@@ -193,7 +193,8 @@ MUST check, in order:
 ## Preview gate
 
 Show the proposed doc inline; diff for existing docs. MUST get Apply / Edit / Skip via `AskUserQuestion`
-before writing.
+before writing — unless the reply is already an explicit imperative ("go", "go on", "apply", "do it"),
+which is the Apply selection for that one doc; don't re-ask it. Each further doc gets its own gate.
 
 ## Stop
 

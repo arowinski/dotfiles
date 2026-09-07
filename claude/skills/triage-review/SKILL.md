@@ -95,6 +95,9 @@ For each selected Fix:
 2. Use `AskUserQuestion` with options: Apply / Edit / Skip
 3. Apply only on "Apply". On "Edit", take the user's revision and re-show the diff. On "Skip", move on.
 
+An explicit imperative in the reply ("go", "go on", "apply", "do it") is the Apply selection for that one
+change — don't re-ask it. The next change gets its own gate; one "go" never covers the rest.
+
 Never apply silently. Never batch without per-change confirmation.
 
 ### 8. Re-review

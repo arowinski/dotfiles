@@ -86,24 +86,16 @@ An explicit PR number or URL in the request overrides this — edit that one.
 
 1. Display generated title and body. When editing an existing PR, show the full proposed body
    (not a description of the changes).
-2. **MUST use AskUserQuestion tool** (not conversational, don't skip to Step 6). Structure:
-   - header: "Next step"
-   - question: "What would you like to do?"
-   - options (exactly 3):
-     1. create mode — label: "Create PR", description: "Create the PR as shown above"
-        edit mode — label: "Update PR", description: "Update the PR with the title and body above"
-     2. label: "Edit title", description: "Modify the PR title"
-     3. label: "Edit body", description: "Modify the PR body"
-   - multiSelect: false
-3. Handle response:
-   - "Create PR" / "Update PR" → proceed to Step 6
-   - "Edit title" → user provides via "Other", apply, show updated PR, return to 2
-   - "Edit body" → user provides via "Other", apply, show updated PR, return to 2
-   - "Other" → ask which field to edit if unclear
+2. Ask in text, one line: "Draft ready. Reply `create` to open it." (create mode) / "Reply `update` to
+   apply it." (edit mode). Not a yes/no question — a plain "yes" has no defined meaning here.
+   An explicit imperative ("create", "update", "go", "push it", "do it") = confirmed.
+   Assent ("ok", "sure", "yes", "looks fine") is not a go; ask once more.
+   Any other reply = edit request: apply it to the title or body, re-show, return to 2.
+   Don't use AskUserQuestion here.
 
 ### Step 6: Create or update the PR (WAIT for Step 5 explicit confirmation — DO NOT accept empty responses)
 
-**Only after user selected "Create PR" / "Update PR" in Step 5.**
+**Only after an explicit imperative in Step 5.**
 
 Creating:
 1. Push branch with `-u` if not tracking remote.
