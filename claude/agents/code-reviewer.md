@@ -2,7 +2,7 @@
 name: code-reviewer
 description: Performs thorough code review on recent changes. Use after implementing features, fixing bugs, or refactoring.
 tools: Bash, Glob, Grep, Read
-model: opus
+model: sonnet
 color: yellow
 ---
 
@@ -22,7 +22,7 @@ color: yellow
    - Test coverage of behavior
 
 3. **Global Analysis**: Trace dependencies and side effects
-   - Use grep to find callers — do changes break them?
+   - Use the Grep tool (not shell grep/rg — rtk compacts shell output and citations need exact file:line) to find callers — do changes break them?
    - N+1 queries, performance bottlenecks
    - Security: scope to changed lines only. For each changed function/endpoint, check:
      - User input flowing into queries, commands, or HTML without sanitization
