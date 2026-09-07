@@ -1,11 +1,11 @@
 ---
-description: Deep parallel review by 4 specialists. Use for thorough PR review, before shipping risky changes, or when /review feels too shallow.
+description: Deep parallel review by 5 specialists — guidelines conformance and discovery, plus security, architecture, correctness. Use for thorough PR review, before shipping risky changes, or when /review feels too shallow.
 argument-hint: [PR link, path, or empty for uncommitted]
 model: opus
 allowed-tools: Bash(git:*), Bash(gh:*), Agent, Read, Glob, Grep, mcp__atlassian__getJiraIssue
 ---
 
-Spawn 4 read-only specialists in parallel. Each works blind. Synthesize their findings into one consolidated review.
+Spawn read-only specialists in parallel. Each works blind. Synthesize their findings into one consolidated review.
 
 ## Scope
 
@@ -38,32 +38,47 @@ Agents read file content from the working tree. If HEAD doesn't match the PR hea
 
 ## Specialists
 
-Launch all 4 in a single message via the Agent tool with `run_in_background: true`. Each gets the same scope + context but a different role.
+Five agents: guidelines splits into conformance and discovery (below); security, architecture, and correctness are one each. Launch all of them in a single message via the Agent tool with `run_in_background: true`. Each gets the same scope + diff, and a different role.
 
-### 1. project-guidelines (subagent_type: code-reviewer)
+### 1. guidelines (2 agents: conformance + discovery)
 
-Read CLAUDE.md as a routing manifest. Check every change against stated rules.
+One role, two jobs, and they need different models. Checking a diff against stated rules is closed and verifiable — a cheaper model does it reliably. Finding what no rule names is open-ended and degrades sharply with tier. Split by role, not by document: bucketing the docs blinds each agent to everything outside its slice, and the findings that matter most are usually the ones spanning two slices.
 
-Always read:
-- `~/.claude/CLAUDE.md` (auto-loaded)
-- Repo-root `CLAUDE.md` (auto-loaded)
-- Repo-root `README.md`
-- `.claude/rules/*.md`
-- `.github/CLAUDE.md` if present
+**Doc inventory — orchestrator does this before spawning. Deterministic, no agent:**
 
-Conditional on changed paths:
-- For each touched package: `packages/<pkg>/CLAUDE.md`, `README.md`, `AGENTS.md` if any
-- Walk nested `CLAUDE.md` upward for deep changes (e.g., `packages/myapp/lib/web/CLAUDE.md`)
-- Extract any docs paths referenced from CLAUDE.md files (treat as routing manifest)
-- Read everything under `docs/guidelines/**` when present (small, always relevant)
-- Read matching `docs/how-to/<topic>.md` when changes match the topic (new schemas → `adding-modules-and-business-logic.md`, PubSub work → `events.md`, etc.)
-- For auth-related changes, read `@moduledoc` on cited auth modules
+```
+find . \( -name node_modules -o -name vendor -o -name deps -o -name _build \
+          -o -name worktrees -o -name .git \) -prune -o \
+     \( -name 'CLAUDE.md' -o -name 'AGENTS.md' -o -name 'AGENT.md' \
+        -o -path '*/.claude/rules/*.md' \
+        -o -path '*docs/guidelines/*.md' -o -path '*docs/how-to/*.md' \) -print
+```
 
-Skip: `node_modules/**`, `vendor/**`, `_build/**`, `deps/**`.
+Then word-count everything in one pass (`wc -w`) — this sizes the corpus and exposes duplicates: an `AGENTS.md` sitting beside a `CLAUDE.md` with an identical count is the same file under two names. Read one, drop the other. If the total is large enough that one agent cannot hold it alongside the diff, say so in the output rather than letting an agent silently sample.
 
-Augmentation: Evidence must include the rule source (file + line/section) alongside the offending code. No "follows project conventions" hand-waves; quote the rule.
+Pass the resulting list, with word counts, to both agents below. Always include `~/.claude/CLAUDE.md`, repo-root `CLAUDE.md`, and repo-root `README.md`.
 
-### 2. security (subagent_type: code-reviewer)
+**1a. conformance (subagent_type: code-reviewer, model: sonnet)** — full diff plus the doc list, and it reads every doc on the list. Checks the changeset against stated rules, and nothing else.
+
+- Quote the rule verbatim with its source path beside the offending code
+- Before claiming something is missing from a config file, read that file and confirm
+- Apply a rule only where it actually governs. A rule about how the agent issues Bash commands does not automatically govern the body of a committed script; check for existing code that contradicts the reading before flagging. When scope is genuinely uncertain, say so and lower the severity rather than arguing around it
+
+**1b. discovery (subagent_type: code-reviewer, model: opus)** — full diff plus the doc list as *paths*, reading what it needs. Its job is what no rule names:
+
+- A change satisfying one layer of a multi-layer convention but not the others
+- A new file diverging from the established pattern for its file type — audit siblings to prove the pattern
+- A rule that plainly does not apply despite matching keywords: say so, cite the precedent
+- Claims checked against the world rather than the docs — does the cited path exist, does the referenced command resolve
+- Anything the changeset gets wrong that the docs never anticipated, including a malformed diff
+
+**Both guidelines agents:**
+
+**Report coverage.** List every doc read and every doc deliberately skipped, with the reason. The orchestrator repeats this in the final output. A doc nobody read is a silent false negative — the one failure the skeptic pass cannot catch — so it has to be visible rather than implied.
+
+**No compliance assertions.** Report violations only. "Follows project conventions", "matches the shape used by other skills", "consistent with the repo's preference", and any section of positive observations are banned. Certifying compliance you did not verify is worse than saying nothing, because it converts a miss into a false all-clear. A clean slice is reported by staying silent about it.
+
+### 2. security (subagent_type: code-reviewer, model: opus)
 
 Scope: auth, input validation, secrets, injection, authz, SSRF, deserialization, crypto, race conditions in security-relevant paths. Skip style, naming, architecture.
 
@@ -73,7 +88,7 @@ Augmentation: Reasoning must describe a concrete attack scenario (input source �
 
 Scope: patterns, layering, coupling, abstractions, module boundaries, dependency direction, public API design, structural naming (modules, classes, public functions). Skip line-level bugs, local style.
 
-### 4. correctness (subagent_type: code-reviewer)
+### 4. correctness (subagent_type: code-reviewer, model: opus)
 
 Scope: edge cases, off-by-one, error handling, nil/empty handling, test gaps, local naming (variables, private methods, locals). Skip security, architecture.
 
@@ -105,7 +120,7 @@ Drop findings that fail any check. Report only structured, evidenced findings �
 
 ## Synthesize
 
-After all 4 complete, before presenting:
+After every agent completes, before presenting:
 
 ### 1. Skeptic pass (orchestrator, no extra agents)
 
@@ -127,7 +142,7 @@ Do not soften the skeptic. A finding that says "this MIGHT cause issues if X hap
 
 ### 2. Dedupe
 
-If multiple agents flag the same file:line with the same claim, merge into one finding citing both agents.
+If multiple agents flag the same file:line with the same claim, merge into one finding citing every agent that raised it. Conformance and discovery converging on the same finding from different directions is signal — note it.
 
 ### 3. Group
 
@@ -153,7 +168,7 @@ Output shape (illustrative, not a code-fenced template):
 
 _(Failed: 2 findings dropped, wrong line citations.)_
 
-Severity sections (Blockers, Major, Nits, Info) hold Strong findings grouped by file. Weak findings go in their own "Weak" section. Omit empty sections. If all 4 specialists return clean, output "No findings" and skip the handoff.
+Open with one Coverage line: docs read, docs skipped with reason. Severity sections (Blockers, Major, Nits, Info) hold Strong findings grouped by file. Weak findings go in their own "Weak" section. Omit empty sections. If every specialist returns clean, output "No findings" and skip the handoff.
 
 ## Handoff
 
