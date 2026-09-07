@@ -26,9 +26,10 @@ get_sessions() {
         else
             echo "  $name"
         fi
-    # Hide dev-managed sessions (those with @dev-procfile set)
+    # Hide hidden scratch sessions (_pc_<ws> popups)
     done < <(tmux list-sessions -F "#{session_name}" | while read -r s; do
-        tmux show -t "$s" -v @dev-procfile 2>/dev/null >/dev/null || echo "$s"
+        case "$s" in _*) continue ;; esac
+        echo "$s"
     done)
 }
 

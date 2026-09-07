@@ -1,13 +1,13 @@
 #!/bin/bash
 #
-# Switch to next/prev tmux session, skipping dev-managed sessions.
+# Switch to next/prev tmux session, skipping hidden scratch sessions.
 
 current=$(tmux display -p '#{session_name}')
 
-# Build list of non-dev sessions
+# Build list of visible sessions
 sessions=()
 while read -r s; do
-  tmux show -t "$s" -v @dev-procfile 2>/dev/null >/dev/null && continue
+  case "$s" in _*) continue ;; esac   # hidden scratch sessions (e.g. _pc_<ws> popups)
   sessions+=("$s")
 done < <(tmux list-sessions -F '#{session_name}')
 
