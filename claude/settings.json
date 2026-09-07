@@ -1,20 +1,20 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
   "permissions": {
     "allow": [
       "Read(~/.local/share/mise/*)",
       "Read(~/gat/*)",
       "Grep(~/gat/*)",
-      "Glob(~/gat/*)",
-      "Search(~/gat/*)",
-      "Write(~/.claude/retro-log.md)",
       "Edit(~/.claude/retro-log.md)",
-      "Write(~/.claude/news-history.md)",
       "Edit(~/.claude/news-history.md)",
       "Read(~/.claude/news-history.md)",
-      "Write(*/claude/plans/*)",
       "Edit(*/claude/plans/*)",
+      "Edit(*/claude/handovers/*)",
       "Bash(ls:*)",
+      "Bash(cp:*)",
       "Bash(cat:*)",
       "Bash(cut:*)",
       "Bash(tr:*)",
@@ -54,6 +54,7 @@
       "Bash(git remote:*)",
       "Bash(git stash:*)",
       "Bash(git switch:*)",
+      "Bash(git checkout:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(git pull:*)",
@@ -61,24 +62,37 @@
       "Bash(gh pr checks:*)",
       "Bash(gh pr list:*)",
       "Bash(gh pr diff:*)",
+      "Bash(gh pr edit:*)",
+      "Bash(gh pr checkout:*)",
       "Bash(gh run view:*)",
       "Bash(gh run list:*)",
       "Bash(gh run watch:*)",
       "Bash(gh-comments:*)",
       "Bash(gh api:*)",
+      "Bash(curl -s https://hex.pm/api/packages/*)",
       "Bash(coderabbit:*)",
       "Bash(just:*)",
       "Bash(git-commit-context:*)",
       "Bash(safe-python:*)",
       "Bash(safe-ruby:*)",
+      "Bash(safe-node:*)",
       "Bash(claude-retro:*)",
-      "Bash(dev:*)",
+      "Bash(ws:*)",
+      "Bash(ensure-docker:*)",
+      "Bash(docker compose logs:*)",
+      "Bash(docker logs:*)",
+      "Bash(ws-popup:*)",
       "Bash(git-clean-branches:*)",
       "Bash(mise ls:*)",
       "Bash(mise ls-remote:*)",
       "Bash(mise current:*)",
       "Bash(mise which:*)",
       "Bash(mise where:*)",
+      "Bash(mise settings get:*)",
+      "Bash(mise settings ls:*)",
+      "Bash(mise config ls:*)",
+      "Bash(mise config get:*)",
+      "Bash(mise doctor:*)",
       "Bash(tmux:*)",
       "Bash(smug:*)",
       "Bash(rubocop:*)",
@@ -93,54 +107,73 @@
       "Bash(bin/packwerk check:*)",
       "Bash(bin/packwerk validate:*)",
       "Bash(yarn run:*)",
+      "Bash(APP_ENV=test NODE_ENV=test yarn run:*)",
       "Bash(yarn test:*)",
+      "Bash(yarn typecheck:*)",
+      "Bash(yarn jest:*)",
+      "Bash(yarn tsc:*)",
+      "Bash(yarn prettier:*)",
       "Bash(pg_dump:*)",
       "Bash(psql:*)",
       "Bash(npx playwright test:*)",
       "Bash(git rebase:*)",
       "Bash(git absorb:*)",
       "Bash(mix:*)",
-      "Bash(MIX_ENV=* mix:*)",
-      "Bash(PATH=* mix:*)",
-      "Bash(POSTGRES_DBNAME=* mix:*)",
-      "Bash(RAILS_ENV=* bin/rails:*)",
-      "Bash(RAILS_ENV=* bundle exec:*)",
-      "Bash(RAILS_ENV=* just:*)",
-      "Bash(CI=* just:*)",
+      "Bash(MIX_ENV=test mix:*)",
+      "Bash(MIX_ENV=dev mix:*)",
+      "Bash(RAILS_ENV=test bin/rails:*)",
+      "Bash(RAILS_ENV=development bin/rails:*)",
+      "Bash(RAILS_ENV=test bundle exec:*)",
+      "Bash(RAILS_ENV=development bundle exec:*)",
+      "Bash(RAILS_ENV=test just:*)",
+      "Bash(CI=1 just:*)",
+      "Bash(CI=true just:*)",
       "Bash(gh search:*)",
       "Bash(bundle exec rspec:*)",
       "Bash(bundle exec rubocop:*)",
       "Bash(bundle exec rails runner:*)",
       "Bash(bundle show:*)",
       "Bash(bundle info:*)",
+      "Bash(gem which:*)",
+      "Bash(gem list:*)",
+      "Bash(gem contents:*)",
+      "Bash(gem info:*)",
+      "Bash(gem env:*)",
+      "Bash(npm ls:*)",
+      "Bash(npm view:*)",
+      "Bash(npm audit:*)",
+      "Bash(npm explain:*)",
+      "Bash(git worktree list:*)",
       "Skill(*)",
       "mcp__context7__*",
       "mcp__tidewave__*",
       "mcp__tidewave-web__*",
       "mcp__sentry__*",
-      "mcp__db__*",
-      "mcp__db_hive__*",
-      "mcp__db_tracker__*",
-      "mcp__db_model__*",
       "mcp__atlassian__getJiraIssue",
       "mcp__atlassian__getAccessibleAtlassianResources",
       "mcp__atlassian__search",
+      "mcp__atlassian__searchJiraIssuesUsingJql",
       "mcp__atlassian__fetch",
       "mcp__atlassian__atlassianUserInfo",
       "mcp__atlassian__getVisibleJiraProjects",
       "mcp__atlassian__getTransitionsForJiraIssue",
       "mcp__atlassian__getIssueLinkTypes",
-      "mcp__atlassian__lookupJiraAccountId"
+      "mcp__atlassian__lookupJiraAccountId",
+      "mcp__process-compose__pc_process_logs",
+      "mcp__process-compose__pc_process_get",
+      "mcp__process-compose__pc_process_list",
+      "mcp__process-compose__pc_process_ports",
+      "mcp__process-compose__pc_project_state",
+      "mcp__process-compose__pc_project_is_ready"
     ],
     "deny": [
       "Read(~/gat/gat-local/*.env)",
-      "Grep(~/gat/gat-local/*.env)",
-      "Glob(~/gat/gat-local/*.env)",
-      "Search(~/gat/gat-local/*.env)"
+      "Grep(~/gat/gat-local/*.env)"
     ],
     "ask": [],
-    "defaultMode": "default"
+    "defaultMode": "auto"
   },
+  "model": "claude-fable-5-1[1m]",
   "hooks": {
     "Notification": [
       {
@@ -200,6 +233,15 @@
             "command": "/Users/adam/.claude/hooks/rtk-rewrite.sh"
           }
         ]
+      },
+      {
+        "matcher": "mcp__atlassian__createJiraIssue|mcp__atlassian__editJiraIssue|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "claude-gate-rules"
+          }
+        ]
       }
     ]
   },
@@ -218,7 +260,18 @@
   "sandbox": {
     "enabled": false
   },
+  "feedbackSurveyRate": 0,
   "alwaysThinkingEnabled": true,
+  "effortLevel": "xhigh",
+  "modelSettings": {
+    "claude-fable-5-1": {
+      "effortLevel": "xhigh"
+    }
+  },
   "autoUpdatesChannel": "latest",
-  "teammateMode": "in-process"
+  "tui": "default",
+  "skipWorkflowUsageWarning": true,
+  "autoCompactEnabled": true,
+  "teammateMode": "in-process",
+  "agentPushNotifEnabled": true
 }

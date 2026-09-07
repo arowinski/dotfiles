@@ -1,0 +1,54 @@
+#!/bin/bash
+#
+# PreToolUse bounce-once gate for outward writes that a skill governs.
+#
+# The first Jira create/edit, or the first review/comment post (`gh api
+# …/pulls/N/reviews|comments` with a mutating flag, `gh pr review`, `gh pr
+# comment`) in a session is refused, with the governing skill's rules as the
+# reason. The model rewrites the payload with the rules in front of it and
+# re-issues the call; the retry passes (per-session marker, 20 minutes).
+#
+# Wired in claude/settings.json under hooks.PreToolUse with matcher
+# "mcp__atlassian__createJiraIssue|mcp__atlassian__editJiraIssue|Bash".
+set -euo pipefail
+
+input=$(cat)
+tool=$(printf '%s' "$input" | jq -r '.tool_name // empty')
+sid=$(printf '%s' "$input" | jq -r '.session_id // "nosession"')
+skills="${CLAUDE_SKILLS_DIR:-$HOME/.claude/skills}"
+
+key=""
+rules=""
+case "$tool" in
+  mcp__atlassian__createJiraIssue|mcp__atlassian__editJiraIssue)
+    key=jira
+    rules=$(sed -n '/^## Writing good tickets/,/^### Bugs/p' "$skills/jira/SKILL.md")
+    ;;
+  Bash)
+    cmd=$(printf '%s' "$input" | jq -r '.tool_input.command // empty')
+    if printf '%s' "$cmd" | grep -qE 'gh pr (review|comment)\b'; then
+      key=review
+    elif printf '%s' "$cmd" | grep -qE 'gh api [^|;&]*pulls/[0-9]+/(reviews|comments)' \
+      && printf '%s' "$cmd" | grep -qE -- '(--method|-X) *(POST|PUT|PATCH)|--input|(^| )-[fF] '; then
+      key=review
+    fi
+    [ -n "$key" ] && rules=$(sed -n '/^## Forbidden LLM tells/,/^## Bad-vs-good/p' "$skills/human-writing/SKILL.md")
+    ;;
+esac
+[ -n "$key" ] || exit 0
+# Heading renamed in the skill file: nothing to show, so don't bounce with an empty reason.
+[ -n "$rules" ] || exit 0
+
+marker="/tmp/claude-gate-${key}-${sid}"
+if [ -f "$marker" ] && [ -z "$(find "$marker" -mmin +20 2>/dev/null)" ]; then
+  exit 0
+fi
+touch "$marker"
+
+jq -n --arg r "$rules" --arg k "$key" '{
+  hookSpecificOutput: {
+    hookEventName: "PreToolUse",
+    permissionDecision: "deny",
+    permissionDecisionReason: ("Gate (" + $k + "): check the payload against these rules. If the user already approved this payload verbatim, re-issue it unchanged. If the rules demand changes, re-show the revised payload and get an explicit go before posting. The retry passes.\n\n" + $r)
+  }
+}'
