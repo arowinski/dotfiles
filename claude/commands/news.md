@@ -18,7 +18,13 @@ If argument provided, focus on that topic. Otherwise search by tier:
 **Tier 3 (only if genuinely popular or important):**
 - General tech: infra/devops tooling (CI, build, deploy, observability), databases, major industry news
 
-Run multiple web searches in parallel — dedicate at least one or two to the Elixir/Phoenix ecosystem every run, even when it's quiet (search elixirstatus, Thinking Elixir, hex.pm, ElixirForum, library changelogs).
+Run multiple web searches in parallel — dedicate at least one or two to the Elixir/Phoenix ecosystem every run, even when it's quiet (search elixirstatus, ElixirForum, library changelogs).
+
+Elixir releases need a direct check, not a search — searching alone misses them. Every run, hit both:
+- `gh api repos/elixir-lang/elixir/releases` and `gh api repos/erlang/otp/releases` for core (core releases carry CVEs and never surface on elixirstatus).
+- `curl -s https://hex.pm/api/packages/<name>` for phoenix, phoenix_live_view, ecto, ash, oban, req, igniter, tidewave, bandit, nx — the JSON lists versions with `inserted_at`, so a two-day window is a diff, not a judgment call.
+
+Thinking Elixir is not a source: the podcast ended at episode 309 on 2026-06-23.
 
 Aggregator pass: fetch Hacker News front page (`https://hn.algolia.com/api/v1/search?tags=front_page`) and Lobsters hottest (`https://lobste.rs/hottest.json`) to catch what's broadly popular. Tier 3 items should come from here — popularity on aggregators is the bar for "generic tech worth including". Tier 1/2 items don't need aggregator presence.
 
