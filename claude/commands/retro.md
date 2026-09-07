@@ -43,7 +43,9 @@ Cost: adds 6 extra `claude-retro` calls per /retro run.
 
 **What went wrong** — narrate the friction. Use prompts as evidence.
 
-**Recurring** — issues from past retros that are still showing up.
+**Recurring** — issues from past retros that are still showing up. Apply-or-drop: a fix
+flagged in 3 prior retros gets applied in this session (ask go per change) or retired
+from the log with the reason. Nothing carries past its third flag.
 
 **Fixes** — concrete changes to config, rules, skills, or workflow. No vague suggestions.
 
@@ -66,6 +68,7 @@ After presenting, append a summary to `~/.claude/retro-log.md`:
 - [finding 2]
 - Fixes proposed: [list]
 - Fixes applied: [list, if any were applied this session]
+- Dropped: [proposals retired at their third flag, one reason each]
 ```
 
 Keep entries concise — 3-5 bullets max per day. The log is for future retros to reference, not a full report.
