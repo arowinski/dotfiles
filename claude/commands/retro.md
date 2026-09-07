@@ -17,6 +17,8 @@ Don't report stats. Find the 2-3 most notable sessions and explain what happened
 
 **Corrections** — sessions with `corrections` > 0 are the highest-signal finding. Read the actual correction prompts, then explain: what did the user ask? What did Claude do instead? What rule, config, or workflow change would prevent it?
 
+**Queries** — `query_samples` are "why did you X" prompts. Design questions as often as overreach, so read each one and classify it by hand; never report `query_signals` as a count.
+
 **Churning** — flag sessions where `model_calls_per_prompt` is notably higher than others. Cross-reference with the prompt text and commit count to judge whether the high ratio was justified (complex task) or wasteful (simple task, Claude spinning). Compare the session's `intent` (first prompt) against what was actually committed.
 
 **Session outcomes** — sessions with many prompts but no commits (`outcome: no-commit`) deserve a look. Was it a research/analysis session (fine) or did the user give up (problem)?
