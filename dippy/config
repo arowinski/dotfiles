@@ -11,27 +11,35 @@ allow git stash
 allow git mv
 allow git absorb
 allow git rebase
-allow GIT_SEQUENCE_EDITOR=* git rebase *
-allow GIT_EDITOR=* git rebase *
-allow GIT_SEQUENCE_EDITOR=* GIT_EDITOR=* git rebase *
+# Editor value stays pinned — a wildcard here would allow any binary to run as the editor
+allow GIT_SEQUENCE_EDITOR=: git rebase *
+allow GIT_SEQUENCE_EDITOR=true git rebase *
+allow GIT_EDITOR=: git rebase *
+allow GIT_EDITOR=true git rebase *
+allow GIT_SEQUENCE_EDITOR=: GIT_EDITOR=: git rebase *
 allow git branch
 allow git checkout
 ask git checkout [!-]* "Use git switch for branch operations"
+# Restoring paths from a ref is not a branch switch — last match wins
+allow git checkout * -- *
 
 # Filesystem
 allow touch
 allow mkdir
+allow cp
 allow-redirect /tmp/**
 allow-redirect /private/tmp/**
+allow-redirect /dev/null
+allow-redirect ~/.claude/jobs/**
 
 # Project tools
 allow mix
-allow MIX_ENV=* mix *
-allow PATH=* mix *
-allow POSTGRES_DBNAME=* mix *
+allow MIX_ENV=test mix *
+allow MIX_ENV=dev mix *
 allow just
-allow RAILS_ENV=* just *
-allow CI=* just *
+allow RAILS_ENV=test just *
+allow CI=1 just *
+allow CI=true just *
 allow bundle exec rspec
 allow bundle exec rubocop
 allow bundle exec rails runner
@@ -39,7 +47,8 @@ allow bundle exec rails db:prepare
 allow bundle exec rails db:migrate
 allow RAILS_ENV=test bundle exec rails db:drop
 allow RAILS_ENV=test bundle exec rails db:prepare
-allow RAILS_ENV=* bundle exec rails db:schema:dump
+allow RAILS_ENV=test bundle exec rails db:schema:dump
+allow RAILS_ENV=development bundle exec rails db:schema:dump
 deny bundle exec rails db:create "Use db:prepare instead"
 deny bundle exec rails db:schema:load "Use db:prepare instead"
 allow bin/spring
@@ -48,12 +57,18 @@ allow bin/rails db:migrate
 allow bin/rails db:prepare
 allow bin/rails graphql:schema:json
 allow bin/rails runner
-allow RAILS_ENV=* bin/rails *
+allow RAILS_ENV=test bin/rails *
+allow RAILS_ENV=development bin/rails *
 allow rails runner
 allow bin/packwerk check
 allow bin/packwerk validate
 allow yarn run
+allow APP_ENV=test NODE_ENV=test yarn run
 allow yarn test
+allow yarn jest
+allow yarn tsc
+allow yarn typecheck
+allow yarn prettier
 allow pg_dump
 allow psql
 ask psql *CREATE * "Confirm: psql DDL (CREATE)"
@@ -68,11 +83,49 @@ allow npx playwright test
 allow git-commit-context
 allow safe-python
 allow safe-ruby
+allow safe-node
 deny python3 "Use safe-python instead of python3"
 deny ruby "Use safe-ruby for one-liners, rails runner in Rails projects"
-deny elixir -e "Use mix run -e for project context, or iex -S mix"
-ask sed *-i* "Use Edit tool for file modifications; sed -i bypasses diff review"
-ask sed *--in-place* "Use Edit tool for file modifications; sed --in-place bypasses diff review"
+deny node -e * "Throwaway JS eval — use safe-node (network-isolated), or safe-python for data"
+deny node --eval * "Throwaway JS eval — use safe-node (network-isolated), or safe-python for data"
+deny node -p * "Throwaway JS eval — use safe-node (network-isolated), or safe-python for data"
+deny node --print * "Throwaway JS eval — use safe-node (network-isolated), or safe-python for data"
+deny elixir -e "Elixir eval runs in the live app: tidewave project_eval (dev-session.md), not a cold VM"
+deny elixir *.exs "A script that rewrites a file is sed -i with extra steps: use the Edit tool. Probes: tidewave project_eval"
+deny mix run -e * "Elixir eval runs in the live app: tidewave project_eval (dev-session.md), not a cold VM"
+deny mix run *.exs "Probes run in the live app: tidewave project_eval (dev-session.md), not a cold VM"
+deny sleep "Foreground wait — use run_in_background + the task notification, or the Monitor tool; never poll with sleep/for/until loops"
+deny /**/rg "Use bare 'rg'"
+deny /**/rg * "Use bare 'rg'"
+deny /**/fd "Use bare 'fd'"
+deny /**/fd * "Use bare 'fd'"
+deny /**/find "Use bare 'find' (or 'fd')"
+deny /**/find * "Use bare 'find' (or 'fd')"
+# Reject shell-alias-bypass escapes in tool calls (no aliases to bypass in a
+# non-interactive subprocess; the leading `\` only breaks matchers like this one).
+deny \rg "Escaped rg — no aliases to bypass in tool calls; use bare rg"
+deny \rg * "Escaped rg — no aliases to bypass in tool calls; use bare rg"
+deny \fd "Escaped fd — no aliases to bypass in tool calls; use bare fd"
+deny \fd * "Escaped fd — no aliases to bypass in tool calls; use bare fd"
+deny \grep "Escaped grep — no aliases to bypass in tool calls; use bare grep"
+deny \grep * "Escaped grep — no aliases to bypass in tool calls; use bare grep"
+deny \jq "Escaped jq — no aliases to bypass in tool calls; use bare jq"
+deny \jq * "Escaped jq — no aliases to bypass in tool calls; use bare jq"
+deny \git "Escaped git — no aliases to bypass in tool calls; use bare git"
+deny \git * "Escaped git — no aliases to bypass in tool calls; use bare git"
+deny command * "command prefix — no aliases to bypass in tool calls; use the bare command"
+deny unalias * "unalias prefix — no aliases to bypass in tool calls; use the bare command"
+deny gatt "Use the ws helper — it wraps gatt (ws status <name>, ws logs, ws restart)"
+deny gatt * "Use the ws helper — it wraps gatt (ws status <name>, ws logs, ws restart)"
+# In-place file edits → use the Edit tool (single file) or per-file Edits for bulk.
+# Denied, not asked: Edit is always available, reviewable, and prompt-free.
+deny sed -i* "In-place edit — use the Edit tool (per-file Edits for bulk)"
+deny sed * -i* "In-place edit — use the Edit tool (per-file Edits for bulk)"
+deny sed --in-place* "In-place edit — use the Edit tool (per-file Edits for bulk)"
+deny sed * --in-place* "In-place edit — use the Edit tool (per-file Edits for bulk)"
+deny perl -i* * "In-place perl edit — use the Edit tool (per-file Edits for bulk)"
+deny perl -pi* * "In-place perl edit — use the Edit tool (per-file Edits for bulk)"
+deny perl -0pi* * "In-place perl edit — use the Edit tool (per-file Edits for bulk)"
 allow claude-retro
 allow gh-comments
 allow gh pr view
@@ -80,7 +133,9 @@ allow gh pr checks
 allow gh pr list
 allow gh pr diff
 allow gh pr create
+allow gh pr edit
 allow gh pr ready
+allow gh pr checkout
 allow gh api
 ask gh api *--method * "Confirm: gh api mutating request — verify endpoint and payload"
 ask gh api *-X * "Confirm: gh api mutating request — verify endpoint and payload"
@@ -94,17 +149,36 @@ ask gh api *--input * "Confirm: gh api mutating request (body from file) — ver
 ask gh api *--input=* "Confirm: gh api mutating request (body from file) — verify endpoint and payload"
 allow gh run
 allow gh search
+allow ensure-docker
+allow docker compose logs
+allow docker logs
+allow ws
+allow ws-popup
 allow git-clean-branches
 allow mise ls
 allow mise ls-remote
 allow mise current
 allow mise which
 allow mise where
-allow dev
+allow mise settings get
+allow mise settings ls
+allow mise config ls
+allow mise config get
+allow mise doctor
 allow tmux
 allow smug
 allow rubocop
 allow bundle show
 allow bundle info
+allow gem which
+allow gem list
+allow gem contents
+allow gem info
+allow gem env
+allow npm ls
+allow npm view
+allow npm audit
+allow npm explain
+allow git worktree list
 
 set log-full
