@@ -145,7 +145,7 @@ def analyze_session(sid, project, target_date=None):
     teams = set()
     git_commands = []
     last_edit = None  # most recent Edit/Write tool_use info
-    overact_signals = []  # [(file, complaint_excerpt), ...]
+    overact_signals = []  # [(file, excerpt, kind), ...] kind: "overact" | "query"
 
     with open(path) as f:
         for line in f:
@@ -182,8 +182,20 @@ def analyze_session(sid, project, target_date=None):
                         not target_prefix
                         or (e.get("timestamp", "")).startswith(target_prefix)
                     )
-                    if on_target_date and OVERACT_PATTERNS.search(content):
-                        overact_signals.append((last_edit, content[:120].replace("\n", " ")))
+                    if on_target_date:
+                        kind = None
+                        if OVERACT_PATTERNS.search(content):
+                            kind = "overact"
+                        elif QUERY_PATTERNS.search(content):
+                            kind = (
+                                "overact"
+                                if FRUSTRATION_PATTERNS.search(content)
+                                else "query"
+                            )
+                        if kind:
+                            overact_signals.append(
+                                (last_edit, content[:120].replace("\n", " "), kind)
+                            )
                     last_edit = None
 
             if msg.get("role") == "tool" and isinstance(msg.get("content"), list):
@@ -210,11 +222,28 @@ CORRECTION_PATTERNS = re.compile(
 
 # Patterns where the user objects to something Claude just did unprompted.
 # Used to detect Edit/Write actions immediately followed by an "over-act" complaint.
+# Unauthorized-action complaints. These name the authorization itself, so a match
+# is the user saying the work wasn't asked for.
 OVERACT_PATTERNS = re.compile(
-    r"i didn'?t ask|did i (tell|ask)|why (u|did u|did you) |"
-    r"don'?t do (that|stuff)|who asked|not what i asked|wasn'?t asked|"
-    r"why use |why update|why add|why change|why move|why rewrite|"
-    r"why wrap|why do |i asked.*not",
+    r"i didn'?t ask|did i (tell|ask)|don'?t do (that|stuff)|"
+    r"who asked|not what i asked|wasn'?t asked|i asked.*not",
+    re.IGNORECASE,
+)
+
+# "why did you X" openers. These catch real overreach ("why did u add \"\"\" above
+# the func?") but match design questions just as often ("why do u push it from
+# gat-app, why not enqueue in the API?"), so they are reported separately and
+# never counted as overact signals. Read them; don't trust the count.
+QUERY_PATTERNS = re.compile(
+    r"why (u|did u|did you) |why use |why update|why add|why change|"
+    r"why move|why rewrite|why wrap|why do ",
+    re.IGNORECASE,
+)
+
+# A "why did you X" carrying one of these isn't a design question. Promotes a
+# QUERY match back to overact.
+FRUSTRATION_PATTERNS = re.compile(
+    r"what the fuck|wtf|ffs|for fuck'?s sake|are you kidding",
     re.IGNORECASE,
 )
 
@@ -314,6 +343,8 @@ def main():
     agent_session_count = 0
     total_overact = 0
     overact_samples = []
+    total_query = 0
+    query_samples = []
 
     for sid, info in sessions.items():
         is_agent, agent_name, team_name = is_agent_session(sid, info["project"])
@@ -345,14 +376,25 @@ def main():
             s["meta_prompts_filtered"] = meta_count
         if corrections:
             s["corrections"] = corrections
-        if signals:
-            s["overact_signals"] = len(signals)
-            total_overact += len(signals)
-            for sig in signals:
+        overact = [sig for sig in signals if sig[2] == "overact"]
+        queries = [sig for sig in signals if sig[2] == "query"]
+        if overact:
+            s["overact_signals"] = len(overact)
+            total_overact += len(overact)
+            for sig in overact:
                 overact_samples.append({
                     "session": sid[:8],
                     "file": sig[0],
                     "complaint": sig[1],
+                })
+        if queries:
+            s["query_signals"] = len(queries)
+            total_query += len(queries)
+            for sig in queries:
+                query_samples.append({
+                    "session": sid[:8],
+                    "file": sig[0],
+                    "question": sig[1],
                 })
         if work_count:
             model_calls = sum(detail.get("models", {}).values())
@@ -401,11 +443,14 @@ def main():
             "top_tools": dict(sorted(all_tools.items(), key=lambda x: -x[1])[:10]),
             "teams": sorted(all_teams),
             "overact_signals": total_overact,
+            "query_signals": total_query,
         },
         "projects": {},
     }
     if overact_samples:
         output["overact_samples"] = overact_samples[:20]
+    if query_samples:
+        output["query_samples"] = query_samples[:20]
 
     for project, buckets in sorted(by_project.items()):
         user_sessions = buckets["user"]
