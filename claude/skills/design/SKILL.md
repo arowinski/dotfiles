@@ -41,6 +41,7 @@ When creating: `git fetch origin && git switch -c <name> origin/main` (or `origi
 Use the Agent tool with `subagent_type: architect`. Prompt must include:
 
 - Full task description (and Jira details if any: title, description, AC verbatim)
+- **Decisions already made**: every choice the user stated in this conversation, the ticket, or project memory (storage location, module placement, naming, what stays as is). Quote each in one line. The architect must not propose their opposite; a plan that contradicts one is rejected at self-review.
 - Current branch
 - "Recommend one approach. Also list 1-3 alternatives you seriously considered, with a one-sentence rejection reason each. No strawman alternatives. If you can't name a coherent alternative, the recommendation may be weak — say so."
 - "Cover: high-level approach, files to touch, key risks, alternatives considered, open questions you can't resolve from the code."
@@ -54,7 +55,7 @@ Wait for architect to complete. If it reports blockers (missing info, broken ass
 Before writing the plan, scan the architect's output for:
 
 - **Placeholders**: TBD, TODO, XXX, "fill in later"
-- **Contradictions**: sections that say opposite things
+- **Contradictions**: sections that say opposite things, or an approach that reverses a decision already made
 - **Vague requirements**: "handle errors appropriately", "as needed"
 - **AC gaps** (Jira tasks only): every acceptance criterion should map to something in the approach or be explicitly out of scope
 
