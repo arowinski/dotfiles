@@ -1,13 +1,13 @@
 ---
 name: design
-description: Plan a feature or change. Spawn the architect agent to research, then produce a one-page plan with goal, approach, files, risks, alternatives, and open questions. Save to `<git-common-dir>/claude/plans/<branch>.md`. Use when the next step is deciding HOW to build something rather than building it — "design this", "plan the X work", "scope this out", a Jira URL to work from, and equally the phrasings that never say plan: "how should we approach X", "what's the plan for X", "which way should we go, A or B", "what would actually change if we moved X", "before I touch this, work out what it takes". Any non-trivial change spanning several files or modules qualifies. Not for implementing a decision already made, debugging, reviewing, or explaining existing code.
+description: Plan a feature or change. Spawn three architect agents under opposing design constraints, compare, then produce a one-page plan with goal, approach, files, risks, alternatives, and open questions. Save to `<git-common-dir>/claude/plans/<branch>.md`. Use when the next step is deciding HOW to build something rather than building it — "design this", "plan the X work", "scope this out", a Jira URL to work from, and equally the phrasings that never say plan: "how should we approach X", "what's the plan for X", "which way should we go, A or B", "what would actually change if we moved X", "before I touch this, work out what it takes". Any non-trivial change spanning several files or modules qualifies. Not for implementing a decision already made, debugging, reviewing, or explaining existing code.
 allowed-tools: Bash(git:*), Bash(mkdir:*), Read, Glob, Grep, Agent, AskUserQuestion, Write, mcp__atlassian__getJiraIssue, mcp__atlassian__getAccessibleAtlassianResources
 argument-hint: [Jira URL, description, or empty]
 ---
 
 # Design
 
-Produce a one-page plan for a feature or change. Architect agent does the research; this skill orchestrates input, branch setup, and the plan artifact.
+Produce a one-page plan for a feature or change. Three architect agents design under opposing constraints; this skill orchestrates input, branch setup, the comparison, and the plan artifact.
 
 **You do NOT:** create branches without asking, commit anything, push, or hand off to an implementation skill. The user reads the plan and starts implementing.
 
@@ -36,23 +36,31 @@ Run `git rev-parse --abbrev-ref HEAD`.
 
 When creating: `git fetch origin && git switch -c <name> origin/main` (or `origin/master`).
 
-### 4. Spawn architect
+### 4. Spawn three architects
 
-Use the Agent tool with `subagent_type: architect`. Prompt must include:
+Design it twice, then once more: the first idea is rarely the best, and one agent asked for alternatives produces strawmen. Spawn three `architect` agents in parallel (one message, three Agent calls) with the same brief and one differing constraint each:
+
+- **Minimal interface**: 1–3 entry points, the most behaviour per entry point.
+- **Common caller first**: the default case is trivial for the caller who hits it most.
+- **Smallest diff**: reuse existing seams and patterns, fewest new modules and files.
+
+Each prompt must include:
 
 - Full task description (and Jira details if any: title, description, AC verbatim)
 - **Decisions already made**: every choice the user stated in this conversation, the ticket, or project memory (storage location, module placement, naming, what stays as is). Quote each in one line. The architect must not propose their opposite; a plan that contradicts one is rejected at self-review.
 - Current branch
-- "Recommend one approach. Also list 1-3 alternatives you seriously considered, with a one-sentence rejection reason each. No strawman alternatives. If you can't name a coherent alternative, the recommendation may be weak — say so."
-- "Cover: high-level approach, files to touch, key risks, alternatives considered, open questions you can't resolve from the code."
+- Its constraint, then: "Design under this constraint only. Omit Alternatives Considered; two other designs run in parallel and the comparison happens upstream."
+- "Cover: high-level approach, files to touch, key risks, open questions you can't resolve from the code."
 - "Prefer introspection over guessing. Use Tidewave (`mcp__tidewave__*`) for Ecto schemas, source location, package docs, and live behavior in Phoenix projects. Use Sentry (`mcp__sentry__*`) for current error state in the area you're touching. Use context7 for up-to-date library API docs when designing with a library."
 - "Be concrete. Cite file paths. Flag blockers explicitly."
 
-Wait for architect to complete. If it reports blockers (missing info, broken assumption), present them to the user and ask how to proceed before generating the plan.
+Wait for all three. If any reports a blocker (missing info, broken assumption), present it to the user and ask how to proceed before comparing.
 
-### 5. Self-review pass
+### 5. Compare, pick, self-review
 
-Before writing the plan, scan the architect's output for:
+Contrast the three by **depth** (behaviour a caller gets per unit of interface learned), **locality** (where change and future bugs concentrate), and **change size**. Pick one, or a hybrid when parts combine cleanly. Be opinionated: the plan carries one approach. The two not chosen become the Alternatives considered, with the real reason each lost.
+
+Then scan the chosen design for:
 
 - **Placeholders**: TBD, TODO, XXX, "fill in later"
 - **Contradictions**: sections that say opposite things, or an approach that reverses a decision already made
@@ -73,8 +81,8 @@ Compute path: `<git-common-dir>/claude/plans/<branch-name>.md` where `<git-commo
 - **## Approach**: high-level strategy, 3-7 sentences, including the why
 - **## Files**: concrete list of files to create or modify, one line per file with what changes
 - **## Risks**: what could break, edge cases, assumptions, things to watch
-- **## Alternatives considered**: 1-3 paths architect weighed, one sentence each on what they were and why rejected
-- **## Open questions**: anything that needs user input, a spike, or that architect couldn't resolve
+- **## Alternatives considered**: the two designs not chosen, one sentence each on their shape and why the chosen one beats them
+- **## Open questions**: anything that needs user input, a spike, or that no architect could resolve
 
 For Jira tasks, include the ticket's verbatim description and AC near the top so context survives session compression.
 
