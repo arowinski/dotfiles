@@ -29,10 +29,15 @@ Reject and rewrite if the draft contains:
 - Direct verdicts ("blocker", "nit", "ship it", "lgtm")
 - Casual openers when appropriate ("Hmm, intentional?", "Wait, what if...", "Yeah, you're right")
 - Backticked code references inline (`func/2` reads more peer than "the func function")
-- GitHub auto-links short SHAs (`a3f8b7d`) and `#1234`; file paths don't — append `#L42` or `#L42-L50`, and SHA-pin the URL for stability (`.../blob/<sha>/file.ex#L42-L50`).
-- Caption by what the link points to (`[the nil guard]`, `[the failing test]`), not the bare path; bare path only when the location itself is the point.
-- Better still: post it as an inline review comment on the line, so the path is implicit.
 - Backticks for code identifiers (`func/2`), not paraphrase — `lib/auth.ex`, not "the auth module".
+
+## Linking to code
+
+- A bare path is not a link: `lib/accounts/auth.ex#L55` renders as text and the reader still hunts for the line. GitHub auto-links SHAs (`a3f8b7d`) and `#1234`; paths never.
+- Best: an inline review comment on the line, location implicit.
+- Otherwise a URL pinned to a SHA — `gh pr view <n> --json headRefOid -q .headRefOid`, or `git rev-parse HEAD`. Never `blob/main/...`: the branch moves and the link silently points elsewhere.
+  `https://github.com/<owner>/<repo>/blob/<sha>/lib/accounts/auth.ex#L42-L50`
+- Caption by what the reader finds there (`[the nil guard]`), not the path.
 
 ## Bad-vs-good examples
 
