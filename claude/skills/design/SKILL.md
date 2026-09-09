@@ -1,6 +1,6 @@
 ---
 name: design
-description: Plan a feature or change. Spawn the architect agent to research, then produce a one-page plan with goal, approach, files, risks, alternatives, and open questions. Save to `<git-common-dir>/claude/plans/<branch>.md`. Use when starting non-trivial work, given a Jira URL, or asked to design, plan, or scope an approach.
+description: Plan a feature or change. Spawn the architect agent to research, then produce a one-page plan with goal, approach, files, risks, alternatives, and open questions. Save to `<git-common-dir>/claude/plans/<branch>.md`. Use when the next step is deciding HOW to build something rather than building it — "design this", "plan the X work", "scope this out", a Jira URL to work from, and equally the phrasings that never say plan: "how should we approach X", "what's the plan for X", "which way should we go, A or B", "what would actually change if we moved X", "before I touch this, work out what it takes". Any non-trivial change spanning several files or modules qualifies. Not for implementing a decision already made, debugging, reviewing, or explaining existing code.
 allowed-tools: Bash(git:*), Bash(mkdir:*), Read, Glob, Grep, Agent, AskUserQuestion, Write, mcp__atlassian__getJiraIssue, mcp__atlassian__getAccessibleAtlassianResources
 argument-hint: [Jira URL, description, or empty]
 ---
