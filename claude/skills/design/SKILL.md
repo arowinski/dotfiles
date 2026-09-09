@@ -49,9 +49,8 @@ Each prompt must include:
 - Full task description (and Jira details if any: title, description, AC verbatim)
 - **Decisions already made**: every choice the user stated in this conversation, the ticket, or project memory (storage location, module placement, naming, what stays as is). Quote each in one line. The architect must not propose their opposite; a plan that contradicts one is rejected at self-review.
 - Current branch
-- Its constraint, then: "Design under this constraint only. Omit Alternatives Considered; two other designs run in parallel and the comparison happens upstream."
+- Its constraint, then: "Design under this constraint only; two other designs run in parallel and the comparison happens upstream."
 - "Cover: high-level approach, files to touch, key risks, open questions you can't resolve from the code."
-- "Prefer introspection over guessing. Use Tidewave (`mcp__tidewave__*`) for Ecto schemas, source location, package docs, and live behavior in Phoenix projects. Use Sentry (`mcp__sentry__*`) for current error state in the area you're touching. Use context7 for up-to-date library API docs when designing with a library."
 - "Be concrete. Cite file paths. Flag blockers explicitly."
 
 Wait for all three. If any reports a blocker (missing info, broken assumption), present it to the user and ask how to proceed before comparing.

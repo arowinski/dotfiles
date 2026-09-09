@@ -72,11 +72,7 @@ Pass the resulting list, with word counts, to both agents below. Always include 
 - Claims checked against the world rather than the docs — does the cited path exist, does the referenced command resolve
 - Anything the changeset gets wrong that the docs never anticipated, including a malformed diff
 
-**Both guidelines agents:**
-
-**Report coverage.** List every doc read and every doc deliberately skipped, with the reason. The orchestrator repeats this in the final output. A doc nobody read is a silent false negative — the one failure the skeptic pass cannot catch — so it has to be visible rather than implied.
-
-**No compliance assertions.** Report violations only. "Follows project conventions", "matches the shape used by other skills", "consistent with the repo's preference", and any section of positive observations are banned. Certifying compliance you did not verify is worse than saying nothing, because it converts a miss into a false all-clear. A clean slice is reported by staying silent about it.
+**Both guidelines agents:** their Coverage section lists every doc read and every doc deliberately skipped, with the reason. Repeat it in the final output. A doc nobody read is a silent false negative — the one failure the skeptic pass cannot catch — so it has to be visible rather than implied.
 
 ### 2. security (subagent_type: code-reviewer, model: opus)
 
@@ -84,7 +80,7 @@ Scope: auth, input validation, secrets, injection, authz, SSRF, deserialization,
 
 Augmentation: Reasoning must describe a concrete attack scenario (input source → vulnerable sink → impact). No "could be exploited" without a path.
 
-### 3. architecture (subagent_type: architect)
+### 3. architecture (subagent_type: code-reviewer, model: opus)
 
 Scope: patterns, layering, coupling, abstractions, module boundaries, dependency direction, public API design, structural naming (modules, classes, public functions). Skip line-level bugs, local style.
 
@@ -98,25 +94,9 @@ When ticket context is loaded: for every acceptance criterion in the ticket, ide
 
 - Full scope + context + diff
 - Role and explicit non-scope ("you do NOT review X")
-- Severity scale: blocker / major / nit / info
 - "Answer independently. Do not coordinate."
 
-### Finding format (every agent)
-
-Each finding must be structured with these fields:
-
-- **Claim** — one sentence: what's wrong
-- **Evidence** — quoted code with file:line, or quoted rule with source path:line
-- **Reasoning** — how the evidence produces the claimed harm
-- **Severity** — blocker | major | nit | info
-- **Fix** — concrete change, code snippet, or rule reference
-
-No prose-only reports. Self-verify before reporting:
-- The cited line exists in the diff or at the cited file path
-- The quoted evidence matches the actual code or rule text
-- The reasoning chain connects evidence to harm without unsupported leaps
-
-Drop findings that fail any check. Report only structured, evidenced findings — never "I think X might be wrong" or "could potentially...".
+Finding format and severity scale (Claim / Evidence / Reasoning / Severity / Fix, blocker / major / nit / info, self-verified) are the code-reviewer agent's own; don't restate them in the prompt.
 
 ## Synthesize
 
