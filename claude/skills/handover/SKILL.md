@@ -2,7 +2,7 @@
 name: handover
 description: Write or read a session handover at `<git-common-dir>/claude/handovers/<branch>.md` — the state a fresh session needs to pick the work up. Use on "write a handover", "write the handoff", "prepare a handover", "hand this off", "dump state before we run out of context", and on the read side "read the handover", "read the handoff", "resume from the handover", "where did we leave off on this branch". One file per branch, rewritten in place. Does NOT commit, push, or start implementing.
 allowed-tools: Bash(git:*), Bash(mkdir:*), Bash(gh pr view:*), Read, Glob, Grep, Write
-argument-hint: [write | read | empty]
+argument-hint: [read | write | <what the next session is for>]
 ---
 
 # Handover
@@ -47,7 +47,7 @@ Rewrite in place; there is no history to fall back on (`.git/claude/` is untrack
 - **## Open questions**: what genuinely needs the user or a spike. Not a dumping ground for things you didn't check
 - **## Gotchas**: environment quirks, flaky tests, non-obvious file relationships. Skip the section when there are none
 
-Facts only. No status-report voice, no "we successfully implemented". A claim in **Done** that isn't backed by a commit or a passing test belongs in **Next**. A section with nothing real to put in it gets left out or marked unknown — a handover padded with plausible-sounding detail is worse than a short one, because the next session acts on it.
+Facts only. No status-report voice, no "we successfully implemented". A claim in **Done** that isn't backed by a commit or a passing test belongs in **Next**. A section with nothing real to put in it gets left out or marked unknown — a handover padded with plausible-sounding detail is worse than a short one, because the next session acts on it. No secrets: a token, password, or personal detail that surfaced in output is redacted, not carried over — the file is untracked, but it is plain text on disk.
 
 If the work pivoted mid-session, rewrite **Goal** to what it became. Don't bend new work into the old framing to keep the sections tidy.
 
