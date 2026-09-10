@@ -249,7 +249,6 @@
   },
   "enabledPlugins": {
     "coderabbit@claude-plugins-official": true,
-    "caveman@caveman": true,
     "skill-creator@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
