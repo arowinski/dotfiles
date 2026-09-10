@@ -244,6 +244,15 @@
             "command": "claude-gate-rules"
           }
         ]
+      },
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "claude-gate-read"
+          }
+        ]
       }
     ]
   },
