@@ -31,6 +31,8 @@ allow-redirect /tmp/**
 allow-redirect /private/tmp/**
 allow-redirect /dev/null
 allow-redirect ~/.claude/jobs/**
+# The allow-rules above match literal text, so `$SP/x.md` never matches and prompts every time
+deny-redirect $* "Write the path out in full — $VAR paths never match the allow-rule"
 
 # Project tools
 allow mix
