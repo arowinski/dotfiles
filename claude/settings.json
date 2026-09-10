@@ -160,6 +160,8 @@
       "mcp__atlassian__getTransitionsForJiraIssue",
       "mcp__atlassian__getIssueLinkTypes",
       "mcp__atlassian__lookupJiraAccountId",
+      "mcp__atlassian__createJiraIssue",
+      "mcp__atlassian__editJiraIssue",
       "mcp__process-compose__pc_process_logs",
       "mcp__process-compose__pc_process_get",
       "mcp__process-compose__pc_process_list",
