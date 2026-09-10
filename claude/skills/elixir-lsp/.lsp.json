@@ -1,0 +1,10 @@
+{
+  "expert": {
+    "command": "expert-lsp-shim",
+    "extensionToLanguage": {
+      ".ex": "elixir",
+      ".exs": "elixir",
+      ".heex": "heex"
+    }
+  }
+}

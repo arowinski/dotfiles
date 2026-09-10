@@ -1,0 +1,98 @@
+#!/usr/bin/env node
+// Stdio shim between an LSP client and Expert (the Elixir language server).
+//
+// Expert issues server-to-client requests such as client/registerCapability and
+// then blocks until it gets a response. A client that ignores them leaves the
+// server idle forever, which looks exactly like a hang. This shim answers those
+// requests on the client's behalf and passes everything else through untouched,
+// so Expert keeps being upgraded independently.
+//
+// Wire format is LSP over stdio: "Content-Length: N\r\n\r\n" followed by N bytes
+// of JSON. Requests carry both id and method; responses carry id without method.
+
+const { spawn } = require("child_process");
+
+const child = spawn("expert", ["--stdio"], {
+  stdio: ["pipe", "pipe", "inherit"],
+});
+
+child.on("error", (err) => {
+  process.stderr.write(`expert-lsp-shim: cannot start expert: ${err.message}\n`);
+  process.exit(1);
+});
+child.on("exit", (code, signal) => process.exit(code ?? (signal ? 1 : 0)));
+
+// Server-to-client requests we answer ourselves. Each maps to a function
+// returning the `result` field. Anything not listed is forwarded to the client.
+const AUTO_REPLY = {
+  "client/registerCapability": () => null,
+  "client/unregisterCapability": () => null,
+  "window/workDoneProgress/create": () => null,
+  // One settings object per requested section; null means "no override".
+  "workspace/configuration": (params) => (params?.items ?? []).map(() => null),
+};
+
+function frame(obj) {
+  const body = Buffer.from(JSON.stringify(obj), "utf8");
+  return Buffer.concat([
+    Buffer.from(`Content-Length: ${body.length}\r\n\r\n`, "ascii"),
+    body,
+  ]);
+}
+
+// Splits a stdio stream into whole LSP messages. Calls onMessage(parsed, raw)
+// for each; raw is kept so anything we forward goes through byte-identical.
+function reader(onMessage) {
+  let buf = Buffer.alloc(0);
+  return (chunk) => {
+    buf = Buffer.concat([buf, chunk]);
+    for (;;) {
+      const sep = buf.indexOf("\r\n\r\n");
+      if (sep === -1) return;
+      const header = buf.subarray(0, sep).toString("ascii");
+      const match = /content-length:\s*(\d+)/i.exec(header);
+      if (!match) {
+        // Unparseable header: drop it rather than stall the stream forever.
+        buf = buf.subarray(sep + 4);
+        continue;
+      }
+      const length = Number(match[1]);
+      const start = sep + 4;
+      if (buf.length < start + length) return;
+      const raw = buf.subarray(0, start + length);
+      const body = buf.subarray(start, start + length).toString("utf8");
+      buf = buf.subarray(start + length);
+      let parsed = null;
+      try {
+        parsed = JSON.parse(body);
+      } catch {
+        // Malformed JSON is the server's problem, not ours — pass it along.
+      }
+      onMessage(parsed, raw);
+    }
+  };
+}
+
+// Client to server: verbatim.
+process.stdin.on("data", (chunk) => child.stdin.write(chunk));
+process.stdin.on("end", () => child.stdin.end());
+
+// Server to client: intercept the blocking requests, forward the rest.
+child.stdout.on(
+  "data",
+  reader((msg, raw) => {
+    const isRequest = msg && msg.id !== undefined && msg.method;
+    if (isRequest && AUTO_REPLY[msg.method]) {
+      child.stdin.write(
+        frame({ jsonrpc: "2.0", id: msg.id, result: AUTO_REPLY[msg.method](msg.params) }),
+      );
+      return;
+    }
+    if (isRequest) {
+      // Unknown server-to-client request. Forward it, but say so: if the client
+      // ignores it and the server blocks, this line names the culprit.
+      process.stderr.write(`expert-lsp-shim: forwarding ${msg.method} (id ${msg.id})\n`);
+    }
+    process.stdout.write(raw);
+  }),
+);

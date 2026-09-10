@@ -1,0 +1,11 @@
+{
+  "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
+  "name": "elixir-lsp",
+  "version": "0.1.0",
+  "description": "Elixir language server (Expert) for code intelligence",
+  "author": {
+    "name": "arowinski",
+    "email": "arowinski02@gmail.com"
+  },
+  "lspServers": "./.lsp.json"
+}
