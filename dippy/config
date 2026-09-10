@@ -176,6 +176,7 @@ allow smug
 allow rubocop
 allow bundle show
 allow bundle info
+allow bundle outdated
 allow gem which
 allow gem list
 allow gem contents
