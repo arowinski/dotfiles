@@ -86,6 +86,7 @@ allow safe-ruby
 allow safe-node
 allow expert-lsp-shim
 deny python3 "Use safe-python instead of python3"
+allow skill-eval
 deny ruby "Use safe-ruby for one-liners, rails runner in Rails projects"
 deny node -e * "Throwaway JS eval — use safe-node (network-isolated), or safe-python for data"
 deny node --eval * "Throwaway JS eval — use safe-node (network-isolated), or safe-python for data"

@@ -1,0 +1,548 @@
+#!/usr/bin/env python3
+"""Measure a skill: does its description trigger, does its body help.
+
+Layers on top of the skill-creator plugin rather than replacing it. The plugin
+owns the train/test split, the description-improvement loop and the iteration
+logic, so its updates keep flowing; this script fixes the four things that make
+its numbers meaningless for a skill that is already installed:
+
+  1. Host python is 3.9 and the plugin uses 3.10 syntax, so each copied module
+     gets `from __future__ import annotations` prepended.
+  2. Its detector gives up at the first non-Skill tool, but agents run git
+     status and friends before reaching for a skill.
+  3. It only counts its own probe command name, while an installed skill
+     invokes under its real name and wins.
+  4. Eval runs mutate the working tree, so a shared fixture is spent after one
+     query and the rest correctly decline.
+
+The patch is appended to a temp copy of the plugin's run_eval module, where a
+later definition shadows the earlier one. Nothing matches on the plugin's exact
+text beyond the names it must call, and a missing name fails loudly.
+
+Usage:
+  skill-eval triggers --skill <dir> --evals <queries.json> [--fixture <dir>]
+                      [--iterations 3] [--runs 3] [--timeout 150] [--model <id>]
+  skill-eval ab --skill <dir> --cases <cases.json> [--fixture <dir>] [--runs 1]
+
+queries.json: [{"query": "...", "should_trigger": true}, ...]
+cases.json:   [{"id": "slop", "prompt": "..."}, ...]
+"""
+
+import argparse
+import glob
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+PLUGIN_GLOB = str(
+    Path.home() / ".claude/plugins/cache/*/skill-creator/*/skills/skill-creator"
+)
+# Runs are expensive; their output outlives the process. mkdtemp gets reaped by
+# the OS, and ~/.claude is a symlink into the dotfiles repo, so neither is a
+# home for results.
+OUT_ROOT = Path.home() / ".cache" / "skill-eval"
+PATCH_MODULES = ("run_loop", "run_eval", "improve_description", "generate_report", "utils")
+
+# Appended to the copied run_eval module. A ProcessPoolExecutor on macOS spawns
+# fresh interpreters that re-import the module, so a monkeypatch in the parent
+# would not reach the children; a later definition in the source does.
+OVERRIDE = '''
+
+# ---- skill-eval override -------------------------------------------------
+import os as _os
+import re as _re
+import shutil as _shutil
+import tempfile as _tempfile
+import uuid as _uuid
+from pathlib import Path as _Path
+
+_SKILL_RE = _re.compile(r'"skill"\\s*:\\s*"([^"]+)"')
+
+
+def _swap_description(text, description):
+    """Replace the frontmatter description, block scalars included.
+
+    A `description: |` field carries its value on the indented lines that
+    follow. Replacing only the `description:` line leaves those orphaned, and
+    the skill loads with a mangled description while the harness's probe file
+    still carries a good copy - so the run scores fine and measures nothing.
+    """
+    lines = text.split("\\n")
+    for i, line in enumerate(lines):
+        if not line.startswith("description:"):
+            continue
+        j = i + 1
+        if line.rstrip().endswith(("|", ">", "|-", ">-")):
+            while j < len(lines) and (lines[j].startswith((" ", "\\t")) or not lines[j].strip()):
+                j += 1
+        flat = " ".join(description.split())
+        return "\\n".join(lines[:i] + ["description: " + flat] + lines[j:])
+    raise ValueError("no description field in " + text[:80])
+
+
+def _install_description(live_skill_md, description):
+    """Point the installed skill at the description under test.
+
+    The installed skill is what `claude -p` loads, so its frontmatter is the
+    thing being measured. Body is untouched.
+    """
+    p = _Path(live_skill_md)
+    text = p.read_text()
+    out = _swap_description(text, description)
+    if out != text:
+        p.write_text(out)
+
+
+def run_single_query(query, skill_name, skill_description, timeout, project_root, model=None):
+    fixture = _os.environ["SKILL_EVAL_FIXTURE"]
+    live_skill = _os.environ["SKILL_EVAL_LIVE_SKILL"]
+    _install_description(live_skill, skill_description)
+
+    clean_name = skill_name + "-skill-" + _uuid.uuid4().hex[:8]
+    run_dir = _Path(_tempfile.mkdtemp(prefix="skilleval-"))
+    repo = run_dir / "repo"
+    _shutil.copytree(fixture, str(repo), symlinks=True)
+    commands = repo / ".claude" / "commands"
+    commands.mkdir(parents=True, exist_ok=True)
+    indented = "\\n  ".join(skill_description.split("\\n"))
+    (commands / (clean_name + ".md")).write_text(
+        "---\\ndescription: |\\n  " + indented + "\\n---\\n\\n# " + skill_name + "\\n"
+    )
+
+    cmd = ["claude", "-p", query, "--output-format", "stream-json",
+           "--verbose", "--include-partial-messages"]
+    if model:
+        cmd.extend(["--model", model])
+    # Eval runs are real agent runs. A skill whose tools write to something
+    # outside this machine (a tracker, a PR, a chat) would do it for real,
+    # dozens of times over, so those tools get blocked at the CLI.
+    blocked = _os.environ.get("SKILL_EVAL_DISALLOW", "").strip()
+    if blocked:
+        cmd.append("--disallowedTools")
+        cmd.extend(blocked.split(","))
+    env = {k: v for k, v in _os.environ.items() if k != "CLAUDECODE"}
+
+    try:
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+                                cwd=str(repo), env=env)
+        accumulated = ""
+        start = time.time()
+        try:
+            while time.time() - start < timeout:
+                if proc.poll() is not None:
+                    rest = proc.stdout.read()
+                    if rest:
+                        accumulated += rest.decode("utf-8", errors="replace")
+                    break
+                ready, _, _ = select.select([proc.stdout], [], [], 1.0)
+                if not ready:
+                    continue
+                chunk = _os.read(proc.stdout.fileno(), 65536)
+                if not chunk:
+                    break
+                accumulated += chunk.decode("utf-8", errors="replace")
+                # Partial JSON deltas split mid-string, so match the whole
+                # buffer rather than a line, and stop as soon as it is decided.
+                for found in _SKILL_RE.findall(accumulated):
+                    if found in (clean_name, skill_name):
+                        return True
+            for found in _SKILL_RE.findall(accumulated):
+                if found in (clean_name, skill_name):
+                    return True
+            return False
+        finally:
+            if proc.poll() is None:
+                proc.kill()
+                proc.wait()
+    finally:
+        _shutil.rmtree(str(run_dir), ignore_errors=True)
+# ---- end skill-eval override ---------------------------------------------
+'''
+
+
+def die(msg):
+    print("skill-eval: " + msg, file=sys.stderr)
+    sys.exit(1)
+
+
+def read_description(text):
+    """The frontmatter description, block scalar folded to one line."""
+    lines = text.split("\n")
+    for i, line in enumerate(lines):
+        if not line.startswith("description:"):
+            continue
+        rest = line[len("description:"):].strip()
+        if rest not in ("|", ">", "|-", ">-"):
+            return rest
+        out = []
+        j = i + 1
+        while j < len(lines) and (lines[j].startswith((" ", "\t")) or not lines[j].strip()):
+            out.append(lines[j].strip())
+            j += 1
+        return " ".join(w for w in out if w)
+    die("no description field found in SKILL.md")
+
+
+def swap_description(text, description):
+    """Replace the description field, block scalar continuation lines included."""
+    lines = text.split("\n")
+    for i, line in enumerate(lines):
+        if not line.startswith("description:"):
+            continue
+        j = i + 1
+        if line.rstrip().endswith(("|", ">", "|-", ">-")):
+            while j < len(lines) and (lines[j].startswith((" ", "\t")) or not lines[j].strip()):
+                j += 1
+        flat = " ".join(description.split())
+        return "\n".join(lines[:i] + ["description: " + flat] + lines[j:])
+    die("no description field found in SKILL.md")
+
+
+def plugin_dir():
+    matches = sorted(glob.glob(PLUGIN_GLOB))
+    if not matches:
+        die("skill-creator plugin not found under " + PLUGIN_GLOB
+            + "\nInstall it, or the layering has nothing to layer on.")
+    return Path(matches[-1])
+
+
+def prepare_scripts(workdir):
+    """Copy the plugin's scripts and apply the version-independent patches."""
+    src = plugin_dir() / "scripts"
+    dst = Path(workdir) / "scripts"
+    shutil.copytree(str(src), str(dst))
+
+    for name in PATCH_MODULES:
+        f = dst / (name + ".py")
+        if not f.exists():
+            die("plugin no longer ships scripts/" + name + ".py - upstream changed, "
+                "re-check the adapter before trusting any numbers")
+        f.write_text("from __future__ import annotations\n" + f.read_text())
+
+    run_eval = dst / "run_eval.py"
+    text = run_eval.read_text()
+    if "def run_single_query(" not in text:
+        die("plugin's run_eval.py no longer defines run_single_query - upstream "
+            "changed, re-check the adapter before trusting any numbers")
+    run_eval.write_text(text + OVERRIDE)
+    return dst
+
+
+def default_fixture(workdir):
+    """A small git repo, so queries naming files land on files that exist."""
+    repo = Path(workdir) / "fixture"
+    (repo / "lib").mkdir(parents=True)
+    (repo / "README.md").write_text("# demo\n\nA small project used for skill evals.\n")
+    (repo / "lib" / "worker.rb").write_text("class Worker\n  TIMEOUT = 5\nend\n")
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    subprocess.run(["git", "-C", str(repo), "add", "-A"], check=True)
+    subprocess.run(["git", "-C", str(repo), "-c", "user.email=t@t", "-c", "user.name=t",
+                    "commit", "-qm", "Add worker"], check=True)
+    (repo / "lib" / "worker.rb").write_text("class Worker\n  TIMEOUT = 30\nend\n")
+    return repo
+
+
+def run_claude(prompt, cwd, model, timeout=300):
+    """One direct run, no probe command file. Returns (text, skills_loaded)."""
+    cmd = ["claude", "-p", prompt, "--output-format", "stream-json", "--verbose",
+           "--include-partial-messages"]
+    if model:
+        cmd.extend(["--model", model])
+    env = {k: v for k, v in os.environ.items() if k != "CLAUDECODE"}
+    try:
+        out = subprocess.run(cmd, cwd=str(cwd), env=env, timeout=timeout,
+                             stdout=subprocess.PIPE, stderr=subprocess.DEVNULL).stdout
+    except subprocess.TimeoutExpired:
+        return ("(timed out)", [])
+    raw = out.decode("utf-8", errors="replace")
+    skills = sorted(set(re.findall(r'"skill"\s*:\s*"([^"]+)"', raw)))
+    texts = []
+    for line in raw.splitlines():
+        try:
+            event = json.loads(line)
+        except ValueError:
+            continue
+        if event.get("type") == "assistant":
+            for block in event.get("message", {}).get("content", []) or []:
+                if block.get("type") == "text" and block.get("text"):
+                    texts.append(block["text"])
+    return ("\n".join(texts).strip(), skills)
+
+
+def pct(n, d):
+    return "n/a" if not d else str(round(100.0 * n / d)) + "%"
+
+
+def capture_artifacts(work, dest):
+    """Save files the run created or changed, including ones outside the tree.
+
+    A skill's real output is often a file: /design writes a plan under the git
+    common dir, /doc edits modules in place. git status finds the tracked and
+    untracked ones; the plans dir sits inside .git and needs naming outright.
+    """
+    saved = []
+    try:
+        out = subprocess.run(["git", "-C", str(work), "status", "--porcelain"],
+                             stdout=subprocess.PIPE, timeout=30).stdout.decode()
+    except Exception:
+        out = ""
+    paths = [line[3:].strip() for line in out.splitlines() if line[3:].strip()]
+    paths += [str(p.relative_to(work)) for p in work.glob(".git/claude/**/*.md")]
+    for rel in sorted(set(paths)):
+        src = work / rel
+        if not src.is_file():
+            continue
+        target = dest / rel
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy(str(src), str(target))
+        saved.append(rel)
+    return saved
+
+
+def cmd_triggers(args):
+    skill = Path(args.skill).resolve()
+    skill_md = skill / "SKILL.md"
+    if not skill_md.exists():
+        die("no SKILL.md in " + str(skill))
+    evals = json.loads(Path(args.evals).read_text())
+
+    # Each nested run is a full agent session re-reading a system prompt and
+    # the whole skill set, so the count is the cost. Say it before spending it.
+    sessions = len(evals) * args.runs * args.iterations
+    print("~%d nested sessions (%d queries x %d runs x up to %d iterations)"
+          % (sessions, len(evals), args.runs, args.iterations))
+    if sessions > args.max_sessions:
+        die("that is over the %d-session budget. Lower --runs, --iterations or the "
+            "eval set, or raise --max-sessions deliberately. Verifying one specific "
+            "description needs --iterations 1; only a search needs more."
+            % args.max_sessions)
+
+    workdir = Path(tempfile.mkdtemp(prefix="skill-eval-"))
+    snapshot = workdir / "SKILL.md.snapshot"
+    shutil.copy(str(skill_md), str(snapshot))
+    scripts = prepare_scripts(workdir)
+    fixture = Path(args.fixture).resolve() if args.fixture else default_fixture(workdir)
+
+    os.environ["SKILL_EVAL_FIXTURE"] = str(fixture)
+    os.environ["SKILL_EVAL_LIVE_SKILL"] = str(skill_md)
+    if args.disallow:
+        os.environ["SKILL_EVAL_DISALLOW"] = args.disallow
+    sys.path.insert(0, str(workdir))
+
+    from scripts.run_loop import run_loop  # noqa: E402
+    from scripts.utils import parse_skill_md  # noqa: E402
+
+    _name, original, _content = parse_skill_md(skill)
+    try:
+        result = run_loop(
+            eval_set=evals, skill_path=skill, description_override=None,
+            num_workers=args.workers, timeout=args.timeout,
+            max_iterations=args.iterations, runs_per_query=args.runs,
+            trigger_threshold=0.5, holdout=0.4, model=args.model,
+            verbose=args.verbose, live_report_path=None, log_dir=None,
+        )
+    finally:
+        shutil.copy(str(snapshot), str(skill_md))
+
+    report(result, original, evals, fixture, args)
+
+
+def report(result, original, evals, fixture, args):
+    history = result.get("history") or []
+    if history:
+        triggered_any = any(
+            q.get("triggers", 0) > 0
+            for split in ("train_results", "test_results")
+            for q in (history[0].get(split) or [])
+        )
+        if not triggered_any:
+            die("every query scored zero triggers, negatives included. That is a "
+                "broken harness, not a bad description - fix it before reporting "
+                "numbers. Usual causes: fixture does not match the queries, or the "
+                "timeout is shorter than the agent's run.")
+
+    best_desc = result.get("best_description", "")
+    print("\n## Trigger evals\n")
+    print("| iteration | train | test | recall | precision |")
+    print("|---|---|---|---|---|")
+    for h in history:
+        rows = (h.get("test_results") or []) or (h.get("train_results") or [])
+        positives = [q for q in rows if q.get("should_trigger")]
+        fired = [q for q in rows if q.get("trigger_rate", 0) >= 0.5]
+        hits = [q for q in fired if q.get("should_trigger")]
+        test = ("%s/%s" % (h.get("test_passed"), h.get("test_total"))
+                if h.get("test_total") else "-")
+        print("| %s%s | %s/%s | %s | %s | %s |" % (
+            h.get("iteration", "?"),
+            " (best)" if h.get("description", "") == best_desc else "",
+            h.get("train_passed"), h.get("train_total"), test,
+            pct(len(hits), len(positives)), pct(len(hits), len(fired)),
+        ))
+    print("\nRecall and precision are over the held-out split where there is one, "
+          "the train split otherwise.")
+
+    # An iteration can beat the winner on train and lose the tie on test. Its
+    # wording is what fixed those queries, so it is worth reading even though
+    # the loop discarded it.
+    best_train = max((h.get("train_passed") or 0) for h in history) if history else 0
+    for h in history:
+        if (h.get("description", "") != best_desc
+                and (h.get("train_passed") or 0) >= best_train):
+            print("\n**Candidate that scored higher on train (iteration %s, %s/%s)**\n"
+                  % (h.get("iteration"), h.get("train_passed"), h.get("train_total")))
+            print(h.get("description", ""))
+
+    print("\n**Best description**\n")
+    print(best_desc or "(none)")
+    if best_desc.strip() == original.strip():
+        print("\nUnchanged from the original: no candidate beat it on held-out queries.")
+
+    print("\n### Borderline verdicts, re-probed directly\n")
+    print("The loop injects its own probe command carrying the candidate "
+          "description, which can pull a borderline query over the line. These "
+          "runs use no probe file, so they show what actually loads.\n")
+    print("| query | expected | skills loaded |")
+    print("|---|---|---|")
+    for item in failures(history, best_desc):
+        text, skills = run_claude(item["query"], fixture, args.model)
+        del text
+        print("| %s | %s | %s |" % (
+            item["query"][:60].replace("|", "/"),
+            "trigger" if item["should_trigger"] else "no trigger",
+            ", ".join(skills) if skills else "NONE",
+        ))
+    print("\nA skill loading *alongside* another is a co-load, not a false "
+          "positive: companion skills are meant to stack.")
+    print("A single non-trigger on a short query is usually triviality, not a "
+          "description defect - re-run it with more context before believing it.")
+    print("\n**Not measured:** body quality. Trigger rate says nothing about "
+          "whether the skill's instructions improve the output; use `skill-eval ab` "
+          "with a failing case for that.")
+
+
+def failures(history, best_desc=None):
+    best = None
+    for h in history:
+        if best_desc and h.get("description", "") == best_desc:
+            best = h
+    if best is None and history:
+        best = history[-1]
+    if not best:
+        return []
+    out = []
+    for split in ("train_results", "test_results"):
+        for q in best.get(split) or []:
+            if not q.get("pass", True):
+                out.append({"query": q.get("query", ""),
+                            "should_trigger": q.get("should_trigger", False)})
+    return out
+
+
+def cmd_ab(args):
+    skill = Path(args.skill).resolve()
+    skill_md = skill / "SKILL.md"
+    cases = json.loads(Path(args.cases).read_text())
+    repo_root = subprocess.run(["git", "-C", str(skill), "rev-parse", "--show-toplevel"],
+                               stdout=subprocess.PIPE, check=True).stdout.decode().strip()
+    rel = os.path.relpath(str(skill_md), repo_root)
+
+    workdir = OUT_ROOT / ("ab-" + time.strftime("%Y%m%d-%H%M%S"))
+    (workdir / "artifacts").mkdir(parents=True, exist_ok=True)
+    new_arm = workdir / "new.md"
+    old_arm = workdir / "old.md"
+    shutil.copy(str(skill_md), str(new_arm))
+    head = subprocess.run(["git", "-C", repo_root, "show", "HEAD:" + rel],
+                          stdout=subprocess.PIPE, check=True).stdout.decode()
+    # Hold the description constant so only the body varies between arms.
+    head = swap_description(head, read_description(new_arm.read_text()))
+    old_arm.write_text(head)
+
+    fixture = Path(args.fixture).resolve() if args.fixture else default_fixture(workdir)
+    results = {}
+    try:
+        for arm, path in (("old", old_arm), ("new", new_arm)):
+            shutil.copy(str(path), str(skill_md))
+            for case in cases:
+                for n in range(args.runs):
+                    work = workdir / ("work-%s-%s-%d" % (arm, case["id"], n))
+                    shutil.copytree(str(fixture), str(work), symlinks=True)
+                    text, skills = run_claude(case["prompt"], work, args.model,
+                                              timeout=args.timeout)
+                    # Some skills deliver a file, not chat text - a plan, a
+                    # rewritten doc. Keep whatever the run wrote, or the thing
+                    # being measured dies with the work dir.
+                    files = capture_artifacts(
+                        work, workdir / "artifacts" / ("%s-%s-%d" % (arm, case["id"], n)))
+                    results.setdefault(case["id"], {}).setdefault(arm, []).append(
+                        {"text": text, "skills": skills, "files": files})
+                    shutil.rmtree(str(work), ignore_errors=True)
+    finally:
+        shutil.copy(str(new_arm), str(skill_md))
+
+    out = workdir / "ab-results.json"
+    out.write_text(json.dumps(results, indent=2))
+    print("\n## Body A/B: HEAD vs working copy\n")
+    print("Description held constant across arms, so any difference is the body.\n")
+    for case in cases:
+        print("### " + case["id"] + "\n")
+        for arm in ("old", "new"):
+            for run in results.get(case["id"], {}).get(arm, []):
+                loaded = "skill loaded" if run["skills"] else "SKILL DID NOT LOAD"
+                print("**%s** (%s): %s\n" % (arm, loaded, run["text"][:600]))
+    print("\nFull outputs: " + str(out))
+    print("\nCall it a wash unless a difference repeats across runs. Two arms "
+          "differing once is noise, and tuning prose against noise is how a "
+          "regression gets written in.")
+
+
+def main():
+    p = argparse.ArgumentParser(prog="skill-eval")
+    sub = p.add_subparsers(dest="cmd", required=True)
+
+    t = sub.add_parser("triggers", help="measure whether the description triggers")
+    t.add_argument("--skill", required=True)
+    t.add_argument("--evals", required=True)
+    t.add_argument("--fixture")
+    t.add_argument("--iterations", type=int, default=2,
+                   help="improvement rounds; 1 verifies a description you wrote, "
+                        "more searches for one (the expensive mode)")
+    t.add_argument("--runs", type=int, default=2,
+                   help="runs per query; 2 separates signal from a flake, and a "
+                        "third rarely changes the verdict")
+    t.add_argument("--max-sessions", type=int, default=150,
+                   help="refuse to start above this many nested sessions")
+    t.add_argument("--workers", type=int, default=10)
+    t.add_argument("--timeout", type=int, default=150)
+    t.add_argument("--model", default="claude-opus-5")
+    t.add_argument("--disallow", default="",
+                   help="comma-separated tools to block in eval runs, e.g. "
+                        "'mcp__atlassian__createJiraIssue,mcp__atlassian__editJiraIssue'. "
+                        "Required whenever the skill's tools write outside this machine: "
+                        "the runs are real, and they are many")
+    t.add_argument("--verbose", action="store_true",
+                   help="show the plugin's own per-query chatter; off by default "
+                        "so only the table lands")
+    t.set_defaults(func=cmd_triggers)
+
+    a = sub.add_parser("ab", help="A/B the body against HEAD")
+    a.add_argument("--skill", required=True)
+    a.add_argument("--cases", required=True)
+    a.add_argument("--fixture")
+    a.add_argument("--runs", type=int, default=1)
+    a.add_argument("--timeout", type=int, default=300,
+                   help="seconds per run; raise it for skills that spawn "
+                        "research agents, whose runs take minutes")
+    a.add_argument("--model", default="claude-opus-5")
+    a.set_defaults(func=cmd_ab)
+
+    args = p.parse_args()
+    args.func(args)
+
+
+if __name__ == "__main__":
+    main()
