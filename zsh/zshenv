@@ -25,5 +25,10 @@ export WS_LOCAL="${WS_LOCAL:-$HOME/gat/gat-local}"
 # mise activate prepends ~/.local/bin; re-prepend ~/.bin so our shims win.
 export PATH="$HOME/.bin:$PATH"
 
+# mise activate only exports bin dirs for tools installed when the shell started,
+# so a tool added later is missing from any process that inherited this PATH.
+# Append the shims dir as a fallback: it resolves whatever version the config pins.
+export PATH="$PATH:$HOME/.local/share/mise/shims"
+
 # Per-workspace env (ports, DB) is not loaded here: each worktree's mise.toml does it,
 # via `mise activate` above. See $WS_LOCAL/docs/claude/dev-session.md, "Workspace env".

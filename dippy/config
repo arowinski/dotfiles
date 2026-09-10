@@ -100,6 +100,8 @@ deny elixir -e "Elixir eval runs in the live app: tidewave project_eval (dev-ses
 deny elixir *.exs "A script that rewrites a file is sed -i with extra steps: use the Edit tool. Probes: tidewave project_eval"
 deny mix run -e * "Elixir eval runs in the live app: tidewave project_eval (dev-session.md), not a cold VM"
 deny mix run *.exs "Probes run in the live app: tidewave project_eval (dev-session.md), not a cold VM"
+deny mise x "mise is active in zshenv: pin the version in the project's mise.toml/.ruby-version and run the bare command"
+deny mise exec "mise is active in zshenv: pin the version in the project's mise.toml/.ruby-version and run the bare command"
 deny sleep "Foreground wait — use run_in_background + the task notification, or the Monitor tool; never poll with sleep/for/until loops"
 deny /**/rg "Use bare 'rg'"
 deny /**/rg * "Use bare 'rg'"
