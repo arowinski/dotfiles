@@ -5,6 +5,8 @@ ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'
 ZSH_AUTOSUGGEST_STRATEGY=(history completion)
 
 [[ -f $HOME/.zsh_local ]] && source $HOME/.zsh_local
+# ~/.zsh_local prepends ~/.local/bin; put ~/.bin back in front so its wrappers win.
+export PATH="$HOME/.bin:$PATH"
 
 for config in $HOME/.zsh/configs/*; do
   source $config
