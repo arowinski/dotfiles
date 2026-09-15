@@ -106,5 +106,5 @@ if ! $assume_yes; then
   case "$reply" in y|Y|yes|YES) ;; *) echo "aborted"; exit 0 ;; esac
 fi
 
-for b in "${merged[@]}"; do git branch -d "$b"; done
+for b in "${merged[@]:-}"; do [ -n "$b" ] && git branch -d "$b"; done
 for b in "${not_mine[@]:-}"; do [ -n "$b" ] && git branch -D "$b"; done
