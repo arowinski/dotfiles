@@ -1,0 +1,17 @@
+#!/bin/bash
+#
+# UserPromptSubmit hook: restate the response budget right after every prompt.
+#
+# The CLAUDE.md budget line sits at the top of a long system prompt and stops
+# holding a few hours into a session (retro 09-07, 09-15, 09-16). A reminder at
+# the most recent position is the lever the Opus 5 prompting guide names.
+#
+# Wired in claude/settings.json under hooks.UserPromptSubmit.
+set -euo pipefail
+
+jq -n '{
+  hookSpecificOutput: {
+    hookEventName: "UserPromptSubmit",
+    additionalContext: "Reminder — the CLAUDE.md response budget applies: lead with the answer, at most four sentences of prose unless analysis, comparison, or a walkthrough was asked for. Out-of-scope extras: one line each, no code. No recap after actions."
+  }
+}'
