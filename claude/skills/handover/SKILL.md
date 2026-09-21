@@ -1,8 +1,8 @@
 ---
 name: handover
-description: Write or read a session handover at `<git-common-dir>/claude/handovers/<branch>.md` — the state a fresh session needs to pick the work up. Use on "write a handover", "write the handoff", "prepare a handover", "hand this off", "dump state before we run out of context", and on the read side "read the handover", "read the handoff", "resume from the handover", "where did we leave off on this branch". One file per branch, rewritten in place. Does NOT commit, push, or start implementing.
+description: Write, read, or list session handovers at `<git-common-dir>/claude/handovers/<branch>.md` — the state a fresh session needs to pick the work up. Use on "write a handover", "write the handoff", "prepare a handover", "hand this off", "dump state before we run out of context"; on the read side "read the handover", "read the handoff", "resume from the handover", "where did we leave off on this branch"; and to survey "list the handovers", "what's parked", "which branches have handovers". One file per branch, rewritten in place. Does NOT commit, push, or start implementing.
 allowed-tools: Bash(git:*), Bash(mkdir:*), Bash(gh pr view:*), Read, Glob, Grep, Write
-argument-hint: [read | write | <what the next session is for>]
+argument-hint: [read | write | list | <what the next session is for>]
 ---
 
 # Handover
@@ -15,6 +15,7 @@ One handover per branch, at `<git-common-dir>/claude/handovers/<branch>.md`. `gi
 
 - **Write** — the ask is to record state ("write a handover", "hand this off"), or context is about to run out mid-task.
 - **Read** — the ask is to pick work up ("read the handoff", "where did we leave off").
+- **List** — the ask is a survey across branches ("what's parked", "list the handovers").
 
 No argument and a handover exists for the current branch → read. No argument, no file → write.
 
@@ -72,3 +73,16 @@ Compare the state line against reality: current branch, `git log --oneline` sinc
 - **Open questions**: verbatim from the file, with anything the drift has already answered marked as settled
 
 Then stop and wait for a go. Reading a handover is not authorization to start the work in it.
+
+## List
+
+One row per file under `<git-common-dir>/claude/handovers/`, branch name = path relative to that directory minus `.md`. For each, read the state line and the first line under **## Next**, then check the branch: `git rev-parse --verify --quiet <branch>` and `git branch -r --list origin/<branch>`.
+
+| Branch | State | PR | Next |
+|---|---|---|---|
+
+**State** is one of: `current` (branch head equals the recorded SHA), `moved +N` (N commits since it), `gone` (no local or remote branch). PR is the recorded link and state, not refreshed; `gh pr view` only for a row the user then asks about. Sort `current` and `moved` first, `gone` last.
+
+A `gone` row is a handover whose branch was merged or deleted; name them and offer to remove the files. Delete only on a yes, one confirmation for the whole set.
+
+Stop after the table. Reading one of the listed handovers is the read mode, on request.
