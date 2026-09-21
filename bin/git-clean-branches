@@ -2,8 +2,10 @@
 #
 # git-clean-branches — prune local branches that are merged or not yours.
 #
-# Two categories, shown before anything is deleted:
+# Three categories, shown before anything is deleted:
 #   merged   — local branches already merged into the main branch (safe: `-d`)
+#   gone     — branches whose upstream was deleted on origin, i.e. squash- or
+#              rebase-merged then removed (uses `-D`; git can't see the merge)
 #   not-mine — branches whose tip commit author isn't you (uses `-D`, may be unmerged)
 #
 # Always protected: the current branch, main/master, and any branch checked out
@@ -12,7 +14,7 @@
 #   git-clean-branches            # show + confirm, then delete
 #   git-clean-branches --dry-run  # show only, delete nothing
 #   git-clean-branches --yes      # skip the confirmation prompt
-#   git-clean-branches --merged   # only the merged category (skip not-mine)
+#   git-clean-branches --merged   # only merged + gone (skip not-mine)
 #
 set -euo pipefail
 
@@ -24,7 +26,7 @@ for arg in "$@"; do
     --dry-run) dry_run=true ;;
     --yes|-y) assume_yes=true ;;
     --merged) merged_only=true ;;
-    -h|--help) sed -n '2,18p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help) sed -n '2,17p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "unknown arg: $arg" >&2; exit 2 ;;
   esac
 done
@@ -64,19 +66,28 @@ while IFS= read -r b; do
   merged+=("$b")
 done < <(git branch --merged "$main" --format='%(refname:short)')
 
+# Upstream deleted on origin after `fetch --prune` — the squash/rebase-merge case.
+gone=()
+while IFS= read -r b; do
+  [ -z "$b" ] && continue
+  protected "$b" && continue
+  printf '%s\n' "${merged[@]:-}" | grep -qxF "$b" && continue
+  gone+=("$b")
+done < <(git branch --format='%(refname:short) %(upstream:track)' | awk '$2 == "[gone]" {print $1}')
+
 not_mine=()
 if ! $merged_only; then
   while IFS= read -r b; do
     [ -z "$b" ] && continue
     protected "$b" && continue
-    # skip ones already in merged list
-    printf '%s\n' "${merged[@]:-}" | grep -qxF "$b" && continue
+    # skip ones already in merged or gone lists
+    printf '%s\n' "${merged[@]:-}" "${gone[@]:-}" | grep -qxF "$b" && continue
     author="$(git log -1 --format='%ae' "$b")"
     [ "$author" != "$me" ] && not_mine+=("$b")
   done < <(git branch --format='%(refname:short)')
 fi
 
-if [ ${#merged[@]} -eq 0 ] && [ ${#not_mine[@]} -eq 0 ]; then
+if [ ${#merged[@]} -eq 0 ] && [ ${#gone[@]} -eq 0 ] && [ ${#not_mine[@]} -eq 0 ]; then
   echo "Nothing to clean. ✨"
   exit 0
 fi
@@ -85,6 +96,11 @@ if [ ${#merged[@]} -gt 0 ]; then
   echo
   echo "Merged into $main (will use git branch -d):"
   printf '  %s\n' "${merged[@]}"
+fi
+if [ ${#gone[@]} -gt 0 ]; then
+  echo
+  echo "Upstream gone on origin — squash/rebase-merged (will use git branch -D):"
+  printf '  %s\n' "${gone[@]}"
 fi
 if [ ${#not_mine[@]} -gt 0 ]; then
   echo
@@ -107,4 +123,5 @@ if ! $assume_yes; then
 fi
 
 for b in "${merged[@]:-}"; do [ -n "$b" ] && git branch -d "$b"; done
+for b in "${gone[@]:-}"; do [ -n "$b" ] && git branch -D "$b"; done
 for b in "${not_mine[@]:-}"; do [ -n "$b" ] && git branch -D "$b"; done
