@@ -2,14 +2,16 @@
 #
 # PreToolUse bounce-once gate for outward writes that a skill governs.
 #
-# The first Jira create/edit, or the first review/comment post (`gh api
+# The first Jira create/edit, the first review/comment post (`gh api
 # …/pulls/N/reviews|comments` with a mutating flag, `gh pr review`, `gh pr
-# comment`) in a session is refused, with the governing skill's rules as the
-# reason. The model rewrites the payload with the rules in front of it and
-# re-issues the call; the retry passes (per-session marker, 20 minutes).
+# comment`), the first PR body write (`gh pr create|edit` with a body flag),
+# and the first Edit/Write that adds an Elixir `@moduledoc`/`@doc`/`@typedoc`
+# block in a session are refused, with the governing skill's rules as the reason. The
+# model rewrites the payload with the rules in front of it and re-issues the
+# call; the retry passes (per-session marker, 20 minutes).
 #
 # Wired in claude/settings.json under hooks.PreToolUse with matcher
-# "mcp__atlassian__createJiraIssue|mcp__atlassian__editJiraIssue|Bash".
+# "mcp__atlassian__createJiraIssue|mcp__atlassian__editJiraIssue|Bash|Edit|Write".
 set -euo pipefail
 
 input=$(cat)
@@ -19,6 +21,7 @@ skills="${CLAUDE_SKILLS_DIR:-$HOME/.claude/skills}"
 
 key=""
 rules=""
+lead="check the payload against these rules. If the user already approved this payload verbatim, re-issue it unchanged. If the rules demand changes, re-show the revised payload and get an explicit go before posting. The retry passes."
 case "$tool" in
   mcp__atlassian__createJiraIssue|mcp__atlassian__editJiraIssue)
     key=jira
@@ -31,8 +34,23 @@ case "$tool" in
     elif printf '%s' "$cmd" | grep -qE 'gh api [^|;&]*pulls/[0-9]+/(reviews|comments)' \
       && printf '%s' "$cmd" | grep -qE -- '(--method|-X) *(POST|PUT|PATCH)|--input|(^| )-[fF] '; then
       key=review
+    elif printf '%s' "$cmd" | grep -qE 'gh pr (create|edit)\b' \
+      && printf '%s' "$cmd" | grep -qE -- '(^| )(--body|--body-file|-b|-F)( |=)'; then
+      key=prbody
     fi
-    [ -n "$key" ] && rules=$(sed -n '/^## Forbidden LLM tells/,/^## Bad-vs-good/p' "$skills/human-writing/SKILL.md")
+    case "$key" in
+      review) rules=$(sed -n '/^## Forbidden LLM tells/,/^## Bad-vs-good/p' "$skills/human-writing/SKILL.md") ;;
+      prbody) rules=$(sed -n '/^2\. Body/,/^### Step 5/p' "$skills/pr/SKILL.md") ;;
+    esac
+    ;;
+  Edit|Write)
+    path=$(printf '%s' "$input" | jq -r '.tool_input.file_path // empty')
+    text=$(printf '%s' "$input" | jq -r '.tool_input.new_string // .tool_input.content // empty')
+    if printf '%s' "$path" | grep -qE '\.exs?$' && printf '%s' "$text" | grep -qE '@(moduledoc|doc|typedoc) (~[sS])?"""'; then
+      key=doc
+      lead="Elixir docs are drafted by the doc skill in a fresh-context fork: run /doc <file> and gate the draft it returns against these rules. If this edit applies a draft the fork already returned and the user approved, re-issue it unchanged. The retry passes."
+      rules=$(sed -n '/^## Quality gates/,$p' "$skills/doc/SKILL.md")
+    fi
     ;;
 esac
 [ -n "$key" ] || exit 0
@@ -45,10 +63,10 @@ if [ -f "$marker" ] && [ -z "$(find "$marker" -mmin +20 2>/dev/null)" ]; then
 fi
 touch "$marker"
 
-jq -n --arg r "$rules" --arg k "$key" '{
+jq -n --arg r "$rules" --arg k "$key" --arg l "$lead" '{
   hookSpecificOutput: {
     hookEventName: "PreToolUse",
     permissionDecision: "deny",
-    permissionDecisionReason: ("Gate (" + $k + "): check the payload against these rules. If the user already approved this payload verbatim, re-issue it unchanged. If the rules demand changes, re-show the revised payload and get an explicit go before posting. The retry passes.\n\n" + $r)
+    permissionDecisionReason: ("Gate (" + $k + "): " + $l + "\n\n" + $r)
   }
 }'
