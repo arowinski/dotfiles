@@ -140,6 +140,7 @@ def analyze_session(sid, project, target_date=None):
     target_prefix = str(target_date) if target_date else None
 
     tools = defaultdict(int)
+    skills = defaultdict(int)  # skill name -> Skill tool invocations
     tool_errors = []
     models = defaultdict(int)
     teams = set()
@@ -166,6 +167,8 @@ def analyze_session(sid, project, target_date=None):
                     if isinstance(block, dict) and block.get("type") == "tool_use":
                         name = block.get("name", "?")
                         tools[name] += 1
+                        if name == "Skill":
+                            skills[block.get("input", {}).get("skill", "?")] += 1
                         cmd = block.get("input", {}).get("command", "")
                         if re.search(r"git (commit|reset)\b", cmd):
                             git_commands.append(cmd)
@@ -206,6 +209,7 @@ def analyze_session(sid, project, target_date=None):
     commit_messages = count_net_commits(git_commands, project)
     return {
         "tools": dict(tools),
+        "skills": dict(skills),
         "tool_errors": tool_errors[:10],
         "models": dict(models),
         "teams": sorted(teams),
@@ -216,7 +220,19 @@ def analyze_session(sid, project, target_date=None):
 
 
 CORRECTION_PATTERNS = re.compile(
-    r"^(no[,.]\s|stop[,.]\s|stop$|don'?t do |don'?t use |i said |i meant |that'?s not |wrong[,.]\s|not what )",
+    r"^(no[,.]\s|stop[,.]\s|stop$|don'?t do |don'?t use |i said |i meant |that'?s not |wrong[,.]\s|not what |"
+    r"wait what\b|this is wrong\b)",
+    re.IGNORECASE,
+)
+
+# Mid-task quality nags: the output was accepted in kind but had to be re-asked
+# for in shape ("make it concise", "use natural lang", "use the X skill"). They
+# never open like a correction, so CORRECTION_PATTERNS misses every one. A nag
+# in a session where a skill fired is a behavior gap in that skill. Read them;
+# "shorter" also matches "shorter timeout" and "too long" a slow spec.
+QUALITY_NAG_PATTERNS = re.compile(
+    r"concise|shorter|too (long|verbose)|natural lang|plain (english|lang)|"
+    r"cut (the )?fluff|less (words|text)|use (the )?[\w-]+ skill|use skills",
     re.IGNORECASE,
 )
 
@@ -243,33 +259,45 @@ QUERY_PATTERNS = re.compile(
 # A "why did you X" carrying one of these isn't a design question. Promotes a
 # QUERY match back to overact.
 FRUSTRATION_PATTERNS = re.compile(
-    r"what the fuck|wtf|ffs|for fuck'?s sake|are you kidding",
+    r"what the fuck|\bwtf\b|\bffs\b|for fuck'?s sake|are you kidding",
     re.IGNORECASE,
 )
 
 
+def is_correction(prompt):
+    """A correction opener, or a frustration marker anywhere ("FFS, can't u do
+    proper research", "wait what? what are u doing", "This is wrong")."""
+    return bool(CORRECTION_PATTERNS.search(prompt) or FRUSTRATION_PATTERNS.search(prompt))
+
+
 def count_corrections(prompts):
     """Count prompts that look like corrections or restatements."""
-    return sum(1 for p in prompts if CORRECTION_PATTERNS.search(p))
+    return sum(1 for p in prompts if is_correction(p))
+
+
+def count_quality_nags(prompts):
+    """Count prompts that re-ask for the output's shape (concise, natural, via skill)."""
+    return sum(1 for p in prompts if QUALITY_NAG_PATTERNS.search(p))
 
 
 def cap_prompts(prompts):
     """Return first/last N prompts if list is too long, filtering meta prompts.
 
-    Always includes correction-matching prompts regardless of position.
+    Always includes correction- and nag-matching prompts regardless of position.
     """
     work_prompts = [p for p in prompts if not is_meta_prompt(p)]
     total = len(work_prompts)
     corrections = count_corrections(work_prompts)
+    quality_nags = count_quality_nags(work_prompts)
     if total <= MAX_PROMPTS_SHOWN:
-        return work_prompts, total, corrections
+        return work_prompts, total, corrections, quality_nags
     half = MAX_PROMPTS_SHOWN // 2
     head = set(range(half))
     tail = set(range(total - half, total))
     keep = head | tail
-    # Always include correction prompts from the middle
+    # Always include correction and nag prompts from the middle
     for i, p in enumerate(work_prompts):
-        if CORRECTION_PATTERNS.search(p):
+        if is_correction(p) or QUALITY_NAG_PATTERNS.search(p):
             keep.add(i)
     capped = []
     prev = -1
@@ -281,7 +309,7 @@ def cap_prompts(prompts):
         prev = i
     if prev < total - 1:
         capped.append(f"... ({total - prev - 1} more) ...")
-    return capped, total, corrections
+    return capped, total, corrections, quality_nags
 
 
 # Extract base command: two words for git/bundle, first word otherwise
@@ -351,7 +379,7 @@ def main():
         detail = analyze_session(sid, info["project"], target_date=target)
         dur = round((info["end"] - info["start"]).total_seconds() / 60, 1)
 
-        capped, work_count, corrections = cap_prompts(info["prompts"])
+        capped, work_count, corrections, quality_nags = cap_prompts(info["prompts"])
         meta_count = len(info["prompts"]) - work_count
 
         # Intent = first non-meta prompt
@@ -360,6 +388,8 @@ def main():
         outcome = "committed" if detail.get("commits", 0) > 0 else "no-commit"
 
         signals = detail.pop("overact_signals", [])
+        if not detail.get("skills"):
+            detail.pop("skills", None)
 
         s = {
             "id": sid[:8],
@@ -376,6 +406,8 @@ def main():
             s["meta_prompts_filtered"] = meta_count
         if corrections:
             s["corrections"] = corrections
+        if quality_nags:
+            s["quality_nags"] = quality_nags
         overact = [sig for sig in signals if sig[2] == "overact"]
         queries = [sig for sig in signals if sig[2] == "query"]
         if overact:
