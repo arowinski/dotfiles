@@ -1,6 +1,6 @@
 ---
 name: design
-description: Plan a feature or change. Spawn three architect agents under opposing design constraints, compare, then produce a one-page plan with goal, approach, files, risks, alternatives, and open questions. Save to `<git-common-dir>/claude/plans/<branch>.md`. Use when the next step is deciding HOW to build something rather than building it — "design this", "plan the X work", "scope this out", a Jira URL to work from, and equally the phrasings that never say plan: "how should we approach X", "what's the plan for X", "which way should we go, A or B", "what would actually change if we moved X", "before I touch this, work out what it takes". Any non-trivial change spanning several files or modules qualifies. Not for implementing a decision already made, debugging, reviewing, or explaining existing code.
+description: Plan a feature or change. Spawn three architect agents under opposing design constraints, compare, then produce a one-page plan with goal, approach, patterns to mirror, files, risks, alternatives, and open questions. Save to `<git-common-dir>/claude/plans/<branch>.md`. Use when the next step is deciding HOW to build something rather than building it — "design this", "plan the X work", "scope this out", a Jira URL to work from, and equally the phrasings that never say plan: "how should we approach X", "what's the plan for X", "which way should we go, A or B", "what would actually change if we moved X", "before I touch this, work out what it takes". Any non-trivial change spanning several files or modules qualifies. Not for implementing a decision already made, debugging, reviewing, or explaining existing code.
 allowed-tools: Bash(git:*), Bash(mkdir:*), Read, Glob, Grep, Agent, AskUserQuestion, Write, mcp__atlassian__getJiraIssue, mcp__atlassian__getAccessibleAtlassianResources
 argument-hint: [Jira URL, description, or empty]
 ---
@@ -50,7 +50,8 @@ Each prompt must include:
 - **Decisions already made**: every choice the user stated in this conversation, the plan file's `## Decisions` section (written by /nag-me), the ticket, or project memory (storage location, module placement, naming, what stays as is). Quote each in one line. The architect must not propose their opposite; a plan that contradicts one is rejected at self-review.
 - Current branch
 - Its constraint, then: "Design under this constraint only; two other designs run in parallel and the comparison happens upstream."
-- "Cover: high-level approach, files to touch, key risks, open questions you can't resolve from the code."
+- "Cover: high-level approach, patterns to mirror, files to touch, key risks, open questions you can't resolve from the code."
+- "Patterns to mirror: for naming, error handling, data access, and tests in the affected area, the one existing example the implementation should copy, as `path:line`. If nothing similar exists, say so; an invented pattern is a defect."
 - "Be concrete. Cite file paths. Flag blockers explicitly."
 
 Wait for all three. If any reports a blocker (missing info, broken assumption), present it to the user and ask how to proceed before comparing.
@@ -61,7 +62,7 @@ Contrast the three by **depth** (behaviour a caller gets per unit of interface l
 
 Then scan the chosen design for:
 
-- **Placeholders**: TBD, TODO, XXX, "fill in later"
+- **Placeholders**: TBD, TODO, XXX, "fill in later", a pattern row without a `path:line`
 - **Contradictions**: sections that say opposite things, or an approach that reverses a decision already made
 - **Vague requirements**: "handle errors appropriately", "as needed"
 - **AC gaps** (Jira tasks only): every acceptance criterion should map to something in the approach or be explicitly out of scope
@@ -72,12 +73,13 @@ Fix these inline before showing the user. Don't punt them downstream.
 
 Compute path: `<git-common-dir>/claude/plans/<branch-name>.md` where `<git-common-dir>` comes from `git rev-parse --git-common-dir`.
 
-`mkdir -p` the parent directory. The file has a title, optional Jira link, and six sections in this order:
+`mkdir -p` the parent directory. The file has a title, optional Jira link, and seven sections in this order:
 
 - **Title** (H1): task title or Jira ticket ID
 - **Jira link** (if applicable): one line below the title
 - **## Goal**: what we're trying to achieve, one paragraph
 - **## Approach**: high-level strategy, 3-7 sentences, including the why
+- **## Patterns to mirror**: one line per category (naming, errors, data access, tests): `path:line` — what to copy. Categories with no existing example say "none in this area".
 - **## Files**: concrete list of files to create or modify, one line per file with what changes
 - **## Risks**: what could break, edge cases, assumptions, things to watch
 - **## Alternatives considered**: the two designs not chosen, one sentence each on their shape and why the chosen one beats them
