@@ -171,7 +171,30 @@
     ],
     "deny": [
       "Read(~/gat/gat-local/*.env)",
-      "Grep(~/gat/gat-local/*.env)"
+      "Read(~/gat/gat-local/.env*)",
+      "Read(~/.ssh/**)",
+      "Read(~/.aws/**)",
+      "Read(~/.netrc)",
+      "Read(~/.config/gh/hosts.yml)",
+      "Read(~/.zsh_local)",
+      "Read(~/.kube/config)",
+      "Read(~/.fly/config.yml)",
+      "Read(~/.claude/.credentials.json)",
+      "Read(.env*)",
+      "Read(!*.example)",
+      "Read(!.env.ci)",
+      "Read(!.env.development)",
+      "Edit(~/.ssh/**)",
+      "Edit(~/.aws/**)",
+      "Bash(gh auth token *)",
+      "Bash(fly auth token *)",
+      "Bash(heroku auth:token *)",
+      "Bash(aws configure export-credentials *)",
+      "Bash(security find-generic-password *)",
+      "Bash(security find-internet-password *)",
+      "Bash(security dump-keychain *)",
+      "Bash(ssh-add -l)",
+      "Bash(ssh-add -L)"
     ],
     "ask": [],
     "defaultMode": "auto"
@@ -289,5 +312,6 @@
   "skipWorkflowUsageWarning": true,
   "autoCompactEnabled": true,
   "teammateMode": "in-process",
-  "agentPushNotifEnabled": true
+  "agentPushNotifEnabled": true,
+  "model": "claude-fable-5-1[1m]"
 }
