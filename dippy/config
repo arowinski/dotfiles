@@ -38,6 +38,7 @@ allow break
 
 # Project tools
 allow mix
+allow mix format
 allow MIX_ENV=test mix *
 allow MIX_ENV=dev mix *
 allow just
