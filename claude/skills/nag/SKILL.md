@@ -1,8 +1,8 @@
 ---
-name: nag-me
-description: Interview the user about a plan, decision, or idea until nothing that changes the build is left undecided, then write the decisions to the plan file. Use on "nag me", "grill me", "interview me about X", "poke holes in this", "stress-test my thinking", "what am I missing", "question me before we build". Not for a question that has an answer (answer it), not for researching how to build (design), and not on a plan the user already called final.
+name: nag
+description: Interview the user about a plan, decision, or idea until nothing that changes the build is left undecided, then write the decisions to the plan file. Use on "nag me", "grill me", "interview me about X", "poke holes in this", "stress-test my thinking", "what am I missing", "question me before we build"; a leading `one` asks one question at a time. Not for a question that has an answer (answer it), not for researching how to build (design), and not on a plan the user already called final.
 allowed-tools: Bash(git rev-parse:*), Bash(git branch:*), Bash(mkdir:*), Read, Glob, Grep, Write, Edit, AskUserQuestion, Agent
-argument-hint: [plan, decision, or idea to be questioned about]
+argument-hint: [one] <plan, decision, or idea to be questioned about>
 ---
 
 # Nag Me
@@ -16,6 +16,8 @@ Interview the user until you share one understanding of what gets built. Map the
 Work in **rounds**. The **frontier** is every decision whose prerequisites are settled: the questions you can ask now without guessing at answers you haven't heard. Ask the whole frontier in one round, numbered, each with your recommended answer, then wait. A question whose answer depends on another question still open in this round belongs to the next round.
 
 Each answer reshapes the tree: settled decisions push the frontier outward and unblock what depended on them. Recompute and ask the next round.
+
+**One at a time.** When the argument starts with `one`, a round is a single question: the frontier decision the most others hang off, asked alone, in the same format as a round of one. The rest of the frontier waits for the answer. Assumptions accumulate and print once, at the finish, instead of after every question.
 
 ## What earns a question
 

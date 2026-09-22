@@ -47,7 +47,7 @@ Design it twice, then once more: the first idea is rarely the best, and one agen
 Each prompt must include:
 
 - Full task description (and Jira details if any: title, description, AC verbatim)
-- **Decisions already made**: every choice the user stated in this conversation, the plan file's `## Decisions` section (written by /nag-me), the ticket, or project memory (storage location, module placement, naming, what stays as is). Quote each in one line. The architect must not propose their opposite; a plan that contradicts one is rejected at self-review.
+- **Decisions already made**: every choice the user stated in this conversation, the plan file's `## Decisions` section (written by /nag), the ticket, or project memory (storage location, module placement, naming, what stays as is). Quote each in one line. The architect must not propose their opposite; a plan that contradicts one is rejected at self-review.
 - Current branch
 - Its constraint, then: "Design under this constraint only; two other designs run in parallel and the comparison happens upstream."
 - "Cover: high-level approach, patterns to mirror, files to touch, key risks, open questions you can't resolve from the code."
