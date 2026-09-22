@@ -3,6 +3,7 @@
 
 import json
 import re
+import statistics
 import subprocess
 import sys
 from collections import defaultdict
@@ -132,6 +133,196 @@ def count_net_commits(commands, project=None):
     return commits
 
 
+# User messages the harness writes on the user's behalf; none of them ends a
+# skill run or counts as the prompt after it.
+HARNESS_PREFIXES = (
+    "<command-",
+    "<local-command",
+    "<system-reminder>",
+    "<task-notification>",
+    "<teammate-message",
+    "Another Claude session sent a message",
+    "[Request interrupted",
+)
+
+
+def parse_ts(s):
+    try:
+        return datetime.fromisoformat(s.replace("Z", "+00:00"))
+    except (ValueError, AttributeError):
+        return None
+
+
+def usage_of(msg):
+    u = msg.get("usage") or {}
+    return {
+        "cache_read": u.get("cache_read_input_tokens") or 0,
+        "cache_create": u.get("cache_creation_input_tokens") or 0,
+        "input": u.get("input_tokens") or 0,
+        "output": u.get("output_tokens") or 0,
+    }
+
+
+def add_usage(total, u):
+    for k, v in u.items():
+        total[k] = total.get(k, 0) + v
+
+
+def classify_prompt(prompt):
+    """What the prompt right after a skill run says about the run."""
+    if OVERACT_PATTERNS.search(prompt):
+        return "overact"
+    if is_correction(prompt):
+        return "correction"
+    if QUALITY_NAG_PATTERNS.search(prompt):
+        return "nag"
+    if QUERY_PATTERNS.search(prompt):
+        return "query"
+    return "accept"
+
+
+def subagent_runs(sid, encoded):
+    """(start, usage) per subagent transcript under <sid>/subagents/."""
+    runs = []
+    for path in sorted((PROJECTS / encoded / sid / "subagents").glob("agent-*.jsonl")):
+        start, usage = None, {}
+        with open(path) as f:
+            for line in f:
+                try:
+                    e = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                if e.get("type") != "assistant":
+                    continue
+                ts = parse_ts(e.get("timestamp", ""))
+                if ts and (start is None or ts < start):
+                    start = ts
+                add_usage(usage, usage_of(e.get("message", {})))
+        if start:
+            runs.append((start, usage))
+    return runs
+
+
+def format_run(r):
+    out = {
+        "skill": r["skill"],
+        "start": r["start"].astimezone().strftime("%H:%M") if r["start"] else None,
+        "minutes": (
+            round((r["end"] - r["start"]).total_seconds() / 60, 1)
+            if r["start"] and r["end"]
+            else None
+        ),
+        "tool_calls": r["tool_calls"],
+        "tokens": sum(r["tokens"].values()),
+        "output_tokens": r["tokens"].get("output", 0),
+        "next": classify_prompt(r["next_prompt"]) if r["next_prompt"] else "none",
+    }
+    if r["args"]:
+        out["args"] = r["args"]
+    if r["agents"]:
+        out["agents"] = dict(r["agents"])
+    if r["nested"]:
+        out["nested"] = r["nested"]
+    if r["next_prompt"]:
+        out["next_prompt"] = r["next_prompt"]
+    return out
+
+
+def collect_skill_runs(path, sid, encoded):
+    """One run per user-initiated skill: a typed /skill (a `<command-name>` message
+    without `<local-command-stdout>`, which marks UI commands) or a Skill tool_use
+    with no run open. A run ends at the next real prompt; Skill calls inside it
+    are recorded as nested. Tokens cover the main transcript's window plus every
+    subagent transcript that started inside it."""
+    runs = []
+    open_run = None
+    last_assistant_ts = None
+
+    def new_run(name, args, ts):
+        return {
+            "skill": name,
+            "args": (args or "")[:120],
+            "start": ts,
+            "tool_calls": 0,
+            "agents": defaultdict(int),
+            "nested": [],
+            "tokens": {},
+        }
+
+    def close(end_ts, next_prompt=None):
+        nonlocal open_run
+        if open_run:
+            open_run["end"] = end_ts or last_assistant_ts or open_run["start"]
+            open_run["next_prompt"] = next_prompt
+            # A UI command (/model, /copy) leaves no assistant turn behind.
+            if open_run["tokens"] or open_run["tool_calls"]:
+                runs.append(open_run)
+            open_run = None
+
+    with open(path) as f:
+        for line in f:
+            try:
+                e = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            msg = e.get("message", {})
+            ts = parse_ts(e.get("timestamp", ""))
+            role = msg.get("role")
+            content = msg.get("content")
+
+            if role == "user" and isinstance(content, str):
+                m = re.search(r"<command-name>/([\w:-]+)</command-name>", content)
+                if m and "<local-command-stdout>" not in content:
+                    close(ts)
+                    args = re.search(r"<command-args>(.*?)</command-args>", content, re.S)
+                    open_run = new_run(m.group(1), args.group(1).strip() if args else "", ts)
+                elif (
+                    content.strip()
+                    and not content.lstrip().startswith(HARNESS_PREFIXES)
+                    and not is_meta_prompt(content)
+                ):
+                    close(ts, content[:120].replace("\n", " "))
+                continue
+
+            if role != "assistant":
+                continue
+            if ts:
+                last_assistant_ts = ts
+            if open_run:
+                add_usage(open_run["tokens"], usage_of(msg))
+            if not isinstance(content, list):
+                continue
+            for block in content:
+                if not (isinstance(block, dict) and block.get("type") == "tool_use"):
+                    continue
+                name = block.get("name", "?")
+                inp = block.get("input") or {}
+                if name == "Skill":
+                    if open_run:
+                        open_run["nested"].append(inp.get("skill", "?"))
+                    else:
+                        open_run = new_run(inp.get("skill", "?"), inp.get("args", ""), ts)
+                    continue
+                if open_run:
+                    open_run["tool_calls"] += 1
+                    if name == "Agent":
+                        open_run["agents"][inp.get("model") or "inherit"] += 1
+    close(None)
+
+    subs = subagent_runs(sid, encoded)
+    for r in runs:
+        for start, usage in subs:
+            if r["start"] and r["end"] and r["start"] <= start <= r["end"]:
+                add_usage(r["tokens"], usage)
+    return [format_run(r) for r in runs]
+
+
+def installed_skills():
+    names = {p.parent.name for p in (CLAUDE_DIR / "skills").glob("*/SKILL.md")}
+    names |= {p.stem for p in (CLAUDE_DIR / "commands").glob("*.md")}
+    return sorted(names)
+
+
 def analyze_session(sid, project, target_date=None):
     encoded = project.replace("/", "-")
     path = PROJECTS / encoded / f"{sid}.jsonl"
@@ -210,6 +401,7 @@ def analyze_session(sid, project, target_date=None):
     return {
         "tools": dict(tools),
         "skills": dict(skills),
+        "skill_runs": collect_skill_runs(path, sid, encoded),
         "tool_errors": tool_errors[:10],
         "models": dict(models),
         "teams": sorted(teams),
@@ -373,6 +565,9 @@ def main():
     overact_samples = []
     total_query = 0
     query_samples = []
+    skill_stats = defaultdict(
+        lambda: {"runs": 0, "minutes": [], "tokens": [], "after": defaultdict(int)}
+    )
 
     for sid, info in sessions.items():
         is_agent, agent_name, team_name = is_agent_session(sid, info["project"])
@@ -390,6 +585,15 @@ def main():
         signals = detail.pop("overact_signals", [])
         if not detail.get("skills"):
             detail.pop("skills", None)
+        for run in detail.get("skill_runs") or []:
+            st = skill_stats[run["skill"]]
+            st["runs"] += 1
+            if run["minutes"] is not None:
+                st["minutes"].append(run["minutes"])
+            st["tokens"].append(run["tokens"])
+            st["after"][run["next"]] += 1
+        if not detail.get("skill_runs"):
+            detail.pop("skill_runs", None)
 
         s = {
             "id": sid[:8],
@@ -476,7 +680,19 @@ def main():
             "teams": sorted(all_teams),
             "overact_signals": total_overact,
             "query_signals": total_query,
+            "skill_runs": {
+                skill: {
+                    "runs": st["runs"],
+                    "median_min": round(statistics.median(st["minutes"]), 1)
+                    if st["minutes"]
+                    else None,
+                    "median_tokens": int(statistics.median(st["tokens"])),
+                    "after": dict(st["after"]),
+                }
+                for skill, st in sorted(skill_stats.items())
+            },
         },
+        "installed_skills": installed_skills(),
         "projects": {},
     }
     if overact_samples:
