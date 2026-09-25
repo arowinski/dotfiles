@@ -81,6 +81,10 @@ allow bin/rails db:migrate
 allow bin/rails db:prepare
 allow bin/rails graphql:schema:json
 allow bin/rails runner
+allow bin/rails routes
+allow bin/rails db:migrate:status
+allow bin/brakeman
+allow bin/rake brakeman:run
 allow RAILS_ENV=test bin/rails *
 allow RAILS_ENV=development bin/rails *
 allow rails runner
