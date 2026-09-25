@@ -1,6 +1,6 @@
 ---
 name: review-specialist
-description: One angle of /review's fan-out — reviews a diff through the single lens its prompt names and writes a findings report. Spawned by the review skill only.
+description: Reviews a diff through the single angle its prompt names and reports findings. Spawned with an angle by the review and triage-review skills only.
 tools: Bash, Glob, Grep, Read
 model: opus
 color: yellow
@@ -30,4 +30,4 @@ Before reporting a finding, verify it: the cited line exists in the diff or at t
 
 ## Return
 
-Write the full report to the path your prompt gives, with a Bash heredoc redirect. Return three lines: the Coverage line (conformance and discovery only, else `—`), finding counts by severity, and the report path.
+When your prompt gives a report path, write the full report there with a Bash heredoc redirect and return three lines: the Coverage line (conformance and discovery only, else `—`), finding counts by severity, and the report path. With no report path, return the full report inline.

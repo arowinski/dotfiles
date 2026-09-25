@@ -6,7 +6,7 @@ allowed-tools: Bash(gh-comments:*), Bash(gh pr view:*), Bash(gh pr diff:*), Bash
 
 # Triage Review
 
-Fetch PR review comments, classify them, investigate the code, recommend actions, apply approved fixes per accept gate, then run a code-reviewer pass on the result.
+Fetch PR review comments, classify them, investigate the code, recommend actions, apply approved fixes per accept gate, then run a re-review pass on the result.
 
 ## Workflow
 
@@ -102,9 +102,9 @@ Never apply silently. Never batch without per-change confirmation.
 
 ### 8. Re-review
 
-After all approved fixes are applied, run the `code-reviewer` agent on the uncommitted diff:
+After all approved fixes are applied, run the `review-specialist` agent on the uncommitted diff. Its prompt carries the repo path, the comments the fixes answer (author, `path:line`, text, and the fix you applied for each), and this angle:
 
-Prompt: "Review these uncommitted changes that were applied in response to PR review feedback. Did the fixes address the reviewers' concerns? Did they introduce new issues? Are there obvious follow-ups?"
+"Re-review of fixes made in response to PR review comments. For each comment, does the diff address the concern it raises; one that is only partly addressed or answered by a different change is a finding. Then, only in lines the diff changes, any new defect the fixes introduced. Non-scope: code the diff leaves untouched, and comments marked push back or clarify."
 
 Present the agent's output verbatim under a "## Re-review" heading.
 
