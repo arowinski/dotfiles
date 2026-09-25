@@ -13,7 +13,7 @@ Run a daily retrospective on Claude Code usage.
 
 Don't report stats. Find the 2-3 most notable sessions and explain what happened in plain language.
 
-**Permission friction** — check `permissions.suggest_allow` for commands with 3+ asks. Only recommend allowing read-only or safe commands; for everything else, report the friction but don't suggest allowing.
+**Permission friction** — check `permissions.top_ask` for commands with 3+ asks. Only recommend allowing read-only or safe commands; for everything else, report the friction but don't suggest allowing.
 
 **Corrections** — sessions with `corrections` > 0 are the highest-signal finding. Read the actual correction prompts, then explain: what did the user ask? What did Claude do instead? What rule, config, or workflow change would prevent it?
 

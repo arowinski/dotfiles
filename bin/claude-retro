@@ -513,33 +513,36 @@ def parse_hook_log(target):
     if not HOOK_LOG.exists():
         return {"ask_count": 0, "approved_count": 0, "top_ask": []}
 
+    # The hook logs one line per line of a multi-line command, all stamped with
+    # the same second, so count events as distinct timestamps, not lines.
     prefix = str(target)
-    ask_cmds = defaultdict(int)
-    approved_count = 0
-    ask_count = 0
+    ask_cmds = defaultdict(set)
+    approved = set()
+    asks = set()
 
     with open(HOOK_LOG) as f:
         for line in f:
             if not line.startswith(prefix):
                 continue
+            stamp = line[:19]
             if "APPROVED:" in line:
-                approved_count += 1
+                approved.add(stamp)
             elif "ASK:" in line:
-                ask_count += 1
+                asks.add(stamp)
                 m = re.search(r"ASK: (.+)$", line)
                 if m:
                     for part in m.group(1).split(","):
-                        cm = BASE_CMD.match(part.strip())
-                        if cm:
-                            ask_cmds[cm.group(1)] += 1
+                        # "parse error" names no command; "command substitution: X" is about X.
+                        part = part.strip().removeprefix("command substitution: ")
+                        cm = BASE_CMD.match(part)
+                        if cm and not part.startswith("parse error"):
+                            ask_cmds[cm.group(1)].add(stamp)
 
-    top = sorted(ask_cmds.items(), key=lambda x: -x[1])[:10]
-    suggest = [cmd for cmd, n in top if n >= 3]
+    top = sorted(((cmd, len(s)) for cmd, s in ask_cmds.items()), key=lambda x: -x[1])[:10]
     return {
-        "ask_count": ask_count,
-        "approved_count": approved_count,
+        "ask_count": len(asks),
+        "approved_count": len(approved),
         "top_ask": [{"command": cmd, "count": n} for cmd, n in top],
-        "suggest_allow": suggest,
     }
 
 
