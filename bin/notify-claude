@@ -81,14 +81,18 @@ transcript=$(echo "$json" | jq -r '.transcript_path // ""')
 session_id=$(echo "$json" | jq -r '.session_id // ""')
 tool_name=$(echo "$json" | jq -r '.tool_name // ""')
 
-# Store session ID in tmux pane variable for focus-based notification clearing
-if [[ -n "$TMUX" ]] && [[ -n "$session_id" ]]; then
+# Store session ID in tmux pane variable for focus-based notification clearing.
+# Always target $TMUX_PANE: without it tmux resolves "current pane" to the
+# client's *active* pane, stamping whichever pane the user happens to be
+# looking at with this session's id. Skip the write when it's unset rather
+# than corrupting another pane's mapping.
+if [[ -n "$TMUX" ]] && [[ -n "$session_id" ]] && [[ -n "$TMUX_PANE" ]]; then
     # Clear any notification from the previous session before updating the pane variable
-    old_session_id=$(tmux show-option -pv @claude_session_id 2>/dev/null)
+    old_session_id=$(tmux show-option -t "$TMUX_PANE" -pv @claude_session_id 2>/dev/null)
     if [[ -n "$old_session_id" ]] && [[ "$old_session_id" != "$session_id" ]]; then
         terminal-notifier -remove "claude-${old_session_id:0:8}" >/dev/null 2>&1
     fi
-    tmux set-option -p @claude_session_id "$session_id" 2>/dev/null
+    tmux set-option -t "$TMUX_PANE" -p @claude_session_id "$session_id" 2>/dev/null
 fi
 
 details=""
