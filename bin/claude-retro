@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Analyze Claude Code daily usage for retro."""
 
+import fnmatch
 import json
 import re
 import statistics
@@ -543,7 +544,62 @@ def parse_hook_log(target):
         "ask_count": len(asks),
         "approved_count": len(approved),
         "top_ask": [{"command": cmd, "count": n} for cmd, n in top],
+        "unused_allow": unused_allow(target),
     }
+
+
+UNUSED_ALLOW_DAYS = 30
+SUBCOMMAND_SPLIT = re.compile(r"&&|\|\||;|\||\n")
+
+
+def allow_matches(rule, cmd):
+    """Claude Code Bash rule semantics: `x:*` is a word prefix, `*` a glob, else exact."""
+    if rule.endswith(":*"):
+        prefix = rule[:-2]
+        return cmd == prefix or cmd.startswith(prefix + " ")
+    if "*" in rule:
+        return fnmatch.fnmatchcase(cmd, rule)
+    return cmd == rule
+
+
+def unused_allow(target):
+    """Bash allow rules in settings.json that no Bash call matched in the window."""
+    try:
+        allow = json.loads((CLAUDE_DIR / "settings.json").read_text())["permissions"]["allow"]
+    except (OSError, KeyError, json.JSONDecodeError):
+        return []
+    rules = {r: r[5:-1] for r in allow if r.startswith("Bash(") and r.endswith(")")}
+    unmatched = dict(rules)
+
+    since = datetime.combine(target - timedelta(days=UNUSED_ALLOW_DAYS), datetime.min.time()).timestamp()
+    for path in PROJECTS.glob("**/*.jsonl"):
+        if not unmatched:
+            break
+        try:
+            if path.stat().st_mtime < since:
+                continue
+            f = open(path)
+        except OSError:
+            continue
+        with f:
+            for line in f:
+                # Cheap filter before parsing: only lines carrying a Bash tool call.
+                if '"name":"Bash"' not in line:
+                    continue
+                try:
+                    content = json.loads(line)["message"]["content"]
+                except (json.JSONDecodeError, KeyError, TypeError):
+                    continue
+                for item in content if isinstance(content, list) else []:
+                    if item.get("type") != "tool_use" or item.get("name") != "Bash":
+                        continue
+                    for part in SUBCOMMAND_SPLIT.split(item.get("input", {}).get("command", "")):
+                        part = part.strip()
+                        for rule, pattern in list(unmatched.items()):
+                            if allow_matches(pattern, part):
+                                del unmatched[rule]
+
+    return sorted(unmatched)
 
 
 def main():
