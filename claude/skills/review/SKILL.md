@@ -43,7 +43,7 @@ Write the diff once to `<scratchpad>/review-diff.patch`; every agent reads that 
           -o -path '*docs/guidelines/*.md' -o -path '*docs/how-to/*.md' \) -print
   ```
 
-  `wc -w` the list. Identical counts beside each other (`AGENTS.md` next to `CLAUDE.md`) are one file under two names: keep one. Always include `~/.claude/CLAUDE.md`, repo-root `CLAUDE.md`, repo-root `README.md`. If the corpus cannot sit beside the diff in one agent, say so in the report rather than letting an agent sample silently.
+  `wc -w` the list. Identical counts beside each other (`AGENTS.md` next to `CLAUDE.md`) are one file under two names: keep one. Always include `~/.claude/CLAUDE.md`, repo-root `CLAUDE.md`, repo-root `README.md`, and each `~/.claude/rules/*.md` whose `paths:` glob matches a changed file. If the corpus cannot sit beside the diff in one agent, say so in the report rather than letting an agent sample silently.
 
 ## 3. Fan-out
 
@@ -51,21 +51,21 @@ Launch every firing angle in a single message via the Agent tool with `run_in_ba
 
 | angle | fires when | subagent_type, model |
 |---|---|---|
-| conformance | always | code-reviewer, sonnet |
-| discovery | diff not small | code-reviewer, opus |
-| architecture | diff not small | code-reviewer, opus |
-| security | always | code-reviewer, opus |
-| correctness | always | code-reviewer, opus |
-| acceptance | ticket found | code-reviewer, opus |
-| reuse | always | code-reviewer, opus |
-| simplification | always | code-reviewer, opus |
-| efficiency | always | code-reviewer, opus |
-| altitude | always | code-reviewer, opus |
+| conformance | always | review-specialist, sonnet |
+| discovery | diff not small | review-specialist, opus |
+| architecture | diff not small | review-specialist, opus |
+| security | always | review-specialist, opus |
+| correctness | always | review-specialist, opus |
+| acceptance | ticket or plan `## Invariants` found | review-specialist, opus |
+| reuse | always | review-specialist, opus |
+| simplification | always | review-specialist, opus |
+| efficiency | always | review-specialist, opus |
+| altitude | always | review-specialist, opus |
 | docs | `.ex`/`.exs` in diff | doc-writer fork via `/doc branch` |
 
-**Every prompt carries**: the review tree's path as the repo to run in, the patch path, its report path `<scratchpad>/review-<angle>.md`, the size and language facts, the plan and ticket summaries, the angle's paragraph from the Angles section at the end of this file as its role, "Scope strictly to lines the diff adds or changes", "Answer independently. Do not coordinate.", and "Read only: the report file is the only thing you write; never edit or run anything that changes the tree." The finding format and severity scale are the code-reviewer agent's own; do not restate them.
+**Every prompt carries**: the review tree's path as the repo to run in, the patch path, its report path `<scratchpad>/review-<angle>.md`, the size and language facts, the plan and ticket summaries, the angle's name and its paragraph from the Angles section at the end of this file as its whole scope, "Scope strictly to lines the diff adds or changes", and "Answer independently. Do not coordinate." Conformance and discovery also get the doc list. The finding format, severity scale, read-only rule, and report return are the review-specialist agent's own; do not restate them.
 
-**Every prompt returns the same way**: the specialist writes its full report to its report path with a Bash redirect (the scratchpad sits under `/private/tmp`, which the hook allows) and returns three lines: the Coverage line, finding counts by severity, the path. A background agent's inline result is cut at about 5K characters, so the file is the report and the return is the receipt.
+**Every prompt returns the same way**: the specialist writes its full report to its report path with a Bash redirect (the scratchpad sits under `/private/tmp`, which the hook allows) and returns three lines: the Coverage line (conformance and discovery only), finding counts by severity, the path. A background agent's inline result is cut at about 5K characters, so the file is the report and the return is the receipt.
 
 ## 4. Gather and dedupe
 
@@ -81,23 +81,9 @@ Read every report file. Merge findings that share file, line, and claim into one
 
 Check 2 fails with Tidewave loaded but silent, and `ws status` shows the workspace stopped → start it yourself: `ws run` with `run_in_background: true`, then re-run check 2 until `project_eval` answers. A running workspace whose app will not answer or compile (a reloader that demands a server restart after a config change) → restart only the app process, never the whole workspace, because `ws restart` on a live workspace can corrupt its postgres; say so in one line and carry on.
 
-Any check still failing → `AskUserQuestion`, one question: which is missing, and the choice between *continue on evidence only* (the verifier and tester are skipped, every finding keeps its desk verdict and the report says so in the Coverage line) and *stop* (you restart the session in the right worktree, then rerun). A non-Elixir, non-Rails diff skips the preflight and the verifier runs whatever the repo's test runner is.
+Any check still failing → `AskUserQuestion`, one question: which is missing, and the choice between *continue on evidence only* (the verifier and tester are skipped, every finding keeps its desk verdict and the report says so in the Coverage line) and *stop* (you restart the session in the right worktree, then rerun). A non-Elixir, non-Rails diff skips the preflight.
 
-One verifier agent (`general-purpose`, `model: opus`) takes every deduped finding, whatever angle raised it, and runs one experiment for each claim a command can settle, in the review tree, serially. Runtime behaviour is one kind; existence, references, dependency direction, and tool-enforced rules are others. A finding stays desk only when no command settles it: wording, naming, intent. A grep, a caller search, or a file read is a static check, not a test: the verifier reports it as `static`, and it never counts toward `tested`. A correctness, security, efficiency, or acceptance finding at Major or above needs a run; static evidence alone leaves it `untestable (<cause>)`. The agent is the verifier: an experiment the orchestrator runs inline counts as none. The step 7 Coverage line carries the tally.
-
-| angle | experiment |
-|---|---|
-| correctness, acceptance | a probe test that triggers the case, or a one-liner against the running app: Tidewave `project_eval` for Elixir (never `mix run -e`), `rails runner` for Rails |
-| security | the correctness experiment fed the attack input from the finding's reasoning |
-| efficiency | the same call with query logging on, queries counted before and after the proposed form |
-| reuse | the named helper on the same input, output compared with the new code's |
-| simplification | dead or single-caller code: a caller search (`mix xref callers`, Grep), `static`; derivable state: a one-liner comparing the stored value with the derived one |
-| architecture, altitude | dependency direction or boundary: `mix xref graph` / `trace` or the stack's equivalent, `static`; "every caller goes through X": a call through the other path in `project_eval`, showing it is or isn't stopped |
-| discovery | a cited command run (`--help`), a config key read from the running app (`project_eval` `Application.get_env`); a path check (`test -e`) is `static` |
-| conformance | a rule a tool enforces (formatter, linter, compiler warning) run on the file in check mode (`mix format --check-formatted`, `mix credo`); a rule only prose states stays desk |
-| docs | doctests in the draft run |
-
-Verifier rules, in its prompt: existing files are read-only; a probe is a new file named `*_review_probe_*` beside the tests it imitates, and every probe is deleted before returning; use the narrowest command (`mix test path:line`, `bundle exec rspec path:line`); return per finding `confirmed`, `refuted`, or `untestable` with the exact command and the decisive output lines, nothing more. A verifier that cannot get the app or test suite to run returns `untestable` for the lot with the failing command; the review continues on evidence.
+Dispatch exactly one `verifier` agent with the review tree path and every deduped finding (angle, `path:line`, claim, reasoning), whatever angle raised it. Its experiments, the `static` label, and the rules for probes and state are its own; do not restate them, and do not split the findings across several verifiers. An experiment the orchestrator runs inline counts as none. The step 7 Coverage line carries the verifier's tally.
 
 **Exercise the diff.** In the same message as the verifier, dispatch the `tester` agent with the review tree path, the patch path, the PR number, the ticket key, and the plan path when step 2 found them. It builds its own behaviour list from those, runs each line in the live app (UI through the Tidewave browser, backend through `project_eval`), and returns one line per behaviour: `works (ui|eval)`, `broken`, or `untestable (<cause>)`. Every `broken` line becomes a finding, severity by its harm, angle `exercise`, verdict `confirmed`, and goes through step 6 like any other.
 
@@ -146,21 +132,19 @@ One paragraph per specialist: its role and non-scope, pasted into its prompt at 
 
 **Discovery** — the doc list as paths, reading what it needs; its job is what no rule names: a change satisfying one layer of a multi-layer convention but not the others; a new file diverging from the established pattern for its file type (audit siblings to prove the pattern); a rule that plainly does not apply despite matching keywords (say so, cite the precedent); claims checked against the world (does the cited path exist, does the command resolve); anything the docs never anticipated, including a malformed diff.
 
-Both guideline agents report Coverage: every doc read and every doc deliberately skipped with the reason. A doc nobody read is a silent false negative, the one failure the skeptic cannot catch, so it stays visible.
-
 **Security** — auth, input validation, secrets, injection, authz, SSRF, deserialization, crypto, race conditions on security-relevant paths. Reasoning must describe a concrete attack: input source → vulnerable sink → impact. Non-scope: style, naming, architecture.
 
 **Architecture** — patterns, layering, coupling, abstractions, module boundaries, dependency direction, public API design, structural naming (modules, classes, public functions). Non-scope: line-level bugs, local style.
 
-**Correctness** — edge cases, off-by-one, error handling, nil/empty handling, test gaps, local naming (variables, private functions, locals). Two audits on top: for every line the diff deletes or replaces, name the invariant it enforced and find where the new code re-establishes it (a removed guard, a dropped error path, a narrowed validation, a deleted test is a finding when nothing does); for every changed function, Grep its callers and check the change against each call site (new precondition, changed return shape, new exception, ordering dependency) and its callees for a parallel change in the same diff. Non-scope: security, architecture, acceptance criteria.
+**Correctness** — edge cases, off-by-one, error handling, nil/empty handling, test gaps, local naming (variables, private functions, locals). Two audits on top: for every line the diff deletes or replaces, name the invariant it enforced and find where the new code re-establishes it (a removed guard, a dropped error path, a narrowed validation, a deleted test is a finding when nothing does); for every changed function, Grep its callers and check the change against each call site (new precondition, changed return shape, new exception, ordering dependency) and its callees for a parallel change in the same diff. For every changed public function, find its test: a new branch with none, or an assertion that only checks "doesn't raise", is a finding. Non-scope: security, architecture, acceptance criteria.
 
-**Acceptance** — for every acceptance criterion in the ticket, name the diff hunk that fulfils it; missing or partially met criteria are findings. For every reviewer comment on the ticket that raises a concern, check whether the diff addresses or ignores it. Non-scope: anything the ticket does not mention.
+**Acceptance** — for every acceptance criterion in the ticket, name the diff hunk that fulfils it; missing or partially met criteria are findings. For every reviewer comment on the ticket that raises a concern, check whether the diff addresses or ignores it. When the plan has an `## Invariants` section, every invariant is kept by the diff or its removal is justified in the plan; one silently dropped is a finding. Non-scope: anything the ticket or plan does not mention.
 
 **Reuse** — new code that re-implements something the codebase already has. Grep the project's shared helper, component, and test-support directories for an existing helper, query, UI component, factory, or test helper that does the same job, in code and tests alike, and name it as `path:line` with module.function/arity or the component name. Report only a helper you have opened and matched. Cost is what gets duplicated.
 
 **Simplification** — unnecessary complexity the diff adds: redundant or derivable state, copy-paste with slight variation, deep nesting, unneeded preloads, dead code left behind, clauses that could collapse, helpers with a single trivial caller. Each finding names the simpler form as a concrete before/after of a few lines. Non-scope: bugs, naming, doc wording.
 
-**Efficiency** — wasted work the diff introduces: repeated queries or preloads for the same rows, N+1 patterns, independent queries that could be one, list operations on large id lists that a query or subquery would do, sequential work that is independent, blocking work added to startup or a hot path. Name the cheaper alternative and the cost as extra round-trips per call or how it scales. Report only what costs a real round-trip or scales with data; skip micro-optimisations.
+**Efficiency** — wasted work the diff introduces: repeated queries or preloads for the same rows, N+1 patterns, independent queries that could be one, list operations on large id lists that a query or subquery would do, `OFFSET` pagination on a large table where a cursor would do, inserts in a loop instead of one multi-row insert, an external call inside a transaction, sequential work that is independent, blocking work added to startup or a hot path. Name the cheaper alternative and the cost as extra round-trips per call or how it scales. Report only what costs a real round-trip or scales with data; skip micro-optimisations.
 
 **Altitude** — is each change made at the right depth: a special case layered onto shared infrastructure where a simpler general change to the mechanism would do the same job with fewer branches; a fix at the wrong layer (a caller working around what the callee should own, or the reverse). Name the deeper change concretely. Be honest when a special case is warranted: report only when the general form is simpler, not merely more abstract.
 
