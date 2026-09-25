@@ -1,53 +1,64 @@
 ---
-description: Ask 3 architects + 2 code reviewers the same question, then synthesize consensus.
+description: Ask five agents with fixed lenses (Architect, Skeptic, Pragmatist, Critic, Precedent) the same question, then synthesize where the lenses agree.
 disable-model-invocation: true
 argument-hint: <question about code, architecture, or approach>
 allowed-tools: Bash(git rev-parse:*), Bash(git diff:*), Bash(git log:*), Read, Glob, Grep, Agent
 ---
 
-Spawn a quorum of 5 agents to answer the same question independently, then synthesize.
+Five agents answer one question independently, each through a different lens, then you synthesize. Agreement between lenses that pull in opposite directions is the signal; five copies of one lens would only agree with themselves.
 
 Run `git` directly. For a different repo use `cd <path> && git <cmd>`.
 
-## Setup
+## 1. Restate
 
-1. Read question from argument. Empty? Stop and ask for one.
-2. Gather context for agents:
-   - `git diff HEAD` (current uncommitted changes, if any)
-   - `git diff main...HEAD` (branch changes, if on a feature branch)
-   - Read any files referenced in the question
+Read the question from the argument. Empty? Stop and ask for one.
 
-## Spawn
+Rewrite it as three lines: **Decide** (the choice being made), **Constraints** (what is fixed: decisions already made, scope, deadlines), **Good answer** (what a useful answer contains). A vague question gets five vague answers; this is where it gets sharp. Don't wait for confirmation — the restatement opens your output, so a misread shows there.
 
-Launch all 5 agents in a **single message** using the Agent tool with `run_in_background: true`:
+## 2. Gather pointers
 
-- 3x `subagent_type: architect` — prompt each with the question + context. Each must work independently.
-- 2x `subagent_type: code-reviewer` — prompt each with the question + context + diff (if relevant).
+- `git diff HEAD` (uncommitted changes, if any)
+- `git diff main...HEAD` (branch changes, if on a feature branch)
+- Files the question names
 
-Include in every agent prompt:
-- The full question and why it's being asked
-- Pointers to relevant files and areas (paths, not content — agents read files themselves)
-- Constraints or decisions already made
-- What's been tried or ruled out (if applicable)
+Collect paths and facts, not conclusions. Agents read the files themselves.
+
+## 3. Spawn
+
+Launch five `subagent_type: general-purpose` agents in a **single message** with `run_in_background: true`, one per lens:
+
+| lens | looks at |
+|---|---|
+| Architect | correctness and the long-term shape of the answer |
+| Skeptic | the premise: does this need solving at all, is there a simpler framing |
+| Pragmatist | shipping cost, operations, what breaks on Monday |
+| Critic | edge cases and the downside if the answer is wrong |
+| Precedent | what this codebase and its git history already do for this kind of problem, and whether it was tried before |
+
+Every prompt carries the same brief plus its lens:
+
+- the three-line restatement
+- pointers: paths, refs, the diff range
+- facts: constraints, decisions already made, what was tried and what happened — events, not verdicts on them
+- its lens, from the table, as the angle to answer from
 - "Answer independently. Do not coordinate. Be specific — cite files and line numbers."
+- "Read only: never edit or run anything that changes the tree."
 - "Run `git` directly. For a different repo use `cd <path> && git <cmd>`."
 
-## Collect
+Leave out your own lean. A prompt that hints at the answer you expect turns five lenses into one.
 
-Wait for all 5 responses.
+## 4. Synthesize
 
-## Synthesize
+Wait for all five, then present:
 
-Present the result as:
+**Question** — the three-line restatement from step 1.
 
-**Consensus** — points where 3+ agents agree. These are high-confidence findings.
+**Consensus** — points where 3+ lenses agree, naming the lenses. Skeptic and Pragmatist landing on the same answer outweighs Architect and Precedent doing so.
 
-**Split** — points where agents disagree, with the positions and who holds them.
+**Split** — where lenses disagree, each position and which lens holds it.
 
-**Unique insights** — points raised by only one agent that are worth considering.
+**Unique** — points raised by one lens that are worth weighing.
 
-**Verdict** — your synthesis: what should the user do, based on the weight of evidence?
+**Verdict** — what to do, on the weight of evidence.
 
-Keep it concise. Quote agents by name when attributing positions.
-
-No team cleanup needed — agents terminate when done.
+Keep it concise.

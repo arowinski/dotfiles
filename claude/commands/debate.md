@@ -8,14 +8,14 @@ Accept a question, pasted requirements, or Jira URL as input. No argument? Ask f
 
 If Jira URL: fetch ticket details via Atlassian MCP (if available).
 
-Frame 2-4 positions or perspectives worth arguing. User provided specifics? Use those. Otherwise present the framing and wait for confirmation.
+Extract the question in one line: what is being decided. Then frame 2-4 positions or perspectives worth arguing. User provided specifics? Use those. Otherwise present the framing and wait for confirmation.
 
 ## Rules
 
 - Use TeamCreate + SendMessage for a real agent team. NEVER simulate the debate.
 - Do NOT use tmux for agent management.
-- All teammates are read-only — no file edits.
-- Give each teammate the full topic, context, and assigned position.
+- Teammates are general-purpose and read-only — no file edits.
+- Give each teammate the extracted question, its assigned position, and pointers (paths, refs, the ticket). Leave out the conversation and your own lean: a teammate seeded with the thread argues the thread.
 - Teammates must research the codebase for evidence, challenge others, and concede when evidence is against them.
 
 ## Moderation
