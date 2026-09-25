@@ -33,7 +33,7 @@ Precondition: `gh` is authenticated as the reviewing user (`gh auth status` show
 
 If the user provided exact text, use it VERBATIM. Do not rewrite, add backticks, or change wording.
 
-If drafting from a finding (e.g., from prior `/review` or `/rr` output), load BOTH:
+If drafting from a finding (e.g., from prior `/review` output), load BOTH:
 - `clear-writing` skill — tightens sentences
 - `human-writing` skill — strips LLM tells, adds peer voice
 
