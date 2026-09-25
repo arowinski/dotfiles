@@ -2,8 +2,7 @@
 name: doc
 description: |
   Write and review Elixir documentation against one standard — `@moduledoc`, `@doc`, `@spec`, `@type`, and doctests.
-  TRIGGER (user prompt match): "document this", "add doc", "write moduledoc", "draft moduledoc", "module is missing a doc", "run docs through /doc", "review the docs", "cut fluff from docs", "trim docs", "go over docs/comments", or asks to write/add/generate/review `@moduledoc`/`@doc`.
-  SELF-RULE (during code work): invoke proactively after writing a new `.ex` file in `lib/` with `@moduledoc false`, when adding `@moduledoc` to a bare-or-`false` file, or when adding `@doc`/`@spec`/`@typedoc` to a public function. The fork reads the target from disk, so the file must exist first.
+  TRIGGER (user prompt only): "document this", "add doc", "write moduledoc", "draft moduledoc", "module is missing a doc", "run docs through /doc", "review the docs", "cut fluff from docs", "trim docs", "go over docs/comments", or asks to write/add/generate/review `@moduledoc`/`@doc`.
   Pass the file path as the argument, or `branch` for a sweep of changed files. Runs in a fresh context and returns drafts to gate.
   For non-Elixir prose, use clear-writing.
 argument-hint: [path to .ex file | branch]
@@ -76,9 +75,11 @@ Answer in working memory (not as visible output sections):
 
 Can't answer 1 + 2 → return the questions instead of a draft; a fabricated answer is worse than no draft.
 
-Then match sibling modules (same directory, same role). A construct the siblings document gets documented in
-their wording; one they leave bare stays bare. Convention beats minimalism, and it is the only exception to
-the per-construct rules in step 6.
+Then match sibling modules (same directory, same role). Count what they document before deciding what this
+one documents — `for f in <dir>/*.ex; do echo "$f $(grep -c '^\s*def ' $f) $(grep -c '@doc [^f]' $f) $(grep -c
+'@spec ' $f) $(grep -c '@type ' $f)"; done`. A construct the siblings document gets documented in their
+wording; one they leave bare stays bare. Convention beats minimalism, and it is the only exception to the
+per-construct rules in step 6.
 
 ### 4. Write `@moduledoc` in this order
 
@@ -131,17 +132,26 @@ rules are inherited, not restated here. Doc-specific additions:
 
 Check, in order:
 
-1. Every factual claim matches current code — wrong beats fluffy; fix stale claims before style work
-2. Every backticked module resolves to a real `defmodule` (Grep)
+1. Every factual claim matches current code, checked by reading it — wrong beats fluffy; fix stale claims
+   before style work. Reading answers every question here, so leave `mix compile` and `mix test` alone
+2. Every backticked module resolves to a real `defmodule` — one Grep with every name alternated
 3. `@spec` arities match; `@type t` fields match the struct/schema
 4. Doctests run without setup; no `@doc` on private functions
 5. Redundancy pass: per sentence, "does the code already show this?" — delete if yes
-6. Quality gates (below): the opening and every sentence pass
+6. Sentence pass: read the draft sentence by sentence. Each one has a subject and a verb and opens on a
+   word. One that opens on a backticked symbol or hangs a list off a colon ("Submitted or missing:
+   `{...}`") is rewritten as a sentence
+7. Quality gates (below): the opening and every sentence pass
 
 ### 9. Return
 
 You cannot ask the user and you never write to the file: the main session shows your report, gets
-Apply / Edit / Skip per file, and applies. Per file, in order:
+Apply / Edit / Skip per file, and applies.
+
+The report is the only copy — compose each draft straight into it. Drafting into a scratch file writes
+every sentence twice, at a cost that exceeds the drafting itself.
+
+Per file, in order:
 
 1. The draft: a diff for existing docs, the inline block for new ones. `@moduledoc false` is a one-line draft.
 2. One line on what changed (moduledoc, N @doc, N @spec, N @type).
