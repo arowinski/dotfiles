@@ -1,6 +1,6 @@
 ---
 name: design
-description: Plan a feature or change. Spawn three architect agents under opposing design constraints, compare, then produce a one-page plan with goal, approach, patterns to mirror, files, risks, alternatives, and open questions. Save to `<git-common-dir>/claude/plans/<branch>.md`. Use when the next step is deciding HOW to build something rather than building it — "design this", "plan the X work", "scope this out", a Jira URL to work from, and equally the phrasings that never say plan: "how should we approach X", "what's the plan for X", "which way should we go, A or B", "what would actually change if we moved X", "before I touch this, work out what it takes", "how would you tackle X". Any non-trivial change spanning several files or modules qualifies. Not for implementing a decision already made, debugging, reviewing, or explaining existing code.
+description: Plan a feature or change. Spawn three architect agents under opposing design constraints, compare, then produce a one-page plan with goal, approach, invariants (for reworks), files with the pattern each mirrors and the check that proves it, risks, alternatives, and open questions. Save to `<git-common-dir>/claude/plans/<branch>.md`. Use when the next step is deciding HOW to build something rather than building it — "design this", "plan the X work", "scope this out", a Jira URL to work from, and equally the phrasings that never say plan: "how should we approach X", "what's the plan for X", "which way should we go, A or B", "what would actually change if we moved X", "before I touch this, work out what it takes", "how would you tackle X". Any non-trivial change spanning several files or modules qualifies. Not for implementing a decision already made, debugging, reviewing, or explaining existing code.
 allowed-tools: Bash(git:*), Bash(mkdir:*), Read, Glob, Grep, Agent, AskUserQuestion, Write, mcp__atlassian__getJiraIssue, mcp__atlassian__getAccessibleAtlassianResources
 argument-hint: [Jira URL, description, or empty]
 ---
@@ -36,7 +36,15 @@ Run `git rev-parse --abbrev-ref HEAD`.
 
 When creating: `git fetch origin && git switch -c <name> origin/main` (or `origin/master`).
 
-### 4. Spawn three architects
+### 4. Mine invariants (reworks only)
+
+A task that changes existing behaviour (refactor, port, migration, consolidation) must keep what the code guarantees today. New features skip this step.
+
+Spawn one read-only agent (`Explore`) to mine the affected areas before any design. Its reading budget, per area: start at the entry points (a context's public functions, controllers), expand one call level per behaviour found, and stop at a system edge (Repo, HTTP, a queue), after three files that add nothing new, or at 15 files; list what is left as `deferred:`. It returns invariants, one line each: the guarantee, the `path:line` that enforces it, and the test that covers it or `untested`. Sources are guard clauses, changeset validations, DB constraints, authorization checks, state transitions, and emitted events.
+
+Mined behaviour includes bugs. Mark each invariant keep or drop; a drop, or one you cannot call, goes to Open questions for the user. Kept invariants go to all three architects as input.
+
+### 5. Spawn three architects
 
 Design it twice, then once more: the first idea is rarely the best, and one agent asked for alternatives produces strawmen. Spawn three `architect` agents in parallel (one message, three Agent calls) with the same brief and one differing constraint each:
 
@@ -49,45 +57,47 @@ Each prompt must include:
 - Full task description (and Jira details if any: title, description, AC verbatim)
 - **Decisions already made**: every choice the user stated in this conversation, the plan file's `## Decisions` section (written by /nag), the ticket, or project memory (storage location, module placement, naming, what stays as is). Quote each in one line. The architect must not propose their opposite; a plan that contradicts one is rejected at self-review.
 - Current branch
+- **Invariants** from step 4, when it ran: "Every kept invariant holds after the change; name where the design re-establishes each."
 - Its constraint, then: "Design under this constraint only; two other designs run in parallel and the comparison happens upstream."
-- "Cover: high-level approach, patterns to mirror, files to touch, key risks, open questions you can't resolve from the code."
-- "Patterns to mirror: for naming, error handling, data access, and tests in the affected area, the one existing example the implementation should copy, as `path:line`. If nothing similar exists, say so; an invented pattern is a defect."
+- "Cover: high-level approach, files to touch, key risks, open questions you can't resolve from the code."
+- "For every file: the one existing example it should copy for naming, error handling, data access, or tests, as `path:line` (a guideline doc section counts, e.g. the testing guide's rule for the kind of test being written), and the narrowest command that proves the file done (`mix test path:line`, `bundle exec rspec path:line`). If nothing similar exists, say so; an invented pattern is a defect."
 - "Be concrete. Cite file paths. Flag blockers explicitly."
 
 Wait for all three. If any reports a blocker (missing info, broken assumption), present it to the user and ask how to proceed before comparing.
 
-### 5. Compare, pick, self-review
+### 6. Compare, pick, self-review
 
 Contrast the three by **depth** (behaviour a caller gets per unit of interface learned), **locality** (where change and future bugs concentrate), and **change size**. Pick one, or a hybrid when parts combine cleanly. Be opinionated: the plan carries one approach. The two not chosen become the Alternatives considered, with the real reason each lost.
 
 Then scan the chosen design for:
 
-- **Placeholders**: TBD, TODO, XXX, "fill in later", a pattern row without a `path:line`
+- **Placeholders**: TBD, TODO, XXX, "fill in later", a Files line without MIRROR or VALIDATE
+- **Invariant gaps** (reworks only): a kept invariant the design does not re-establish
 - **Contradictions**: sections that say opposite things, or an approach that reverses a decision already made
 - **Vague requirements**: "handle errors appropriately", "as needed"
 - **AC gaps** (Jira tasks only): every acceptance criterion should map to something in the approach or be explicitly out of scope
 
 Fix these inline before showing the user. Don't punt them downstream.
 
-### 6. Write plan file
+### 7. Write plan file
 
 Compute path: `<git-common-dir>/claude/plans/<branch-name>.md` where `<git-common-dir>` comes from `git rev-parse --git-common-dir`.
 
-`mkdir -p` the parent directory. The file has a title, optional Jira link, and seven sections in this order:
+`mkdir -p` the parent directory. The file has a title, optional Jira link, and these sections in this order:
 
 - **Title** (H1): task title or Jira ticket ID
 - **Jira link** (if applicable): one line below the title
 - **## Goal**: what we're trying to achieve, one paragraph
 - **## Approach**: high-level strategy, 3-7 sentences, including the why
-- **## Patterns to mirror**: one line per category (naming, errors, data access, tests): `path:line` — what to copy. Categories with no existing example say "none in this area".
-- **## Files**: concrete list of files to create or modify, one line per file with what changes
+- **## Invariants** (reworks only): one line per kept invariant: the guarantee, enforcing `path:line`, test or `untested`
+- **## Files**: one line per file to create or modify: `path — what changes · MIRROR: path:line — what to copy · VALIDATE: <command>`. The pattern sits on the file it applies to, so the implementer meets it at the moment of the edit. Characterization tests for `untested` invariants come first.
 - **## Risks**: what could break, edge cases, assumptions, things to watch
 - **## Alternatives considered**: the two designs not chosen, one sentence each on their shape and why the chosen one beats them
 - **## Open questions**: anything that needs user input, a spike, or that no architect could resolve
 
 For Jira tasks, include the ticket's verbatim description and AC near the top so context survives session compression.
 
-### 7. Present
+### 8. Present
 
 Show the plan content. End with:
 
