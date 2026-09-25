@@ -4,10 +4,8 @@
 # roughly 4k tokens. Bytes rather than lines because cost is in tokens
 # and a line count lets long-line JSON, lockfiles and generated code through.
 #
-# A targeted read (offset or limit) passes, as does anything binary or
-# missing. The refusal names the alternatives so the model picks the
-# section it needs or hands the question to an Explore agent and keeps
-# the answer instead of the file.
+# A targeted read (offset or limit) passes, as does a diff, anything binary,
+# or anything missing. The refusal points the model at the section it needs.
 #
 # Wired in claude/settings.json under hooks.PreToolUse with matcher "Read".
 set -euo pipefail
@@ -19,6 +17,9 @@ bounded=$(printf '%s' "$input" | jq -r '(.tool_input.offset // .tool_input.limit
 
 [ -n "$path" ] && [ -z "$bounded" ] && [ -f "$path" ] || exit 0
 grep -Iq . "$path" 2>/dev/null || exit 0
+# Diffs are needed whole: a partial read misses hunks. In the 2026-09 trial,
+# blocked diffs were re-read in 2-4 chunks covering ~99% of the file anyway.
+case "$path" in *.patch|*.diff) exit 0 ;; esac
 kb=$(( $(wc -c < "$path") / 1024 ))
 [ "$kb" -gt "$max_kb" ] || exit 0
 
@@ -26,6 +27,6 @@ jq -n --arg p "$path" --arg n "$kb" --arg m "$max_kb" '{
   hookSpecificOutput: {
     hookEventName: "PreToolUse",
     permissionDecision: "deny",
-    permissionDecisionReason: ("Blocked: " + $p + " is " + $n + "KB; full reads stop at " + $m + "KB. Read the section you need with offset and limit, or hand your question to an Explore agent and keep its answer, not the file.")
+    permissionDecisionReason: ("Blocked: " + $p + " is " + $n + "KB; full reads stop at " + $m + "KB. Read the section you need with offset and limit.")
   }
 }'
