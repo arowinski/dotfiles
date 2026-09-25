@@ -1,0 +1,162 @@
+#!/bin/zsh
+# Park idle Claude sessions to free memory.
+#
+# Parking SIGTERMs the pane's `claude` and leaves `claude --resume <id>` typed
+# at its shell prompt, unexecuted. The transcript stays on disk; you press
+# Enter when you actually want the session back. By id, never `--continue`,
+# because several panes share a project directory and `--continue` would
+# resume whichever conversation there was touched last.
+#
+#   claude-panes                 list every pane, newest activity first
+#   claude-panes --idle 30       list only sessions idle 30min+
+#   claude-panes --park 30       park sessions idle 30min+
+#   claude-panes --sweep         park at IDLE_MINUTES, throttled (status tick)
+#   claude-panes --prune         drop stale @claude_session_id stamps
+#
+# Idleness is the transcript's mtime. Parking also needs claude to have no
+# `caffeinate` child (a turn is running) and no shell child (a Bash command,
+# background ones included), since both can outlast IDLE_MINUTES of silence.
+
+emulate -L zsh
+setopt err_return no_unset pipe_fail
+
+# 30: p90 of the gaps between turns in ~/.claude/projects is 16m and p95 is
+# 46m, so you are almost always back before a session is parked, and the 7% of
+# gaps that run longer are the ones holding memory for nothing.
+IDLE_MINUTES=30         # --sweep parks anything idle this long
+SWEEP_INTERVAL=600      # seconds between sweeps; the status tick is every 15s
+
+idle_minutes=0
+park=0
+prune=0
+sweep=0
+
+while (( $# )); do
+    case "$1" in
+        --idle) idle_minutes="${2:?--idle needs minutes}"; shift 2 ;;
+        --park) park=1; idle_minutes="${2:?--park needs minutes}"; shift 2 ;;
+        --sweep) sweep=1; park=1; idle_minutes=$IDLE_MINUTES; shift ;;
+        --prune) prune=1; shift ;;
+        -h|--help) sed -n '2,19p' "$0" | sed 's/^# \{0,1\}//'; return 0 ;;
+        *) print -u2 "claude-panes: unknown argument '$1'"; return 2 ;;
+    esac
+done
+
+# Not `[[ -n $TMUX ]]`: --sweep runs from status-right, whose shell the tmux
+# server spawns without TMUX set. Reaching the server is the real requirement.
+tmux list-panes -a -F '' >/dev/null 2>&1 || { print -u2 "claude-panes: no tmux server"; return 1 }
+
+projects="$HOME/.claude/projects"
+now=$(date +%s)
+
+# --sweep is called from the status bar every 15s; do the real work at most
+# once per SWEEP_INTERVAL so the tick stays cheap.
+if (( sweep )); then
+    stamp="${TMPDIR:-/tmp}/claude-panes.sweep"
+    if [[ -f "$stamp" ]] && (( now - $(stat -f %m "$stamp") < SWEEP_INTERVAL )); then
+        return 0
+    fi
+    touch "$stamp"
+fi
+
+# Every live claude, walked up to its owning pane. `pgrep -x claude` is not
+# usable here: it omits the caller's own ancestors, so the session running
+# this script would report itself as gone.
+typeset -a claude_pids
+claude_pids=(${(f)"$(ps -Ao pid,comm | awk '$2 ~ /\/claude$|^claude$/ {print $1}')"})
+
+# `pgrep -P` only sees direct children, and claude is often a grandchild
+# (shell wrapper, mise shim), so walk each candidate's parent chain.
+claude_pid_under() {
+    local root="$1" pid
+    for pid in $claude_pids; do
+        local p=$pid
+        while [[ -n "$p" && "$p" != 1 ]]; do
+            [[ "$p" == "$root" ]] && { print -- "$pid"; return 0 }
+            p=$(ps -o ppid= -p "$p" 2>/dev/null | tr -d ' ')
+        done
+    done
+    return 1
+}
+
+fmt_age() {  # minutes -> 45m / 3h / 2d
+    local m="$1"
+    if (( m < 0 )); then print -- '?'
+    elif (( m < 60 )); then print -- "${m}m"
+    elif (( m < 1440 )); then print -- "$(( m / 60 ))h"
+    else print -- "$(( m / 1440 ))d"
+    fi
+}
+
+transcript_for() {  # session id + cwd -> transcript path, if it belongs there
+    local sid="$1" cwd="$2"
+    local slug="${cwd//\//-}"
+    local f="$projects/$slug/$sid.jsonl"
+    [[ -f "$f" ]] && print -- "$f"
+}
+
+typeset -a rows
+# '|'-separated, not spaces: an unset pane option is an empty field, and `read`
+# with whitespace IFS collapses it, shifting every column after it.
+while IFS='|' read -r pane pane_pid sid pane_active window_active session_attached; do
+    [[ -n "${sid:-}" ]] || continue
+    onscreen=$(( pane_active && window_active && session_attached ))
+
+    cpid=$(claude_pid_under "$pane_pid") || cpid=""
+    if [[ -z "$cpid" ]]; then
+        if (( prune )); then
+            tmux set-option -t "$pane" -pu @claude_session_id 2>/dev/null
+            print "pruned  $pane  ${sid:0:8}  (no claude running)"
+        else
+            rows+=("-1|$pane||${sid:0:8}|stale — no claude in pane")
+        fi
+        continue
+    fi
+
+    cwd=$(lsof -a -p "$cpid" -d cwd -Fn 2>/dev/null | sed -n 's/^n//p')
+    # The stamp must resolve to a transcript under the pane's own cwd. If it
+    # doesn't, the pane carries another session's id (pre-fix notify-claude,
+    # or a session that has since moved) — say so rather than guessing, since
+    # a wrong id would be resumed into this pane on park.
+    file=$(transcript_for "$sid" "$cwd") || {
+        rows+=("-1|$pane|$cpid|${sid:0:8}|unverified stamp — ${cwd/#$HOME/~}")
+        continue
+    }
+
+    age=$(( (now - $(stat -f %m "$file")) / 60 ))
+    rows+=("$age|$pane|$cpid|${sid:0:8}|${cwd/#$HOME/~}")
+
+    (( park && age >= idle_minutes )) || continue
+    # Never park what is on screen: pane-focus-in cannot fire for a pane that
+    # is already focused, so it would sit dead until you switched away and back.
+    (( onscreen )) && continue
+    # The transcript goes quiet during a long subagent or Bash call, so check
+    # for live work directly: claude runs `caffeinate` while a turn is in
+    # progress, and every Bash command, background ones included, is a child shell.
+    pgrep -P "$cpid" -x 'caffeinate|zsh|bash|sh' >/dev/null && continue
+
+    kill "$cpid" 2>/dev/null || true
+
+    # Wait for the shell to get its prompt back. Typing while claude is still
+    # tearing down sends the keys to claude, which echoes them as output
+    # instead of leaving them in the shell's input buffer.
+    for _ in {1..40}; do
+        kill -0 "$cpid" 2>/dev/null || break
+        sleep 0.25
+    done
+
+    # Typed, not run: the pane shows exactly how to get the session back, and
+    # nothing restarts until you press Enter — so passing through a pane costs
+    # nothing, and a pane parked while detached is still waiting when you return.
+    tmux send-keys -t "$pane" "claude --resume $sid" 2>/dev/null
+    (( sweep )) || print "parked  $pane  ${sid:0:8}  $(fmt_age $age) idle  ${cwd/#$HOME/~}"
+done < <(tmux list-panes -a -F '#{pane_id}|#{pane_pid}|#{@claude_session_id}|#{pane_active}|#{window_active}|#{session_attached}')
+
+(( park || prune )) && return 0
+
+printf '%5s  %-6s %-7s %-9s %s\n' IDLE PANE PID SESSION CWD
+for row in ${(On)rows}; do
+    IFS='|' read -r age pane cpid sid cwd <<< "$row"
+    (( age >= idle_minutes || age < 0 )) || continue
+    printf '%5s  %-6s %-7s %-9s %s\n' "$(fmt_age $age)" "$pane" "${cpid:-—}" "$sid" "$cwd"
+done

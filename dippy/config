@@ -136,6 +136,7 @@ deny perl -i* * "In-place perl edit — use the Edit tool (per-file Edits for bu
 deny perl -pi* * "In-place perl edit — use the Edit tool (per-file Edits for bulk)"
 deny perl -0pi* * "In-place perl edit — use the Edit tool (per-file Edits for bulk)"
 allow claude-retro
+allow claude-panes
 allow gh-comments
 allow gh pr view
 allow gh pr checks

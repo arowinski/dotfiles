@@ -77,6 +77,7 @@
       "Bash(safe-ruby:*)",
       "Bash(safe-node:*)",
       "Bash(claude-retro:*)",
+      "Bash(claude-panes:*)",
       "Bash(ws:*)",
       "Bash(ensure-docker:*)",
       "Bash(docker compose logs:*)",
