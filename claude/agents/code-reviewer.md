@@ -2,7 +2,7 @@
 name: code-reviewer
 description: Performs thorough code review on recent changes. Use after implementing features, fixing bugs, or refactoring.
 tools: Bash, Glob, Grep, Read
-model: sonnet
+model: opus
 color: yellow
 ---
 
