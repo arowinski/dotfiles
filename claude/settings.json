@@ -102,7 +102,6 @@
       "Bash(spring:*)",
       "Bash(bin/rails db:migrate:*)",
       "Bash(bin/rails db:prepare:*)",
-      "Bash(bin/rails db:migrate:primary:*)",
       "Bash(bin/rails graphql:schema:json:*)",
       "Bash(bin/rails runner:*)",
       "Bash(rails runner:*)",
