@@ -200,6 +200,7 @@
     "ask": [],
     "defaultMode": "auto"
   },
+  "model": "opus[1m]",
   "hooks": {
     "Notification": [
       {
@@ -312,6 +313,5 @@
   "skipWorkflowUsageWarning": true,
   "autoCompactEnabled": true,
   "teammateMode": "in-process",
-  "agentPushNotifEnabled": true,
-  "model": "claude-fable-5-1[1m]"
+  "agentPushNotifEnabled": true
 }
