@@ -18,6 +18,13 @@ allow GIT_EDITOR=: git rebase *
 allow GIT_EDITOR=true git rebase *
 allow GIT_SEQUENCE_EDITOR=: GIT_EDITOR=: git rebase *
 allow git branch
+# rtk rewrites bare `git diff` into a compacted stat; the absolute path is how Claude gets a real patch
+allow /usr/bin/git diff
+allow /usr/bin/git status
+allow /usr/bin/git grep
+allow /usr/bin/git log
+allow /usr/bin/git show
+allow /usr/bin/git apply --check
 allow git checkout
 ask git checkout [!-]* "Use git switch for branch operations"
 # Restoring paths from a ref is not a branch switch — last match wins
@@ -27,14 +34,24 @@ allow git checkout * -- *
 allow touch
 allow mkdir
 allow cp
+# Probe files live in the session scratchpad; deleting them there is housekeeping
+allow rm -f /private/tmp/claude-501/*
+# `*` spans spaces — a second path could be anywhere, so multi-arg rm still asks (last match wins)
+ask rm -f /private/tmp/claude-501/* *
+ask rm -f /private/tmp/claude-501/*..*
 allow-redirect /tmp/**
 allow-redirect /private/tmp/**
 allow-redirect /dev/null
 allow-redirect ~/.claude/jobs/**
+allow-redirect ~/.claude/retro-log.md
 # The allow-rules above match literal text, so `$SP/x.md` never matches and prompts every time
 deny-redirect $* "Write the path out in full — $VAR paths never match the allow-rule"
-# Shell keyword inside loops; dippy tokenizes it as a command
+# Shell keywords inside loops; dippy tokenizes them as commands
 allow break
+allow continue
+# URLs and HTML pages only — `open` also launches apps and runs .command files
+allow open http*
+allow open *.html
 
 # Project tools
 allow mix
@@ -47,6 +64,8 @@ allow CI=1 just *
 allow CI=true just *
 allow bundle exec rspec
 allow bundle exec rubocop
+allow bin/rspec
+allow bin/rubocop
 allow bundle exec rails runner
 allow bundle exec rails db:prepare
 allow bundle exec rails db:migrate
