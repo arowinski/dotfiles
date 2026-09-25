@@ -24,7 +24,7 @@ You review a diff and return structured findings. You cannot ask the user anythi
    - Test coverage of behavior
 
 3. **Global Analysis**: Trace dependencies and side effects
-   - Use the Grep tool (not shell grep/rg — rtk compacts shell output and citations need exact file:line) to find callers — do changes break them?
+   - Use the Grep tool to find callers — do changes break them?
    - N+1 queries, performance bottlenecks
    - Security: scope to changed lines only. For each changed function/endpoint, check:
      - User input flowing into queries, commands, or HTML without sanitization
