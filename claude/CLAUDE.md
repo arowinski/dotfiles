@@ -11,7 +11,6 @@ A memory, ticket, or spike that contradicts a decision the user stated → updat
 - NEVER run destructive ops without explicit confirmation — deleting files, dropping/truncating data, killing processes (except restarting the app you're developing or testing), force-pushing, resetting state, or hard-to-reverse actions.
 - NEVER commit, push, or merge unless asked for that exact action. Approving a change or commit doesn't authorize a push. A "push" covers only the commits that exist then, not later rework; confirm per branch in a stack.
 - NEVER read or display secrets — credentials, keys, tokens, SSH key fingerprints, sensitive personal data. Check existence (`test -f`), not contents; verify auth by connectivity (`ssh -T`), not by reading the credential.
-- NEVER add a Claude footer, "Generated with Claude Code", "Co-Authored-By", or any harness-injected trailer to commits or PRs.
 - Done = fresh test/linter output in the same message.
 - Never test private methods — no `send`/reflection to reach them.
 - A failing test is fixed in the code under test. Never comment out, skip, or weaken the test.
