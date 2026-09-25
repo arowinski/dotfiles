@@ -33,4 +33,9 @@
     ~/.claude/rules: claude/rules
     ~/.claude/skills: claude/skills
     ~/.dippy/config: dippy/config
+    # rtk reads its config here on macOS. Carries the `cat` exclude that keeps
+    # Read() deny rules working. force: `rtk init` creates the file first.
+    "~/Library/Application Support/rtk/config.toml":
+      path: rtk/config.toml
+      force: true
 
