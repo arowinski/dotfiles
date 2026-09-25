@@ -95,6 +95,21 @@ if [[ -n "$TMUX" ]] && [[ -n "$session_id" ]] && [[ -n "$TMUX_PANE" ]]; then
     tmux set-option -t "$TMUX_PANE" -p @claude_session_id "$session_id" 2>/dev/null
 fi
 
+# Mark the pane for tmux's window list: `ask` while Claude waits on you, `done`
+# when a turn ends. The pane on screen is skipped — you are already looking at
+# it. Focusing the pane clears the mark (clear-claude-notifications).
+set_pane_mark() {
+    [[ -n "$TMUX" ]] && [[ -n "$TMUX_PANE" ]] || return 0
+    local on_screen=$(tmux display -p -t "$TMUX_PANE" '#{&&:#{pane_active},#{&&:#{window_active},#{session_attached}}}' 2>/dev/null)
+    [[ "$on_screen" == 1 ]] && return 0
+    tmux set-option -t "$TMUX_PANE" -p @claude_mark "$1" \; refresh-client -S 2>/dev/null
+}
+
+clear_pane_mark() {
+    [[ -n "$TMUX" ]] && [[ -n "$TMUX_PANE" ]] || return 0
+    tmux set-option -t "$TMUX_PANE" -pu @claude_mark \; refresh-client -S 2>/dev/null
+}
+
 details=""
 if [[ -n "$transcript" ]]; then
     details=$(get_transcript_details "$transcript")
@@ -107,8 +122,13 @@ case "$hook_event_name" in
     "Notification")
         title=$(echo "$json" | jq -r '.title // "Notification"')
         message="$(echo "$json" | jq -r '.message // ""')\n$details"
+        case "$(echo "$json" | jq -r '.notification_type // ""')" in
+            permission_prompt|elicitation_dialog|elicitation_url_dialog|agent_needs_input)
+                set_pane_mark ask ;;
+        esac
         ;;
     "Stop"|"SubagentStop")
+        [[ "$hook_event_name" == "Stop" ]] && set_pane_mark done
         title="Stopped"
         message="${details:-Work completed}"
         ;;
@@ -118,6 +138,7 @@ case "$hook_event_name" in
         ;;
     "PostToolUse")
         # Remove old notifications when tool completes (after accepting permission)
+        clear_pane_mark
         if [[ -n "$session_id" ]]; then
             group_id="claude-${session_id:0:8}"
             terminal-notifier -remove "$group_id" >/dev/null 2>&1
@@ -126,6 +147,7 @@ case "$hook_event_name" in
         ;;
     "UserPromptSubmit")
         # Remove existing notifications when user submits new command
+        clear_pane_mark
         group_id="claude-${session_id:0:8}"
         terminal-notifier -remove "$group_id" >/dev/null 2>&1
         exit 0
