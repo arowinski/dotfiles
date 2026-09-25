@@ -1,7 +1,7 @@
 ---
 name: ci-monitor
 description: Monitor GitHub PR checks and analyze CI failures. Use when checking CI status or diagnosing failing checks.
-tools: Bash, Read, Glob, Grep
+tools: Bash, Read
 model: haiku
 color: yellow
 ---

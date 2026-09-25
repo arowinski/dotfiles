@@ -1,7 +1,7 @@
 ---
 name: doc-writer
 description: Execution environment for the doc skill (context fork). Drafts Elixir docs in a fresh context and returns them for the main session's gate.
-tools: Bash, Read, Glob, Grep, mcp__tidewave__get_source_location, mcp__tidewave__get_ecto_schemas
+tools: Bash, Read, mcp__tidewave__get_source_location, mcp__tidewave__get_ecto_schemas
 model: opus
 color: green
 omitClaudeMd: true

@@ -1,7 +1,7 @@
 ---
 name: verifier
 description: /review's verify step — settles each review finding by experiment in the review tree and returns confirmed, refuted, untestable, or static per finding. Spawned by the review skill only.
-tools: Bash, Read, Write, Glob, Grep, ToolSearch, mcp__tidewave__project_eval, mcp__tidewave__get_logs
+tools: Bash, Read, Write, ToolSearch, mcp__tidewave__project_eval, mcp__tidewave__get_logs
 model: opus
 color: green
 ---
@@ -20,7 +20,7 @@ A grep, a caller search, or a file read is a static check, not a test: label it 
 | security | the correctness experiment fed the attack input from the finding's reasoning |
 | efficiency | the same call with query logging on, queries counted before and after the proposed form |
 | reuse | the named helper on the same input, output compared with the new code's |
-| simplification | dead or single-caller code: a caller search (`mix xref callers`, Grep), `static`; derivable state: a one-liner comparing the stored value with the derived one |
+| simplification | dead or single-caller code: a caller search (`mix xref callers`, `grep -rn`), `static`; derivable state: a one-liner comparing the stored value with the derived one |
 | architecture, altitude | dependency direction or boundary: `mix xref graph` / `trace` or the stack's equivalent, `static`; "every caller goes through X": a call through the other path in `project_eval`, showing it is or isn't stopped |
 | discovery | a cited command run (`--help`), a config key read from the running app (`project_eval` `Application.get_env`); a path check (`test -e`) is `static` |
 | conformance | a rule a tool enforces (formatter, linter, compiler warning) run on the file in check mode (`mix format --check-formatted`, `mix credo`); a rule only prose states stays desk |

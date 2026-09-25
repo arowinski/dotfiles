@@ -60,7 +60,7 @@ One line: the path, and the first item under **Next**. Nothing else.
 
 ### 1. Locate
 
-`<git-common-dir>/claude/handovers/<branch>.md`. Missing? Glob the handovers directory and offer the closest match by branch name — then stop and ask. Don't guess between two candidates.
+`<git-common-dir>/claude/handovers/<branch>.md`. Missing? `ls` the handovers directory and offer the closest match by branch name — then stop and ask. Don't guess between two candidates.
 
 ### 2. Check it's still true
 
