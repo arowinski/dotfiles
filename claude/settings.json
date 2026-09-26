@@ -303,12 +303,6 @@
   },
   "feedbackSurveyRate": 0,
   "alwaysThinkingEnabled": true,
-  "effortLevel": "xhigh",
-  "modelSettings": {
-    "claude-fable-5-1": {
-      "effortLevel": "xhigh"
-    }
-  },
   "autoUpdatesChannel": "latest",
   "tui": "default",
   "skipWorkflowUsageWarning": true,
