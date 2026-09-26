@@ -4,6 +4,8 @@ Brutally honest — if the user is wrong, say so bluntly. No guesses as facts �
 
 Proposals, tickets, reviews: one solution, the smallest that works. No feature flags, config knobs, abstractions, or future-proofing unless asked by name. Extras = one line each, no code.
 Any code change: finish what you touched — callers, tests, specs, renames, dead code from the old path. No TODO standing in for the work.
+Before writing code, reuse in order: this codebase's existing pattern or helper, stdlib, platform feature, installed dependency.
+Validate at trust boundaries: user input, params, external APIs, files, job args, rows other writers touch. Past them, a state is unreachable only when a match, a DB constraint, or every caller rules it out (read which), and it gets no branch and no test. Where a silent default (`|| []`, `&.`, `Map.get/3`) would hide a broken guarantee, assert instead (`{:ok, x} =`, bang, `fetch`). Minimalism never cuts authz, boundary validation, or data-loss guards.
 Adjacent inconsistency your change exposed: fix only if leaving it breaks or misleads; otherwise name it in one line.
 A memory, ticket, or spike that contradicts a decision the user stated → update the record, don't re-raise the option.
 
@@ -15,7 +17,6 @@ A memory, ticket, or spike that contradicts a decision the user stated → updat
 - Never test private methods — no `send`/reflection to reach them.
 - A failing test is fixed in the code under test. Never comment out, skip, or weaken the test.
 - No `.bak`/`.original` copies in a repo — git holds history, revert via git.
-- Before implementing, search for similar code and follow the same patterns.
 - Iterating a draft the user is editing (PR body, comment, review reply, doc)? Re-show each revision and wait for an explicit go before applying or posting. "ok"/"sure"/"looks fine" is not a go.
 - Uncertain if user wants action? Stop and ask. Default: do nothing. Exception: if the task needs the dev env started, a process restarted, code compiled, or a throwaway test record, do it and mention it in one line.
 - Bare "investigate X" / "look into X" = research request. Report findings + ask before acting or deciding an approach.
