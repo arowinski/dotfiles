@@ -57,19 +57,19 @@ Launch every firing angle in a single message via the Agent tool with `run_in_ba
 | security | always | review-specialist, opus |
 | correctness | always | review-specialist, opus |
 | acceptance | ticket or plan `## Invariants` found | review-specialist, opus |
-| reuse | always | review-specialist, opus |
-| simplification | always | review-specialist, opus |
+| reuse | always | simplifier, opus |
+| simplification | always | simplifier, opus |
 | efficiency | always | review-specialist, opus |
-| altitude | always | review-specialist, opus |
+| altitude | always | simplifier, opus |
 | docs | `.ex`/`.exs` in diff | doc-writer fork via `/doc branch` |
 
-**Every prompt carries**: the review tree's path as the repo to run in, the patch path, its report path `<scratchpad>/review-<angle>.md`, the size and language facts, the plan and ticket summaries, the angle's name and its paragraph from the Angles section at the end of this file as its whole scope, "Scope strictly to lines the diff adds or changes", and "Answer independently. Do not coordinate." Conformance and discovery also get the doc list. The finding format, severity scale, read-only rule, and report return are the review-specialist agent's own; do not restate them.
+**Every prompt carries**: the review tree's path as the repo to run in, the patch path, its report path `<scratchpad>/review-<angle>.md`, the size and language facts, the plan and ticket summaries, the angle's name, and "Answer independently. Do not coordinate." A review-specialist prompt also gets the angle's paragraph from the Angles section at the end of this file as its whole scope and "Scope strictly to lines the diff adds or changes"; a simplifier's angles and scope are its own. Conformance and discovery also get the doc list. The finding format, severity scale, read-only rule, and report return are each agent's own; do not restate them.
 
-**Every prompt returns the same way**: the specialist writes its full report to its report path with a Bash redirect (the scratchpad sits under `/private/tmp`, which the hook allows) and returns three lines: the Coverage line (conformance and discovery only), finding counts by severity, the path. A background agent's inline result is cut at about 5K characters, so the file is the report and the return is the receipt.
+**Every prompt returns the same way**: the agent writes its full report to its report path with a Bash redirect (the scratchpad sits under `/private/tmp`, which the hook allows) and returns a short receipt ending in the path: a review-specialist sends the Coverage line (conformance and discovery only) and finding counts by severity, a simplifier its finding count. A background agent's inline result is cut at about 5K characters, so the file is the report and the return is the receipt.
 
 ## 4. Gather and dedupe
 
-Read every report file. Merge findings that share file, line, and claim into one, citing every agent that raised it; conformance and discovery, or a simplify lens and correctness, converging from different directions is signal, note it. Map the doc report: each per-file draft becomes one finding at nit severity (`[docs] path`, one line on what changed, draft attached); each unverifiable claim becomes one finding at info.
+Read every report file. Merge findings that share file, line, and claim into one, citing every agent that raised it; conformance and discovery, or a simplify lens and correctness, converging from different directions is signal, note it. A cleanup (reuse, simplification, altitude) whose fix conflicts with a correctness or security finding on the same line or mechanism is dropped; the defect wins. Map the doc report: each per-file draft becomes one finding at nit severity (`[docs] path`, one line on what changed, draft attached); each unverifiable claim becomes one finding at info.
 
 ## 5. Verify by experiment
 
@@ -98,6 +98,8 @@ Orchestrator, no extra agents. For each finding, four checks:
 - **Fix coherence**: the fix addresses the claim.
 - **Reach and cost**: a caller in this repo produces the triggering input (name the caller check that shows it), and the fix costs less than the harm.
 
+A cleanup (reuse, simplification, altitude) has no triggering input, so its fourth check is **behaviour kept** instead: the Fix's after form returns the same result as the before form for every input the code receives. A cleanup that removes a guard gets reach inverted: the cited guarantee holds, and no caller or boundary produces the guarded state. A cleanup passing all four is Polish; failing behaviour kept or the inverted reach is Failed.
+
 Bucket:
 
 | bucket | criteria | treatment |
@@ -114,7 +116,7 @@ The verifier's verdict overrides the desk check: `refuted` is Failed, `confirmed
 
 Open with one Coverage line: docs read, docs skipped with reason, then `changes exercised: N/B` over the tester's behaviours, then the verifier tally over every deduped finding: `tested: N/M`, followed by the M−N not tested, counted by reason — `S static (grep/read only)`, `K desk (no command settles it)`, `J untestable (<cause>)`, or `M desk — verifier skipped: <reason>`. The counts sum to M. Under it, the tester's lines as a short list: behaviour, then `works via UI`, `works via eval`, `broken → #N`, or `untestable (<cause>)`. Then numbered findings: **Blockers**, **Major**, **Nit**, **Polish**, **Info**, then **Weak** with each gap named, then `_(Unlikely: N — one line each)_` and `_(Failed: N)_`, both printed even at zero. Within a section, order by file path. Omit empty severity sections. Each finding:
 
-- **N. [angle] path:line** — Claim; Evidence; Reasoning; Fix; verifier verdict and command, or `desk — <why not>` when no experiment ran.
+- **N. [angle] path:line** — Claim; Evidence; Reasoning (Cost for a cleanup); Fix; verifier verdict and command, or `desk — <why not>` when no experiment ran.
 
 Every specialist clean → "No findings", no menu. Once the report is printed, delete the patch and every `review-*.md` in the scratchpad, whichever way the run ends: one `rm -f <scratchpad>/<name>` per path, absolute (a `cd` plus a relative path prompts).
 
@@ -128,7 +130,7 @@ Show `[s]` only when the scope is a PR whose author (`gh pr view <pr> --json aut
 
 ## Angles
 
-One paragraph per specialist: its role and non-scope, pasted into its prompt at step 3.
+One paragraph per review-specialist angle: its role and non-scope, pasted into its prompt at step 3. Reuse, simplification, and altitude live in the simplifier agent.
 
 **Conformance** — full diff plus the doc list with word counts; reads every doc on the list; checks the changeset against stated rules and nothing else. Quote the rule verbatim with its source path beside the offending code. Before claiming something is missing from a config file, read that file. Apply a rule only where it governs: a rule about how the agent issues commands does not govern a committed script; look for existing code that contradicts the reading before flagging; when scope is uncertain, say so and lower the severity.
 
@@ -138,16 +140,10 @@ One paragraph per specialist: its role and non-scope, pasted into its prompt at 
 
 **Architecture** — patterns, layering, coupling, abstractions, module boundaries, dependency direction, public API design, structural naming (modules, classes, public functions). Non-scope: line-level bugs, local style.
 
-**Correctness** — edge cases, off-by-one, error handling, nil/empty handling, test gaps, local naming (variables, private functions, locals). Two audits on top: for every line the diff deletes or replaces, name the invariant it enforced and find where the new code re-establishes it (a removed guard, a dropped error path, a narrowed validation, a deleted test is a finding when nothing does); for every changed function, find its callers with `grep -rn` and check the change against each call site (new precondition, changed return shape, new exception, ordering dependency) and its callees for a parallel change in the same diff. For every changed public function, find its test: a new branch with none, or an assertion that only checks "doesn't raise", is a finding. Non-scope: security, architecture, acceptance criteria.
+**Correctness** — edge cases, off-by-one, error handling, nil/empty handling, test gaps, local naming (variables, private functions, locals). Two audits on top: for every line the diff deletes or replaces, name the invariant it enforced and find where the new code re-establishes it (a removed guard, a dropped error path, a narrowed validation, a deleted test is a finding when nothing does); for every changed function, find its callers with `rg -n` and check the change against each call site (new precondition, changed return shape, new exception, ordering dependency) and its callees for a parallel change in the same diff. For every changed public function, find its test: a new branch with none, or an assertion that only checks "doesn't raise", is a finding. Non-scope: security, architecture, acceptance criteria.
 
 **Acceptance** — for every acceptance criterion in the ticket, name the diff hunk that fulfils it; missing or partially met criteria are findings. For every reviewer comment on the ticket that raises a concern, check whether the diff addresses or ignores it. When the plan has an `## Invariants` section, every invariant is kept by the diff or its removal is justified in the plan; one silently dropped is a finding. Non-scope: anything the ticket or plan does not mention.
 
-**Reuse** — new code that re-implements something the codebase already has. Search (`grep -rn`) the project's shared helper, component, and test-support directories for an existing helper, query, UI component, factory, or test helper that does the same job, in code and tests alike, and name it as `path:line` with module.function/arity or the component name. Report only a helper you have opened and matched. Cost is what gets duplicated.
-
-**Simplification** — unnecessary complexity the diff adds: redundant or derivable state, copy-paste with slight variation, deep nesting, unneeded preloads, dead code left behind, clauses that could collapse, helpers with a single trivial caller. Each finding names the simpler form as a concrete before/after of a few lines. Non-scope: bugs, naming, doc wording.
-
 **Efficiency** — wasted work the diff introduces: repeated queries or preloads for the same rows, N+1 patterns, independent queries that could be one, list operations on large id lists that a query or subquery would do, `OFFSET` pagination on a large table where a cursor would do, inserts in a loop instead of one multi-row insert, an external call inside a transaction, sequential work that is independent, blocking work added to startup or a hot path, and client events that reach the server more often than the work needs (a keystroke or blur that triggers a LiveView `phx-change` or a request, including an event bubbling up from a nested input to its form). Name the cheaper alternative and the cost as extra round-trips per call or how it scales. Report only what costs a real round-trip or scales with data; skip micro-optimisations.
-
-**Altitude** — is each change made at the right depth: a special case layered onto shared infrastructure where a simpler general change to the mechanism would do the same job with fewer branches; a fix at the wrong layer (a caller working around what the callee should own, or the reverse). Name the deeper change concretely. Be honest when a special case is warranted: report only when the general form is simpler, not merely more abstract.
 
 **Docs** — the doc skill's own `branch` sweep, returned as per-file drafts plus unverifiable claims.

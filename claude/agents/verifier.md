@@ -20,7 +20,7 @@ A grep, a caller search, or a file read is a static check, not a test: label it 
 | security | the correctness experiment fed the attack input from the finding's reasoning |
 | efficiency | the same call with query logging on, queries counted before and after the proposed form |
 | reuse | the named helper on the same input, output compared with the new code's |
-| simplification | dead or single-caller code: a caller search (`mix xref callers`, `grep -rn`), `static`; derivable state: a one-liner comparing the stored value with the derived one |
+| simplification | dead or single-caller code: a caller search (`mix xref callers`, `rg -n`), `static`; derivable state: a one-liner comparing the stored value with the derived one; a removed guard: produce the guarded state (nil, `{:error, _}`, the raise) through a real caller or boundary, and the finding is `refuted` when it appears, `confirmed` when the cited guarantee stops it |
 | architecture, altitude | dependency direction or boundary: `mix xref graph` / `trace` or the stack's equivalent, `static`; "every caller goes through X": a call through the other path in `project_eval`, showing it is or isn't stopped |
 | discovery | a cited command run (`--help`), a config key read from the running app (`project_eval` `Application.get_env`); a path check (`test -e`) is `static` |
 | conformance | a rule a tool enforces (formatter, linter, compiler warning) run on the file in check mode (`mix format --check-formatted`, `mix credo`); a rule only prose states stays desk |
