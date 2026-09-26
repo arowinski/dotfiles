@@ -1,6 +1,6 @@
 ---
 name: nag
-description: Interview the user about a plan, decision, or idea until nothing that changes the build is left undecided, then write the decisions to the plan file. Use on "nag me", "grill me", "interview me about X", "poke holes in this", "stress-test my thinking", "what am I missing", "question me before we build"; a leading `one` asks one question at a time. Not for a question that has an answer (answer it), not for researching how to build (design), and not on a plan the user already called final.
+description: Interview the user about a plan, decision, or idea until nothing that changes the build is left undecided, then write the decisions to the plan file. Use on "nag me", "grill me", "interview me about X", "poke holes in this", "stress-test my thinking", "what am I missing", "question me before we build", including a plan laid out right in the message; a leading `one` asks one question at a time. Not for a question that has an answer (answer it), not for researching how to build (design), and not on a plan the user already called final.
 allowed-tools: Bash(git rev-parse:*), Bash(git branch:*), Bash(mkdir:*), Read, Glob, Grep, Write, Edit, AskUserQuestion, Agent
 argument-hint: [one] <plan, decision, or idea to be questioned about>
 ---
