@@ -1,7 +1,7 @@
 alias c='clear'
 
 alias v="nvim"
-alias cc="claude"
+alias cc="env -u DO_NOT_TRACK claude"
 alias k=kubectl
 
 alias b='bundle exec'
