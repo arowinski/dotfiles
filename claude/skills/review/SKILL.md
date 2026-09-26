@@ -81,7 +81,9 @@ Read every report file. Merge findings that share file, line, and claim into one
 
 Check 2 fails with Tidewave loaded but silent, and `ws status` shows the workspace stopped → start it yourself: `ws run` with `run_in_background: true`, then re-run check 2 until `project_eval` answers. A running workspace whose app will not answer or compile (a reloader that demands a server restart after a config change) → restart only the app process, never the whole workspace, because `ws restart` on a live workspace can corrupt its postgres; say so in one line and carry on.
 
-Any check still failing → `AskUserQuestion`, one question: which is missing, and the choice between *continue on evidence only* (the verifier and tester are skipped, every finding keeps its desk verdict and the report says so in the Coverage line) and *stop* (you restart the session in the right worktree, then rerun). A non-Elixir, non-Rails diff skips the preflight.
+Check 2 fails with `ws status` showing the workspace running but the Tidewave tools absent from the session → its MCP connection gave up while the workspace was down (Claude Code retries a dropped server for about 30 seconds, then marks it failed), and only the user can reconnect it.
+
+Any check still failing → `AskUserQuestion`, one question: which is missing, and the choice between *continue on evidence only* (the verifier and tester are skipped, every finding keeps its desk verdict and the report says so in the Coverage line) and *stop* (you restart the session in the right worktree, then rerun). In the Tidewave case above, offer *reconnect* first: the user runs `/mcp`, reconnects tidewave, and says go; then rerun check 2. A non-Elixir, non-Rails diff skips the preflight.
 
 Dispatch exactly one `verifier` agent with the review tree path and every deduped finding (angle, `path:line`, claim, reasoning), whatever angle raised it. Its experiments, the `static` label, and the rules for probes and state are its own; do not restate them, and do not split the findings across several verifiers. An experiment the orchestrator runs inline counts as none. The step 7 Coverage line carries the verifier's tally.
 
