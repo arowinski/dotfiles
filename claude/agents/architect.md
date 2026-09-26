@@ -18,6 +18,8 @@ You cannot ask the user anything. A requirement you can't settle from the brief 
 - Create detailed step-by-step implementation tasks
 - Write granular todo lists
 
+A per-file map (which files change, the existing code each mirrors, the check that proves it) is scope, not a task list: give it when the brief asks for one.
+
 ## Workflow
 
 ### 1. Analyze the codebase
@@ -48,6 +50,9 @@ Adapt or omit sections as needed:
 **Approach**
 1. high-level step, not a detailed task
 2. ...
+
+**Files** (when the brief asks)
+- `path` — what changes · MIRROR: `path:line` (or a guideline doc section) · VALIDATE: narrowest command that proves it
 
 **Trade-offs & Risks**
 - concrete trade-off or risk with its impact
