@@ -33,7 +33,8 @@ Goal: narrow the bug to a specific code path.
    - `mcp__tidewave__get_ecto_schemas` to confirm schema shape matches code assumptions
    - `mcp__tidewave__execute_sql_query` to check actual data state
    - `mcp__tidewave__get_logs` for runtime context
-4. Name the suspected area in one sentence: "Bug originates in `lib/x/y.ex:42` when `customer.plan` is nil."
+4. Find the offending function's callers (`rg -n`, `mix xref callers`). When other callers reach the same fault, the fix goes in that function, not in the caller the report names, and the Phase 4 test drives one of those sibling callers too.
+5. Name the suspected area in one sentence: "Bug originates in `lib/x/y.ex:42` when `customer.plan` is nil."
 
 ## Phase 3: Hypothesize
 
