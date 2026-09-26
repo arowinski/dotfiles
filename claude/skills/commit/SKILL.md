@@ -1,7 +1,7 @@
 ---
 name: commit
 description: Use when the user wants their working-tree changes recorded in git history — "commit this", "save/snapshot this to git", "write a commit message", "amend the last commit", "absorb these fixups into the right commits", or "stage these files and write it up". Covers picking what to stage, splitting unrelated changes into separate commits, and writing a subject (and body) that matches the repo's existing log style. Trigger on staging-plus-describe requests even when the word "commit" never appears, and even when the user says not to push. Do not use for other git work that leaves the commit itself alone: pushing, opening PRs, rebasing or squashing existing commits, cherry-picking, stashing, or just showing a diff or status.
-allowed-tools: Bash(git-commit-context:*), Bash(git status:*), Bash(git diff:*), Bash(git log:*), Bash(git add:*), Bash(git commit:*), Bash(git absorb:*), Read, Glob
+allowed-tools: Bash(git-commit-context:*), Bash(git status:*), Bash(git diff:*), Bash(git log:*), Bash(git add:*), Bash(git commit:*), Bash(git absorb:*), Read
 ---
 
 # Commit

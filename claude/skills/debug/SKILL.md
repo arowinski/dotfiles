@@ -1,7 +1,7 @@
 ---
 name: debug
 description: Debug a bug from error to root cause to regression test. Use when given a stack trace, traceback, test failure, error message, crash, 500/503, Sentry URL, or "X doesn't work" / "X is broken" report. Also use when user says debug, diagnose, troubleshoot, or investigate.
-allowed-tools: Bash(git:*), Bash(ws:*), Bash(rg:*), Bash(grep:*), Bash(mix:*), Bash(MIX_ENV=* mix:*), Bash(bin/spring:*), Bash(yarn test:*), Bash(yarn run:*), Read, Glob, Grep, Edit, Write, AskUserQuestion, mcp__tidewave__*, mcp__tidewave-web__*, mcp__sentry__*, mcp__atlassian__getJiraIssue
+allowed-tools: Bash(git:*), Bash(ws:*), Bash(rg:*), Bash(grep:*), Bash(mix:*), Bash(MIX_ENV=* mix:*), Bash(bin/spring:*), Bash(yarn test:*), Bash(yarn run:*), Read, Edit, Write, AskUserQuestion, mcp__tidewave__*, mcp__tidewave-web__*, mcp__sentry__*, mcp__atlassian__getJiraIssue
 argument-hint: [stack trace, error message, Sentry URL, or bug description]
 ---
 
@@ -10,13 +10,6 @@ argument-hint: [stack trace, error message, Sentry URL, or bug description]
 Walk a bug from "what's happening" to "fixed and regression-tested" in six phases. Each phase produces evidence; no phase jumps ahead without it.
 
 **You do NOT:** apply fixes without per-change approval, commit, push, or skip phases. The user commits after the regression test passes.
-
-## Don't skip this skill when
-
-- The bug "looks obvious" — obvious bugs still have root causes
-- You're under time pressure — guessing produces rework; phases 1-3 are fast
-- You already tried a fix and it didn't hold — that's the signal to restart at Phase 1, not try fix #2
-- The user says "just" or "quick fix" — those are the cases that produce regressions
 
 ## Phase 1: Reproduce
 

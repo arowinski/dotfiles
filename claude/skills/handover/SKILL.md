@@ -1,7 +1,7 @@
 ---
 name: handover
 description: Write, read, or list session handovers at `<git-common-dir>/claude/handovers/<branch>.md` — the state a fresh session needs to pick the work up. Use on "write a handover", "write the handoff", "prepare a handover", "hand this off", "dump state before we run out of context"; on the read side "read the handover", "read the handoff", "resume from the handover", "where did we leave off on this branch"; and to survey "list the handovers", "what's parked", "which branches have handovers". One file per branch, rewritten in place. Does NOT commit, push, or start implementing.
-allowed-tools: Bash(git:*), Bash(mkdir:*), Bash(gh pr view:*), Read, Glob, Grep, Write
+allowed-tools: Bash(git:*), Bash(mkdir:*), Bash(gh pr view:*), Read, Write
 argument-hint: [read | write | list | <what the next session is for>]
 ---
 

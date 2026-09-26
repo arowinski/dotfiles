@@ -12,7 +12,7 @@ Extract the question in one line: what is being decided. Then frame 2-4 position
 
 ## Rules
 
-- Use TeamCreate + SendMessage for a real agent team. NEVER simulate the debate.
+- Spawn each teammate as a named Agent and run the rounds through SendMessage. NEVER simulate the debate.
 - Do NOT use tmux for agent management.
 - Teammates are general-purpose and read-only — no file edits.
 - Give each teammate the extracted question, its assigned position, and pointers (paths, refs, the ticket). Leave out the conversation and your own lean: a teammate seeded with the thread argues the thread.
@@ -42,4 +42,4 @@ Synthesize a recommendation:
 
 **Open Questions** — anything needing user input
 
-Present to user. Clean up the team.
+Present to user.

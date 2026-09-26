@@ -1,7 +1,7 @@
 ---
 name: dead-code
 description: Find and delete unreferenced code in an Elixir project — one deletion per test run, reverting any that turns the suite red. Use on "dead code", "unused functions / modules / deps", "what can we delete", "leftovers after the X removal". Not for restructuring live code and not for removing a feature that still has callers.
-allowed-tools: Bash(mix:*), Bash(MIX_ENV=test mix:*), Bash(git:*), Read, Glob, Grep, Edit
+allowed-tools: Bash(mix:*), Bash(MIX_ENV=test mix:*), Bash(git:*), Read, Edit
 argument-hint: [path or module to sweep, or empty for the whole project]
 ---
 

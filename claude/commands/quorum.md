@@ -2,7 +2,7 @@
 description: Ask five agents with fixed lenses (Architect, Skeptic, Pragmatist, Critic, Precedent) the same question, then synthesize where the lenses agree.
 disable-model-invocation: true
 argument-hint: <question about code, architecture, or approach>
-allowed-tools: Bash(git rev-parse:*), Bash(git diff:*), Bash(git log:*), Read, Glob, Grep, Agent
+allowed-tools: Bash(git rev-parse:*), Bash(git diff:*), Bash(git log:*), Read, Agent
 ---
 
 Five agents answer one question independently, each through a different lens, then you synthesize. Agreement between lenses that pull in opposite directions is the signal; five copies of one lens would only agree with themselves.

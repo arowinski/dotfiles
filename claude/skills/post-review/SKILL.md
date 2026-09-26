@@ -2,7 +2,7 @@
 name: post-review
 description: Filters code-review findings to the ones worth posting, drafts each as a question, previews, then posts to a GitHub PR as a single review with inline comments. Use after /review produces findings on someone else's PR, or for a fresh review landing on the PR. Also on "which are worth posting?", "filter findings", "be pragmatic about comments", "what's worth posting?", "what worth commenting?", "what's worth commenting on?" — previews and posts only on explicit confirmation (reply `skip` to draft without publishing). Comments are phrased as questions, not verdicts.
 argument-hint: [pr-number-or-url]
-allowed-tools: Bash(gh-comments:*), Bash(gh api:*), Bash(gh pr view:*), Bash(gh pr diff:*), Bash(git diff:*), Bash(git log:*), Read, Glob, Grep, AskUserQuestion, Skill
+allowed-tools: Bash(gh-comments:*), Bash(gh api:*), Bash(gh pr view:*), Bash(gh pr diff:*), Bash(git diff:*), Bash(git log:*), Read, AskUserQuestion, Skill
 ---
 
 # Post Review
@@ -33,7 +33,7 @@ For each finding capture: file path, line number on the PR head ref, category (s
 
 `/review` produces structured findings (Claim / Evidence / Reasoning / Fix, plus the verifier verdict). Use Evidence and Reasoning to inform the comment body — they're the raw material for a clear question.
 
-### Step 3: Plausibility check (REQUIRED)
+### Step 3: Plausibility check
 
 Before drafting any comment, double-check each finding against current state:
 
@@ -42,7 +42,7 @@ Before drafting any comment, double-check each finding against current state:
 3. Confirm the cited code actually says what the finding claims (no off-by-one, no misread)
 4. Drop findings that don't survive this check. False positives erode trust faster than missing comments add value.
 
-### Step 4: Value filter (REQUIRED)
+### Step 4: Value filter
 
 For each surviving finding, ask: would the PR author thank you for this comment, or sigh? Categorize:
 

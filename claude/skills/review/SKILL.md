@@ -2,7 +2,7 @@
 name: review
 description: One-run compound code review — parallel specialists, a tester that runs the changed behaviour in the live app (UI or eval), a verifier that confirms findings by experiment, a pragmatic skeptic pass, one numbered report with an apply menu. Use on "review", "review this / my changes / the PR", "thorough review", "before I push", or a PR link with review intent. Not for posting comments (post-review) or answering review feedback (triage-review).
 argument-hint: [PR number or link, path, ref range, or empty for uncommitted]
-allowed-tools: Bash(git:*), Bash(gh:*), Bash(find:*), Bash(wc:*), Bash(mix:*), Bash(bundle exec rspec:*), Agent, Read, Glob, Grep, Edit, Skill, AskUserQuestion, ToolSearch, mcp__atlassian__getJiraIssue, mcp__tidewave__project_eval
+allowed-tools: Bash(git:*), Bash(gh:*), Bash(find:*), Bash(wc:*), Bash(mix:*), Bash(bundle exec rspec:*), Agent, Read, Edit, Skill, AskUserQuestion, ToolSearch, mcp__atlassian__getJiraIssue, mcp__tidewave__project_eval
 ---
 
 # Review

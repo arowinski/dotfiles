@@ -1,7 +1,7 @@
 ---
 name: tdd
 description: Build a feature or change test-first in red-green slices, at seams agreed with the user before any test is written. Use on "TDD", "test-first", "red-green", "write the failing test first", "add a test then make it pass", or when the user wants a new behaviour driven by its tests. Not for diagnosing a bug (debug writes the failing test there) and not for adding tests to code that already exists and works.
-allowed-tools: Bash(just:*), Bash(mix:*), Bash(MIX_ENV=* mix:*), Bash(bundle exec rspec:*), Bash(yarn test:*), Bash(yarn run:*), Bash(git:*), Read, Edit, Write, Grep, Glob, AskUserQuestion
+allowed-tools: Bash(just:*), Bash(mix:*), Bash(MIX_ENV=* mix:*), Bash(bundle exec rspec:*), Bash(yarn test:*), Bash(yarn run:*), Bash(git:*), Read, Edit, Write, AskUserQuestion
 argument-hint: [behaviour to build]
 ---
 
