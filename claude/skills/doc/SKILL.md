@@ -67,7 +67,7 @@ Answer in working memory (not as visible output sections):
 
 1. **WHY, in domain terms?** Not "Oban worker" — "drains the event outbox so downstream systems receive
    published events." One sentence.
-2. **Who calls it, what does it call?** `grep -rn` for `alias <Module>` and `<Module>.`.
+2. **Who calls it, what does it call?** `rg -n` for `alias <Module>` and `<Module>.`.
 3. **What surprising constraint or invariant?** Concurrency, idempotency, irreversible side effects,
    auth/scope assumptions, retry semantics, ordering. None nameable = genuinely simple; move on.
 4. **What does real usage look like?** A real snippet from the codebase — config, router line, call site.
@@ -134,7 +134,7 @@ Check, in order:
 
 1. Every factual claim matches current code, checked by reading it — wrong beats fluffy; fix stale claims
    before style work. Reading answers every question here, so leave `mix compile` and `mix test` alone
-2. Every backticked module resolves to a real `defmodule` — one `grep -rnE` with every name alternated
+2. Every backticked module resolves to a real `defmodule` — one `rg -n` with every name alternated
 3. `@spec` arities match; `@type t` fields match the struct/schema
 4. Doctests run without setup; no `@doc` on private functions
 5. Redundancy pass: per sentence, "does the code already show this?" — delete if yes
