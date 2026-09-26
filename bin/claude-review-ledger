@@ -1,0 +1,237 @@
+#!/usr/bin/env python3
+"""Ledger of /review runs: what each run raised, which findings the user
+applied, and which third-party inline PR comments no run raised.
+
+  claude-review-ledger add [--tree PATH] [--pr N] < rows    prints the run id
+  claude-review-ledger applied RUN N[,N...]
+  claude-review-ledger stats [--since DATE] [--until DATE]
+  claude-review-ledger misses [--since DATE]
+
+A row is tab-separated: number (- for a dropped finding), section, angle,
+path[:line], verdict, claim. Sections are the report's: blocker major nit
+polish info weak, and unlikely failed for the dropped ones.
+"""
+
+import argparse
+import json
+import re
+import subprocess
+import sys
+from collections import defaultdict
+from datetime import datetime
+from pathlib import Path
+
+LEDGER = Path.home() / ".claude" / "review-ledger.jsonl"
+SECTIONS = ("blocker", "major", "nit", "polish", "info", "weak", "unlikely", "failed")
+DROPPED = ("unlikely", "failed")
+VERDICTS = ("confirmed", "refuted", "untestable", "static", "desk")
+# A comment this close to a finding on the same file counts as the same issue:
+# the head /review read and the head a reviewer commented on drift by a few lines.
+NEAR = 5
+
+
+def run_cmd(*args):
+    return subprocess.run(args, capture_output=True, text=True, check=True).stdout.strip()
+
+
+def repo_slug(tree):
+    """owner/repo from a GitHub origin, None for a repo without one."""
+    url = subprocess.run(
+        ["git", "-C", tree, "remote", "get-url", "origin"], capture_output=True, text=True
+    ).stdout.strip()
+    m = re.search(r"github\.com[:/](.+?)(?:\.git)?$", url)
+    return m.group(1) if m else None
+
+
+def parse_row(lineno, raw):
+    fields = [f.strip() for f in raw.split("\t")]
+    if len(fields) != 6:
+        sys.exit(f"row {lineno}: want 6 tab-separated fields, got {len(fields)}: {raw!r}")
+    n, section, angle, loc, verdict, claim = fields
+    if section not in SECTIONS:
+        sys.exit(f"row {lineno}: section {section!r} not one of {' '.join(SECTIONS)}")
+    if verdict not in VERDICTS:
+        sys.exit(f"row {lineno}: verdict {verdict!r} not one of {' '.join(VERDICTS)}")
+    if section in DROPPED and n != "-" or section not in DROPPED and not n.isdigit():
+        sys.exit(f"row {lineno}: a {section} finding takes {'-' if section in DROPPED else 'its report number'}, got {n!r}")
+    m = re.fullmatch(r"(.+?)(?::(\d+)(?:-\d+)?)?", loc)
+    return {
+        "n": None if n == "-" else int(n),
+        "section": section,
+        "angle": angle,
+        "path": m.group(1),
+        "line": int(m.group(2)) if m.group(2) else None,
+        "verdict": verdict,
+        "claim": claim,
+    }
+
+
+def append(entry):
+    with open(LEDGER, "a") as f:
+        f.write(json.dumps(entry) + "\n")
+
+
+def load():
+    runs, applied = {}, {}
+    if not LEDGER.exists():
+        return runs, applied
+    for line in LEDGER.read_text().splitlines():
+        e = json.loads(line)
+        if "findings" in e:
+            runs[e["run"]] = e
+        else:
+            applied.setdefault(e["run"], set()).update(e["applied"])
+    return runs, applied
+
+
+def in_window(run, since, until=None):
+    day = run["at"][:10]
+    return (not since or day >= since) and (not until or day <= until)
+
+
+def cmd_add(args):
+    rows = [parse_row(i, l) for i, l in enumerate(sys.stdin.read().splitlines(), 1) if l.strip()]
+    run = datetime.now().strftime("%Y%m%d-%H%M%S")
+    append({
+        "run": run,
+        "at": datetime.now().isoformat(timespec="seconds"),
+        "repo": repo_slug(args.tree),
+        "branch": run_cmd("git", "-C", args.tree, "rev-parse", "--abbrev-ref", "HEAD"),
+        "head": run_cmd("git", "-C", args.tree, "rev-parse", "--short", "HEAD"),
+        "pr": args.pr,
+        "findings": rows,
+    })
+    print(run)
+
+
+def cmd_applied(args):
+    runs, _ = load()
+    if args.run not in runs:
+        sys.exit(f"no run {args.run} in {LEDGER}")
+    if not re.fullmatch(r"\d+(,\d+)*", args.numbers):
+        sys.exit(f"numbers must be comma-separated, got {args.numbers!r}")
+    numbers = {int(x) for x in args.numbers.split(",")}
+    unknown = numbers - {f["n"] for f in runs[args.run]["findings"]}
+    if unknown:
+        sys.exit(f"run {args.run} has no finding {', '.join(map(str, sorted(unknown)))}")
+    append({"run": args.run, "at": datetime.now().isoformat(timespec="seconds"), "applied": sorted(numbers)})
+
+
+def cmd_stats(args):
+    runs, applied = load()
+    window = [r for r in runs.values() if in_window(r, args.since, args.until)]
+    by_angle = defaultdict(lambda: defaultdict(int))
+    for run in window:
+        took = applied.get(run["run"], set())
+        for f in run["findings"]:
+            row = by_angle[f["angle"]]
+            if f["section"] in DROPPED:
+                row[f["section"]] += 1
+                continue
+            row["raised"] += 1
+            row["applied"] += f["n"] in took
+            row["weak"] += f["section"] == "weak"
+    decided = sum(r["run"] in applied for r in window)
+    print(f"runs: {len(window)}, with an applied record: {decided} (a run without one counts as nothing applied)")
+    print(f"{'angle':<16}{'raised':>7}{'applied':>8}{'rate':>6}{'weak':>6}{'unlikely':>9}{'failed':>7}")
+    for angle, row in sorted(by_angle.items(), key=lambda kv: -kv[1]["raised"]):
+        rate = f"{row['applied'] / row['raised']:.0%}" if row["raised"] else "-"
+        print(f"{angle:<16}{row['raised']:>7}{row['applied']:>8}{rate:>6}{row['weak']:>6}"
+              f"{row['unlikely']:>9}{row['failed']:>7}")
+
+
+def pr_for(repo, branch, pr):
+    if pr:
+        return pr
+    found = run_cmd("gh", "pr", "list", "--repo", repo, "--head", branch, "--state", "all",
+                    "--json", "number", "--jq", ".[0].number")
+    return int(found) if found else None
+
+
+def third_party_comments(repo, pr, me):
+    """Top-level inline comments by people other than the PR author and the user."""
+    author = run_cmd("gh", "pr", "view", str(pr), "--repo", repo, "--json", "author", "--jq", ".author.login")
+    out = run_cmd(
+        "gh", "api", f"repos/{repo}/pulls/{pr}/comments", "--paginate", "--jq",
+        ".[] | select(.in_reply_to_id == null and .user.type == \"User\")"
+        " | {path, line: (.line // .original_line), user: .user.login, url: .html_url, body}",
+    )
+    comments = [json.loads(l) for l in out.splitlines() if l]
+    return [c for c in comments if c["user"] not in (author, me)]
+
+
+def near(finding, comment):
+    if finding["path"] != comment["path"]:
+        return False
+    return finding["line"] is None or comment["line"] is None or abs(finding["line"] - comment["line"]) <= NEAR
+
+
+def cmd_misses(args):
+    runs, _ = load()
+    groups = defaultdict(list)
+    for run in runs.values():
+        if run["repo"] and in_window(run, args.since):
+            groups[(run["repo"], run["branch"])].append(run)
+    if not groups:
+        return
+    me = run_cmd("gh", "api", "user", "--jq", ".login")
+    no_pr = 0
+    for (repo, branch), group in sorted(groups.items()):
+        try:
+            pr = pr_for(repo, branch, next((r["pr"] for r in group if r["pr"]), None))
+            if not pr:
+                no_pr += 1
+                continue
+            comments = third_party_comments(repo, pr, me)
+        except subprocess.CalledProcessError as e:
+            print(f"skip {repo} {branch}: {e.stderr.strip().splitlines()[0] if e.stderr.strip() else e}")
+            continue
+        if not comments:
+            continue
+        findings = [f for r in group for f in r["findings"]]
+        lines, raised, dropped = [], 0, 0
+        for c in comments:
+            hits = [f for f in findings if near(f, c)]
+            kept = [f for f in hits if f["section"] not in DROPPED]
+            body = c["body"].strip().splitlines()[0][:100] if c["body"].strip() else ""
+            loc = f"{c['path']}:{c['line']}" if c["line"] else c["path"]
+            if kept:
+                raised += 1
+            elif hits:
+                dropped += 1
+                why = ", ".join(f"{f['angle']} {f['section']}" for f in hits)
+                lines.append(f"  dropped {loc} @{c['user']} [{why}] {body} {c['url']}")
+            else:
+                lines.append(f"  missed  {loc} @{c['user']} {body} {c['url']}")
+        print(f"{repo}#{pr} ({branch}, {len(group)} run{'s' * (len(group) > 1)}): {len(comments)} comments,"
+              f" {raised} raised, {dropped} dropped, {len(comments) - raised - dropped} missed")
+        if lines:
+            print("\n".join(lines))
+    if no_pr:
+        print(f"{no_pr} reviewed branch{'es' * (no_pr > 1)} with no PR yet")
+
+
+def main():
+    p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    sub = p.add_subparsers(dest="cmd", required=True)
+    add = sub.add_parser("add", help="record a run's findings from tab-separated rows on stdin")
+    add.add_argument("--tree", default=".", help="the review tree (default: current directory)")
+    add.add_argument("--pr", type=int, help="PR number when the review scope was a PR")
+    add.set_defaults(fn=cmd_add)
+    ap = sub.add_parser("applied", help="record which findings of a run were applied")
+    ap.add_argument("run")
+    ap.add_argument("numbers", help="comma-separated finding numbers")
+    ap.set_defaults(fn=cmd_applied)
+    st = sub.add_parser("stats", help="raised, applied, and dropped findings per angle")
+    st.add_argument("--since", help="YYYY-MM-DD, inclusive")
+    st.add_argument("--until", help="YYYY-MM-DD, inclusive")
+    st.set_defaults(fn=cmd_stats)
+    mi = sub.add_parser("misses", help="third-party inline PR comments no run raised")
+    mi.add_argument("--since", help="YYYY-MM-DD, inclusive")
+    mi.set_defaults(fn=cmd_misses)
+    args = p.parse_args()
+    args.fn(args)
+
+
+if __name__ == "__main__":
+    main()

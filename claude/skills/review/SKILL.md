@@ -2,7 +2,7 @@
 name: review
 description: One-run compound code review — parallel specialists, a tester that runs the changed behaviour in the live app (UI or eval), a verifier that confirms findings by experiment, a pragmatic skeptic pass, one numbered report with an apply menu. Use on "review", "review this / my changes / the PR", "thorough review", "before I push", or a PR link with review intent. Not for posting comments (post-review) or answering review feedback (triage-review).
 argument-hint: [PR number or link, path, ref range, or empty for uncommitted]
-allowed-tools: Bash(git:*), Bash(gh:*), Bash(find:*), Bash(wc:*), Bash(mix:*), Bash(bundle exec rspec:*), Agent, Read, Edit, Skill, AskUserQuestion, ToolSearch, mcp__atlassian__getJiraIssue, mcp__tidewave__project_eval
+allowed-tools: Bash(git:*), Bash(gh:*), Bash(find:*), Bash(wc:*), Bash(mix:*), Bash(bundle exec rspec:*), Bash(claude-review-ledger:*), Agent, Read, Edit, Skill, AskUserQuestion, ToolSearch, mcp__atlassian__getJiraIssue, mcp__tidewave__project_eval
 ---
 
 # Review
@@ -118,6 +118,8 @@ Open with one Coverage line: docs read, docs skipped with reason, then `changes 
 
 - **N. [angle] path:line** — Claim; Evidence; Reasoning (Cost for a cleanup); Fix; verifier verdict and command, or `desk — <why not>` when no experiment ran.
 
+**Record the run** before printing the report: pipe one tab-separated row per deduped finding, Unlikely and Failed included, to `claude-review-ledger add --tree <review tree>`, plus `--pr <n>` when the scope is a PR. A row is: the report number (`-` for Unlikely and Failed), section (`blocker` `major` `nit` `polish` `info` `weak` `unlikely` `failed`), angle, `path:line`, verdict (`confirmed` `refuted` `untestable` `static` `desk`), the claim in a few words. A clean run records too, with nothing on stdin: a reviewer's later comment on it is a miss. Keep the run id it prints for step 8.
+
 Every specialist clean → "No findings", no menu. Once the report is printed, delete the patch and every `review-*.md` in the scratchpad, whichever way the run ends: one `rm -f <scratchpad>/<name>` per path, absolute (a `cd` plus a relative path prompts).
 
 ## 8. Apply menu
@@ -126,7 +128,7 @@ End with one line; the user types the key as the next message (Colemak home row:
 
 > Next: `[t]` apply every Strong and Polish finding · `[n]` apply by number · `[s]` /post-review
 
-Show `[s]` only when the scope is a PR whose author (`gh pr view <pr> --json author -q .author.login`) differs from `gh api user -q .login`. On `t` or `n`: apply each chosen finding in the main session from its Fix field, doc drafts included, run the narrowest matching test after each, and show one diff at the end. Skip a fix that would change intended behaviour or reach well outside the reviewed diff, and say which and why instead of arguing with the finding. A typed action word ("apply", "post") works too.
+Show `[s]` only when the scope is a PR whose author (`gh pr view <pr> --json author -q .author.login`) differs from `gh api user -q .login`. On `t` or `n`: apply each chosen finding in the main session from its Fix field, doc drafts included, run the narrowest matching test after each, show one diff at the end, and record the fixes that landed with `claude-review-ledger applied <run id> <n,n,...>`. Skip a fix that would change intended behaviour or reach well outside the reviewed diff, and say which and why instead of arguing with the finding. A typed action word ("apply", "post") works too.
 
 ## Angles
 
