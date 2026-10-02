@@ -1,0 +1,1 @@
+{ "name": "context-gauge", "version": "0.1.0", "description": "Context window fill as a footer label; toast when it passes 70%", "types": "./types/index.d.ts" }
