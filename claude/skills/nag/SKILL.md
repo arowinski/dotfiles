@@ -1,7 +1,7 @@
 ---
 name: nag
 description: Interview the user about a plan, decision, or idea until nothing that changes the build is left undecided, then write the decisions to the plan file. Use on "nag me", "grill me", "interview me about X", "poke holes in this", "stress-test my thinking", "what am I missing", "question me before we build", including a plan laid out right in the message; a leading `one` asks one question at a time. Not for a question that has an answer (answer it), not for researching how to build (design), and not on a plan the user already called final.
-allowed-tools: Bash(git rev-parse:*), Bash(git branch:*), Bash(mkdir:*), Read, Write, Edit, AskUserQuestion, Agent
+allowed-tools: Bash(git rev-parse:*), Bash(git branch:*), Bash(mkdir:*), Read, Write, Edit, Agent
 argument-hint: [one] <plan, decision, or idea to be questioned about>
 ---
 
@@ -29,7 +29,7 @@ Never ask for a fact you can look up: read the code, grep, check git. Spawn an E
 
 ## Round format
 
-When every question in the round is a pick from at most four options, run the round through AskUserQuestion with the recommended option first. Otherwise write it out:
+Write every round out as prose — each question with its context and the reason it matters, choices inline, recommended one first; never the AskUserQuestion picker:
 
 ```
 **Q1 · <title>**
