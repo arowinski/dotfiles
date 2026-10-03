@@ -1,0 +1,24 @@
+#!/bin/bash
+#
+# PreToolUse wrapper around dippy. In auto mode only explicit config rules
+# reach Claude Code: every deny, and asks whose message starts "Confirm:".
+# dippy's allow would skip the auto-mode classifier, and its built-in
+# handlers' asks force prompts the classifier could have settled. Silence
+# hands the call to settings.json rules, then the classifier.
+#
+# Outside auto mode dippy's decision passes through unchanged.
+#
+# Wired in claude/settings.json under hooks.PreToolUse with matcher "Bash".
+set -euo pipefail
+
+input=$(cat)
+out=$(printf '%s' "$input" | dippy)
+mode=$(printf '%s' "$input" | jq -r '.permission_mode // empty')
+
+if [ "$mode" = auto ]; then
+  keep=$(printf '%s' "$out" | jq -r '.hookSpecificOutput // {} |
+    .permissionDecision == "deny" or
+    (.permissionDecision == "ask" and (.permissionDecisionReason // "" | test(": Confirm:")))' 2>/dev/null || true)
+  [ "$keep" = true ] || exit 0
+fi
+printf '%s\n' "$out"

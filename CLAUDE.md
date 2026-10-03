@@ -13,11 +13,14 @@ No tests or linters in this repo — skip pre-commit checks.
 
 ## Permissions
 
-Two layers gate Bash commands — both must allow:
-1. `claude/settings.json` `permissions.allow` — Claude Code's built-in permission system
-2. `dippy/config` — PreToolUse hook on all Bash calls. Add `allow <command>` for new scripts.
+Bash calls resolve in this order (sessions run in auto mode):
+1. `dippy/config` via `bin/dippy-auto` (PreToolUse hook). In auto mode only explicit rules reach Claude Code: every `deny`, and every `ask` whose message starts `Confirm:`. dippy's `allow` and its built-in handlers' asks apply only outside auto mode.
+2. `claude/settings.json` `permissions.allow` — approves without the classifier.
+3. Anything else goes to the auto-mode classifier.
 
-When adding a new script to `bin/` or a new command, add a matching `allow` entry in `dippy/config`.
+- Hard gate (push, merge, posting, prod access): `ask <pattern> "Confirm: <why>"` in `dippy/config`.
+- Convention to enforce: `deny <pattern> "<what to use instead>"` in `dippy/config`.
+- New script in `bin/`: a `permissions.allow` entry to skip the classifier, plus an `allow` in `dippy/config` for Manual mode.
 
 ## Commits
 

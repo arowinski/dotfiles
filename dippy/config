@@ -1,6 +1,15 @@
-# Mutations explicitly allowed in Claude Code settings.json
-# Dippy's built-in handlers consider these unsafe, but they're
-# standard workflow commands that shouldn't require prompting.
+# Runs through bin/dippy-auto. In auto mode only deny rules and asks with a
+# "Confirm:" message take effect; allows and the built-in handlers' asks give
+# way to settings.json permissions.allow and the classifier. Outside auto mode
+# every rule applies — the allows below are standard workflow commands that
+# dippy's built-in handlers would otherwise prompt for.
+
+# Outward-facing
+ask git push "Confirm: push"
+ask git -C * push "Confirm: push"
+ask gh pr review "Confirm: PR review is posted publicly"
+ask gh pr merge "Confirm: merge"
+ask ssh "Confirm: remote shell — may be production"
 
 # Git mutations
 allow git add
@@ -26,9 +35,6 @@ allow /usr/bin/git log
 allow /usr/bin/git show
 allow /usr/bin/git apply --check
 allow git checkout
-ask git checkout [!-]* "Use git switch for branch operations"
-# Restoring paths from a ref is not a branch switch — last match wins
-allow git checkout * -- *
 
 # Filesystem
 allow touch
@@ -37,8 +43,8 @@ allow cp
 # Probe files live in the session scratchpad; deleting them there is housekeeping
 allow rm -f /private/tmp/claude-501/*
 # `*` spans spaces — a second path could be anywhere, so multi-arg rm still asks (last match wins)
-ask rm -f /private/tmp/claude-501/* *
-ask rm -f /private/tmp/claude-501/*..*
+ask rm -f /private/tmp/claude-501/* * "Confirm: multi-path rm — a second path could be outside the scratchpad"
+ask rm -f /private/tmp/claude-501/*..* "Confirm: rm path climbs out of the scratchpad"
 allow-redirect /tmp/**
 allow-redirect /private/tmp/**
 allow-redirect /dev/null

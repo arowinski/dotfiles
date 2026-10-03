@@ -254,7 +254,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "dippy"
+            "command": "dippy-auto"
           }
         ]
       },
