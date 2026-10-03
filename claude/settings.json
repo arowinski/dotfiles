@@ -1,9 +1,13 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
-  "attribution": false,
   "env": {
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
     "CLAUDE_CODE_PLUGIN_DIRS": "~/.claude/mods"
+  },
+  "attribution": {
+    "commit": "",
+    "pr": "",
+    "sessionUrl": false
   },
   "permissions": {
     "allow": [
@@ -308,6 +312,7 @@
   "tui": "default",
   "skipWorkflowUsageWarning": true,
   "autoCompactEnabled": true,
+  "switchModelsOnFlag": false,
   "teammateMode": "in-process",
   "agentPushNotifEnabled": true,
   "autoMode": {
