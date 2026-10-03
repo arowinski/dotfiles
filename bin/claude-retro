@@ -510,16 +510,24 @@ BASE_CMD = re.compile(r"^((?:git|bundle)\s+[a-z][\w-]*|[a-z][\w-]*)")
 
 
 def parse_hook_log(target):
-    """Parse hook-approvals.log for permission friction on target date."""
+    """Parse hook-approvals.log for permission friction on target date.
+
+    dippy logs its own decision before bin/dippy-auto filters it. In auto mode
+    only an ask carrying a "Confirm:" message reaches the user as a prompt; any
+    other ask goes to the auto-mode classifier, costing a classifier call
+    rather than a prompt.
+    """
     if not HOOK_LOG.exists():
-        return {"ask_count": 0, "approved_count": 0, "top_ask": []}
+        return {"ask_count": 0, "approved_count": 0, "top_ask": [], "classifier_count": 0, "top_classifier": []}
 
     # The hook logs one line per line of a multi-line command, all stamped with
     # the same second, so count events as distinct timestamps, not lines.
     prefix = str(target)
     ask_cmds = defaultdict(set)
+    classifier_cmds = defaultdict(set)
     approved = set()
     asks = set()
+    to_classifier = set()
 
     with open(HOOK_LOG) as f:
         for line in f:
@@ -529,7 +537,9 @@ def parse_hook_log(target):
             if "APPROVED:" in line:
                 approved.add(stamp)
             elif "ASK:" in line:
-                asks.add(stamp)
+                prompted = ": Confirm:" in line
+                (asks if prompted else to_classifier).add(stamp)
+                cmds = ask_cmds if prompted else classifier_cmds
                 m = re.search(r"ASK: (.+)$", line)
                 if m:
                     for part in m.group(1).split(","):
@@ -537,15 +547,62 @@ def parse_hook_log(target):
                         part = part.strip().removeprefix("command substitution: ")
                         cm = BASE_CMD.match(part)
                         if cm and not part.startswith("parse error"):
-                            ask_cmds[cm.group(1)].add(stamp)
+                            cmds[cm.group(1)].add(stamp)
 
-    top = sorted(((cmd, len(s)) for cmd, s in ask_cmds.items()), key=lambda x: -x[1])[:10]
+    def top(cmds):
+        ranked = sorted(((cmd, len(s)) for cmd, s in cmds.items()), key=lambda x: -x[1])[:10]
+        return [{"command": cmd, "count": n} for cmd, n in ranked]
+
     return {
         "ask_count": len(asks),
         "approved_count": len(approved),
-        "top_ask": [{"command": cmd, "count": n} for cmd, n in top],
+        "top_ask": top(ask_cmds),
+        "classifier_count": len(to_classifier),
+        "top_classifier": top(classifier_cmds),
         "unused_allow": unused_allow(target),
     }
+
+
+# Anchored: a tool result that merely quotes this text (a grep over transcripts) isn't a denial.
+CLASSIFIER_DENIAL = re.compile(
+    r"Permission for this action was denied by the Claude Code auto mode classifier\. Reason: \[([^\]]+)\]"
+)
+
+
+def classifier_denials(sid, encoded, target):
+    """Auto-mode classifier blocks on target date, in the session and its subagents."""
+    prefix = str(target)
+    paths = [PROJECTS / encoded / f"{sid}.jsonl"]
+    paths += sorted((PROJECTS / encoded / sid / "subagents").glob("agent-*.jsonl"))
+    denials = []
+    for path in paths:
+        if not path.exists():
+            continue
+        calls = {}  # tool_use id -> "Tool <command or path>"
+        with open(path) as f:
+            for line in f:
+                try:
+                    e = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                content = e.get("message", {}).get("content")
+                if not isinstance(content, list):
+                    continue
+                for block in content:
+                    if not isinstance(block, dict):
+                        continue
+                    if block.get("type") == "tool_use":
+                        inp = block.get("input", {})
+                        target_of = inp.get("command") or inp.get("file_path") or ""
+                        calls[block.get("id")] = f"{block.get('name', '?')} {target_of}".strip()[:120]
+                    elif block.get("type") == "tool_result" and e.get("timestamp", "").startswith(prefix):
+                        result = block.get("content")
+                        if isinstance(result, list):
+                            result = next((c.get("text", "") for c in result if isinstance(c, dict)), "")
+                        m = CLASSIFIER_DENIAL.match(result or "")
+                        if m:
+                            denials.append({"rule": m.group(1), "call": calls.get(block.get("tool_use_id"), "?")})
+    return denials
 
 
 UNUSED_ALLOW_DAYS = 30
@@ -624,6 +681,7 @@ def main():
     overact_samples = []
     total_query = 0
     query_samples = []
+    denial_samples = []
     skill_stats = defaultdict(
         lambda: {"runs": 0, "minutes": [], "tokens": [], "after": defaultdict(int)}
     )
@@ -671,6 +729,10 @@ def main():
             s["corrections"] = corrections
         if quality_nags:
             s["quality_nags"] = quality_nags
+        denials = classifier_denials(sid, info["project"].replace("/", "-"), target)
+        if denials:
+            s["classifier_denials"] = len(denials)
+            denial_samples.extend({"session": sid[:8], **d} for d in denials)
         overact = [sig for sig in signals if sig[2] == "overact"]
         queries = [sig for sig in signals if sig[2] == "query"]
         if overact:
@@ -789,6 +851,9 @@ def main():
         output["error_samples"] = all_errors[:15]
 
     output["permissions"] = parse_hook_log(target)
+    output["permissions"]["classifier_denials"] = len(denial_samples)
+    if denial_samples:
+        output["permissions"]["classifier_denial_samples"] = denial_samples[:15]
 
     json.dump(output, sys.stdout, indent=2, default=str)
 
