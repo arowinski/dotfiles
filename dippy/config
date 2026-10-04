@@ -43,15 +43,13 @@ allow cp
 # Probe files live in the session scratchpad; deleting them there is housekeeping
 allow rm -f /private/tmp/claude-501/*
 # `*` spans spaces — a second path could be anywhere, so multi-arg rm still asks (last match wins)
-ask rm -f /private/tmp/claude-501/* * "Confirm: multi-path rm — a second path could be outside the scratchpad"
-ask rm -f /private/tmp/claude-501/*..* "Confirm: rm path climbs out of the scratchpad"
+ask rm -f /private/tmp/claude-501/* * "multi-path rm — a second path could be outside the scratchpad"
+ask rm -f /private/tmp/claude-501/*..* "rm path climbs out of the scratchpad"
 allow-redirect /tmp/**
 allow-redirect /private/tmp/**
 allow-redirect /dev/null
 allow-redirect ~/.claude/jobs/**
 allow-redirect ~/.claude/retro-log.md
-# The allow-rules above match literal text, so `$SP/x.md` never matches and prompts every time
-deny-redirect $* "Write the path out in full — $VAR paths never match the allow-rule"
 # Shell keywords inside loops; dippy tokenizes them as commands
 allow break
 allow continue
