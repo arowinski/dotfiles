@@ -79,8 +79,6 @@ allow RAILS_ENV=test bundle exec rails db:drop
 allow RAILS_ENV=test bundle exec rails db:prepare
 allow RAILS_ENV=test bundle exec rails db:schema:dump
 allow RAILS_ENV=development bundle exec rails db:schema:dump
-deny bundle exec rails db:create "Use db:prepare instead"
-deny bundle exec rails db:schema:load "Use db:prepare instead"
 allow bin/spring
 allow spring
 allow bin/rails db:migrate
@@ -105,14 +103,14 @@ allow yarn typecheck
 allow yarn prettier
 allow pg_dump
 allow psql
-ask psql *CREATE * "Confirm: psql DDL (CREATE)"
-ask psql *DROP * "Confirm: psql DDL (DROP)"
-ask psql *DELETE * "Confirm: psql DML write (DELETE)"
-ask psql *TRUNCATE * "Confirm: psql DDL (TRUNCATE)"
-ask psql *ALTER * "Confirm: psql DDL (ALTER)"
-ask psql *-f * "Confirm: psql executes file — verify contents"
-ask psql *--file * "Confirm: psql executes file — verify contents"
-ask psql *--file=* "Confirm: psql executes file — verify contents"
+ask psql *CREATE * "psql DDL (CREATE)"
+ask psql *DROP * "psql DDL (DROP)"
+ask psql *DELETE * "psql DML write (DELETE)"
+ask psql *TRUNCATE * "psql DDL (TRUNCATE)"
+ask psql *ALTER * "psql DDL (ALTER)"
+ask psql *-f * "psql executes file — verify contents"
+ask psql *--file * "psql executes file — verify contents"
+ask psql *--file=* "psql executes file — verify contents"
 allow npx playwright test
 allow git-commit-context
 allow safe-python
@@ -139,19 +137,11 @@ deny /**/fd "Use bare 'fd'"
 deny /**/fd * "Use bare 'fd'"
 deny /**/find "Use bare 'find' (or 'fd')"
 deny /**/find * "Use bare 'find' (or 'fd')"
-# Reject shell-alias-bypass escapes in tool calls (no aliases to bypass in a
-# non-interactive subprocess; the leading `\` only breaks matchers like this one).
-deny \rg "Escaped rg — no aliases to bypass in tool calls; use bare rg"
-deny \rg * "Escaped rg — no aliases to bypass in tool calls; use bare rg"
-deny \fd "Escaped fd — no aliases to bypass in tool calls; use bare fd"
-deny \fd * "Escaped fd — no aliases to bypass in tool calls; use bare fd"
-deny \grep "Escaped grep — no aliases to bypass in tool calls; use bare grep"
-deny \grep * "Escaped grep — no aliases to bypass in tool calls; use bare grep"
-deny \jq "Escaped jq — no aliases to bypass in tool calls; use bare jq"
-deny \jq * "Escaped jq — no aliases to bypass in tool calls; use bare jq"
-deny \git "Escaped git — no aliases to bypass in tool calls; use bare git"
-deny \git * "Escaped git — no aliases to bypass in tool calls; use bare git"
+# A `\` or `command` prefix would slip past the denies and Confirm asks in this file;
+# `command -v` is only a lookup (last match wins)
+deny \* "Escaped command — no aliases to bypass in tool calls; use the bare command"
 deny command * "command prefix — no aliases to bypass in tool calls; use the bare command"
+allow command -v *
 deny unalias * "unalias prefix — no aliases to bypass in tool calls; use the bare command"
 deny gatt "Use the ws helper — it wraps gatt (ws status <name>, ws logs, ws restart)"
 deny gatt * "Use the ws helper — it wraps gatt (ws status <name>, ws logs, ws restart)"
