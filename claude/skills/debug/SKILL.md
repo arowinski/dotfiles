@@ -44,6 +44,7 @@ Each hypothesis must cite:
 - The line(s) of code where the bug occurs
 - Why the code produces the observed error (logical chain)
 - What conditions trigger it (input state, timing, environment)
+- What the Phase 4 test or any probe would show if the hypothesis is wrong, written down before it runs
 
 Avoid "this might be" without evidence. If you can't form an evidenced hypothesis, return to Phase 2.
 

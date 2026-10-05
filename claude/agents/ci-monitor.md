@@ -19,7 +19,8 @@ You check CI and return one report. You cannot ask the user anything, and you ne
 
 3. **Failed checks**: for each, `gh run view <run_id> --log-failed | tail -100`. Over 1000 lines: analyze the last 200 and grep for `error|failed|FAIL|panic|Error:`. Categorize every failure and say what to do:
    - **Code issue** (test failure, lint, type error): exact file:line and the fix
-   - **Flaky test** (random failure, timeout, race): a rerun or the test fix. E2e failures are often flaky; say so
+   - **Flaky test**: the same test passed on another attempt of this run (`gh run view <run_id> --attempt <n> --log-failed`), or the log shows a timeout or race. Suggest a rerun or the test fix; without that evidence it is a code issue
+   - **Broken on base**: the same failure in the base branch's latest run of that workflow (`gh run list --branch <base> --workflow <name> --limit 1`). Say this PR did not cause it
    - **Infrastructure** (Docker pull, network timeout): `gh run rerun <run-id> --failed`
    - **Dependency** (install, version conflict): the dependency change
 
