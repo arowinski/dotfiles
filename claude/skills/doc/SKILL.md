@@ -137,7 +137,7 @@ Check, in order:
 2. Every backticked module resolves to a real `defmodule` — one `rg -n` with every name alternated
 3. `@spec` arities match; `@type t` fields match the struct/schema
 4. Doctests run without setup; no `@doc` on private functions
-5. Redundancy pass: per sentence, "does the code already show this?" — delete if yes
+5. Redundancy pass: per sentence, "does the code, or an earlier sentence of this doc, already say this?" — delete if yes
 6. Sentence pass: read the draft sentence by sentence. Each one has a subject and a verb and opens on a
    word. One that opens on a backticked symbol or hangs a list off a colon ("Submitted or missing:
    `{...}`") is rewritten as a sentence
@@ -167,7 +167,7 @@ IS in domain terms.
 
 **Banned content**:
 
-- Implementation details in `@moduledoc` — it documents the contract
+- Implementation details (locking, transactions, query shape) in `@moduledoc` or `@doc` — they document the contract
 - "Used by X" caller lists in `@doc` (grep answers that); collaborators belong in the moduledoc mental
   model only when they explain WHY
 - Legacy/migration history, tickets, prior/external system names — unless the constraint is still live
