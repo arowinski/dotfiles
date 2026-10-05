@@ -57,8 +57,8 @@ Each pair shows one tell and what survives once it's gone. The note under a pair
 
 **Hedge plus filler:**
 `It is important to note that this change could potentially improve performance in some cases.`
-becomes `This change cuts p99 query time by roughly 40%.`
-The hedge carried no information. The number does.
+becomes `This change can improve performance in some cases.`
+The filler and the stacked hedge carried no information. "In some cases" is the real uncertainty, and the source gave no number to replace it with.
 
 **Copula hiding plus inflation:**
 `The scheduler serves as a robust, comprehensive solution for managing job execution.`
@@ -71,8 +71,8 @@ Three names for one thing read as three things.
 
 **Generic conclusion:**
 `Only time will tell how this approach performs at scale.`
-becomes `We have not tested this above 10k concurrent connections.`
-The vague version says nothing; the concrete version tells the reader what risk they're taking.
+becomes `This approach is untested at scale.`
+The vague version hides the fact; the plain version tells the reader what risk they're taking.
 
 ## Output
 
@@ -84,6 +84,6 @@ Keep the subject a standalone sentence needs. "Rollbacks work in most cases" rea
 
 ## Process
 
-1. List the ideas the output must carry: from the input if rewriting, from the source (diff, ticket, spec, conversation) if writing fresh. Write the shortest sentence that carries each one.
+1. List the ideas the output must carry: from the input if rewriting, from the source (diff, ticket, spec, conversation) if writing fresh. Strike every idea the reader would not miss before tightening any sentence; whole ideas are the biggest cut. Write the shortest sentence that carries each one left.
 2. Read it back. Any sentence that sounds machine-made gets rewritten, not patched.
-3. Check the ideas from step 1 all survived. Compression that dropped one is a rewrite failure, not a tight draft.
+3. Check the ideas from step 1 all survived, and that every fact in the draft traces to that list. Compression that dropped one is a rewrite failure, not a tight draft; a number, cause, or scope the list never held is an invention.
