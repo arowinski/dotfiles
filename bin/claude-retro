@@ -419,13 +419,15 @@ CORRECTION_PATTERNS = re.compile(
 )
 
 # Mid-task quality nags: the output was accepted in kind but had to be re-asked
-# for in shape ("make it concise", "use natural lang", "use the X skill"). They
-# never open like a correction, so CORRECTION_PATTERNS misses every one. A nag
-# in a session where a skill fired is a behavior gap in that skill. Read them;
-# "shorter" also matches "shorter timeout" and "too long" a slow spec.
+# for in shape or rigor ("make it concise", "use natural lang", "use the X skill",
+# "all verified experimentally?"). They never open like a correction, so
+# CORRECTION_PATTERNS misses every one. A nag in a session where a skill fired is
+# a behavior gap in that skill. Read them; "shorter" also matches "shorter
+# timeout" and "too long" a slow spec.
 QUALITY_NAG_PATTERNS = re.compile(
     r"concise|shorter|too (long|verbose)|natural lang|plain (english|lang)|"
-    r"cut (the )?fluff|less (words|text)|use (the )?[\w-]+ skill|use skills",
+    r"cut (the )?fluff|less (words|text)|use (the )?[\w-]+ skill|use skills|"
+    r"experimentally",
     re.IGNORECASE,
 )
 
