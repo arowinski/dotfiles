@@ -287,6 +287,11 @@
   },
   "feedbackSurveyRate": 0,
   "alwaysThinkingEnabled": true,
+  "modelSettings": {
+    "claude-opus-5-5": {
+      "effortLevel": "xhigh"
+    }
+  },
   "autoUpdatesChannel": "latest",
   "tui": "default",
   "skipWorkflowUsageWarning": true,
