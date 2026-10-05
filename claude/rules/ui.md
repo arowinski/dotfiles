@@ -14,11 +14,12 @@ The project's design system decides tokens and components; these rules add judgm
 
 Before building, name what the surface is: a dense operational tool used daily, a form filled once, or a report read top to bottom. Density, hierarchy, and copy follow from that.
 Give each screen one primary thing. Show it through scale contrast and spacing rhythm within the project's scale, so the eye lands there first.
+Build every state the screen can reach: empty (with the action that fills it), loading, error, and the crowded case of long values and many rows.
 Colour carries meaning (status, action, selection); decoration uses neutrals.
 
 ## Slop tells
 
-Replace these when they appear: a grid of identical cards with no hierarchy, the same radius and shadow on every element, a library block pasted as-is, a gradient hero with a centred headline.
+Replace these when they appear: a grid of identical cards with no hierarchy, the same radius and shadow on every element, a library block pasted as-is, a gradient hero with a centred headline, an uppercase tracked label above every heading, numbered markers on content that is not a sequence, metadata chained with middle dots.
 Test each surface: would it pass as a screenshot of a real product, or does it read as a template?
 
 ## Polish
@@ -28,6 +29,7 @@ Test each surface: would it pass as a screenshot of a real product, or does it r
 - Concentric radius: outer radius = inner radius + padding
 - Optically centre icons next to text
 - Exit motion shorter than enter; transition only the properties that change, never `transition: all` or `will-change: all`
+- Motion beyond a hover or focus change sits behind `motion-safe:`
 - Hit areas of 40–44px on interactive controls
 
 ## Accessibility
