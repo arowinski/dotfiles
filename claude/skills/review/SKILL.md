@@ -2,7 +2,7 @@
 name: review
 description: One-run compound code review — parallel specialists, a tester that runs the changed behaviour in the live app (UI or eval), a verifier that confirms findings by experiment, a pragmatic skeptic pass, one numbered report with an apply menu. Use on "review", "review this / my changes / the PR", "thorough review", "before I push", or a PR link with review intent. Not for posting comments (post-review) or answering review feedback (triage-review).
 argument-hint: [PR number or link, path, ref range, or empty for uncommitted]
-allowed-tools: Bash(git:*), Bash(gh:*), Bash(find:*), Bash(wc:*), Bash(mix:*), Bash(bundle exec rspec:*), Bash(claude-review-ledger:*), Agent, Read, Edit, Skill, AskUserQuestion, ToolSearch, mcp__atlassian__getJiraIssue, mcp__tidewave__project_eval
+allowed-tools: Bash(git:*), Bash(gh:*), Bash(find:*), Bash(wc:*), Bash(mix:*), Bash(bundle exec rspec:*), Bash(claude-review-ledger:*), Agent, SendMessage, Read, Edit, Skill, AskUserQuestion, ToolSearch, mcp__atlassian__getJiraIssue, mcp__tidewave__project_eval
 ---
 
 # Review
@@ -88,6 +88,8 @@ Any check still failing → `AskUserQuestion`, one question: which is missing, a
 Dispatch exactly one `verifier` agent with the review tree path and every deduped finding (angle, `path:line`, claim, reasoning), whatever angle raised it. Its experiments, the `static` label, and the rules for probes and state are its own; do not restate them, and do not split the findings across several verifiers. An experiment the orchestrator runs inline counts as none. The step 7 Coverage line carries the verifier's tally.
 
 **Exercise the diff.** In the same message as the verifier, dispatch the `tester` agent with the review tree path, the patch path, the PR number, the ticket key, and the plan path when step 2 found them. It builds its own behaviour list from those, runs each line in the live app (UI through the Tidewave browser, backend through `project_eval`), and returns one line per behaviour: `works (ui|eval)`, `broken`, or `untestable (<cause>)`. Every `broken` line becomes a finding, severity by its harm, angle `exercise`, verdict `confirmed`, and goes through step 6 like any other.
+
+**Second pass.** Once the verifier and the tester have both returned, a finding the tester saw happen in the app is `confirmed`, citing the tester's line. Then send the same verifier a mutation pass via SendMessage: every finding it left `static` or `untestable (needs mutation)` that an edit-and-run could settle. Its new verdicts replace the old ones, and the step 7 Coverage line counts them.
 
 ## 6. Skeptic pass
 
