@@ -89,7 +89,7 @@ Dispatch exactly one `verifier` agent with the review tree path and every dedupe
 
 **Exercise the diff.** In the same message as the verifier, dispatch the `tester` agent with the review tree path, the patch path, the PR number, the ticket key, and the plan path when step 2 found them. It builds its own behaviour list from those, runs each line in the live app (UI through the Tidewave browser, backend through `project_eval`), and returns one line per behaviour: `works (ui|eval)`, `broken`, or `untestable (<cause>)`. Every `broken` line becomes a finding, severity by its harm, angle `exercise`, verdict `confirmed`, and goes through step 6 like any other.
 
-**Second pass.** Once the verifier and the tester have both returned, a finding the tester saw happen in the app is `confirmed`, citing the tester's line. Then send the same verifier a mutation pass via SendMessage: every finding it left `static` or `untestable (needs mutation)` that an edit-and-run could settle. Its new verdicts replace the old ones, and the step 7 Coverage line counts them.
+**Second pass.** Once the verifier and the tester have both returned, a finding the tester saw happen in the app is `confirmed`, citing the tester's line. Then send the same verifier a mutation pass via SendMessage: every finding it left `static` or `untestable`, unfiltered. The verifier, not you, decides which an eval or an edit-and-run settles. In the same message, send the tester every such finding whose claim shows in the app (a page, a count, a refresh). Their new verdicts replace the old ones, and the step 7 Coverage line counts them.
 
 ## 6. Skeptic pass
 
