@@ -4,27 +4,39 @@ applied, and which third-party inline PR comments no run raised.
 
   claude-review-ledger add [--tree PATH] [--pr N] < rows    prints the run id
   claude-review-ledger applied RUN N[,N...]
-  claude-review-ledger stats [--since DATE] [--until DATE]
+  claude-review-ledger stats [--since DATE] [--until DATE] [--by-effort]
   claude-review-ledger misses [--since DATE]
 
 A row is tab-separated: number (- for a dropped finding), section, angle,
 path[:line], verdict, claim. Sections are the report's: blocker major nit
 polish info weak, and unlikely failed for the dropped ones.
+
+Run inside Claude Code, add also records what each review agent the run
+spawned ran at (effort, model, turns, minutes, input tokens), read from the
+session's subagent transcripts; stats --by-effort compares those levels.
 """
 
 import argparse
 import json
+import os
 import re
+import statistics
 import subprocess
 import sys
-from collections import defaultdict
+from collections import Counter, defaultdict
 from datetime import datetime
 from pathlib import Path
 
 LEDGER = Path.home() / ".claude" / "review-ledger.jsonl"
+PROJECTS = Path.home() / ".claude" / "projects"
 SECTIONS = ("blocker", "major", "nit", "polish", "info", "weak", "unlikely", "failed")
 DROPPED = ("unlikely", "failed")
 VERDICTS = ("confirmed", "refuted", "untestable", "static", "desk")
+REVIEW_AGENTS = ("review-specialist", "simplifier", "verifier", "tester")
+# A gap this long between an agent's messages is waiting (the verifier idles until
+# its mutation pass, an agent resumed later), not work, and stays out of its minutes.
+IDLE_MINUTES = 10
+SIMPLIFIER_ANGLES = ("reuse", "simplification", "altitude")
 # A comment this close to a finding on the same file counts as the same issue:
 # the head /review read and the head a reviewer commented on drift by a few lines.
 NEAR = 5
@@ -79,6 +91,8 @@ def load():
         e = json.loads(line)
         if "findings" in e:
             runs[e["run"]] = e
+        elif "agents" in e:  # backfilled for a run recorded before add read transcripts
+            runs[e["run"]].setdefault("agents", e["agents"])
         else:
             applied.setdefault(e["run"], set()).update(e["applied"])
     return runs, applied
@@ -89,18 +103,85 @@ def in_window(run, since, until=None):
     return (not since or day >= since) and (not until or day <= until)
 
 
+def local_time(ts):
+    return datetime.fromisoformat(ts.replace("Z", "+00:00")).astimezone().replace(tzinfo=None)
+
+
+def review_agents(session, after):
+    """Per review agent type, what the session's subagents first active after `after` ran at.
+
+    A transcript repeats an API message once per content block, so turns and
+    tokens count each message id once."""
+    kinds = {}
+    for path in PROJECTS.glob(f"*/{session}/subagents/agent-*.jsonl"):
+        kind, efforts, models, times, seen = None, Counter(), Counter(), [], set()
+        fresh = cache_read = 0
+        with open(path) as f:
+            for line in f:
+                try:
+                    e = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                if e.get("type") != "assistant" or "timestamp" not in e:
+                    continue
+                kind = e.get("attributionAgent", kind)
+                times.append(local_time(e["timestamp"]))
+                msg = e.get("message") or {}
+                if msg.get("id") in seen:
+                    continue
+                seen.add(msg.get("id"))
+                efforts[e.get("effort", "none")] += 1
+                models[msg.get("model")] += 1
+                u = msg.get("usage") or {}
+                fresh += (u.get("input_tokens") or 0) + (u.get("cache_creation_input_tokens") or 0)
+                cache_read += u.get("cache_read_input_tokens") or 0
+        if kind not in REVIEW_AGENTS or not times or (after and min(times) <= after):
+            continue
+        k = kinds.setdefault(kind, {"efforts": Counter(), "models": Counter(), "agents": 0,
+                                    "turns": 0, "minutes": 0.0, "fresh": 0, "cache_read": 0})
+        k["efforts"] += efforts
+        k["models"] += models
+        k["agents"] += 1
+        k["turns"] += len(seen)
+        times.sort()
+        gaps = ((b - a).total_seconds() / 60 for a, b in zip(times, times[1:]))
+        k["minutes"] += sum(g for g in gaps if g < IDLE_MINUTES)
+        k["fresh"] += fresh
+        k["cache_read"] += cache_read
+    return {
+        kind: {
+            "effort": k["efforts"].most_common(1)[0][0],
+            "model": k["models"].most_common(1)[0][0],
+            "agents": k["agents"],
+            "turns": k["turns"],
+            "minutes": round(k["minutes"], 1),
+            "fresh": k["fresh"],
+            "cache_read": k["cache_read"],
+        }
+        for kind, k in kinds.items()
+    }
+
+
 def cmd_add(args):
     rows = [parse_row(i, l) for i, l in enumerate(sys.stdin.read().splitlines(), 1) if l.strip()]
-    run = datetime.now().strftime("%Y%m%d-%H%M%S")
-    append({
+    now = datetime.now().replace(microsecond=0)
+    run = now.strftime("%Y%m%d-%H%M%S")
+    entry = {
         "run": run,
-        "at": datetime.now().isoformat(timespec="seconds"),
+        "at": now.isoformat(),
         "repo": repo_slug(args.tree),
         "branch": run_cmd("git", "-C", args.tree, "rev-parse", "--abbrev-ref", "HEAD"),
         "head": run_cmd("git", "-C", args.tree, "rev-parse", "--short", "HEAD"),
         "pr": args.pr,
         "findings": rows,
-    })
+    }
+    session = os.environ.get("CLAUDE_CODE_SESSION_ID")
+    if session:
+        runs, _ = load()
+        previous = [datetime.fromisoformat(r["at"]) for r in runs.values() if r.get("session") == session]
+        entry["session"] = session
+        entry["agents"] = review_agents(session, max(previous, default=None))
+    append(entry)
     print(run)
 
 
@@ -117,9 +198,59 @@ def cmd_applied(args):
     append({"run": args.run, "at": datetime.now().isoformat(timespec="seconds"), "applied": sorted(numbers)})
 
 
+def finders(angle):
+    """The agent types that raise a finding of this angle; a merged one names several."""
+    out = set()
+    for a in re.split(r"[+,]", angle):
+        if a in SIMPLIFIER_ANGLES:
+            out.add("simplifier")
+        elif a == "exercise":
+            out.add("tester")
+        elif a not in ("docs", "verifier"):
+            out.add("review-specialist")
+    return out
+
+
+def by_effort(window, applied):
+    rows = defaultdict(lambda: {"runs": 0, "shown": 0, "applied": 0, "verdicts": 0, "tested": 0,
+                                "turns": [], "minutes": [], "fresh": []})
+    for run in window:
+        took = applied.get(run["run"], set())
+        for kind, a in run.get("agents", {}).items():
+            row = rows[(kind, a["effort"])]
+            row["runs"] += 1
+            row["turns"].append(a["turns"] / a["agents"])
+            row["minutes"].append(a["minutes"] / a["agents"])
+            row["fresh"].append(a["fresh"] / a["agents"])
+            for f in run["findings"]:
+                if kind == "verifier":
+                    row["verdicts"] += 1
+                    row["tested"] += f["verdict"] in ("confirmed", "refuted")
+                elif kind in finders(f["angle"]) and f["section"] not in DROPPED:
+                    row["shown"] += 1
+                    row["applied"] += f["n"] in took
+    recorded = sum("agents" in r for r in window)
+    print(f"runs: {len(window)}, with recorded agents: {recorded}, with an applied record:"
+          f" {sum(r['run'] in applied for r in window)} (a run without one counts as nothing applied)")
+    print("found = findings shown per run; tested = share of findings the verifier settled by experiment;"
+          " per agent = median over runs")
+    print(f"{'agent':<18}{'effort':<8}{'runs':>5}{'found':>7}{'applied':>8}{'tested':>7}"
+          f"{'turns/agent':>12}{'min/agent':>10}{'fresh k/agent':>14}")
+    for (kind, effort), row in sorted(rows.items()):
+        n = row["runs"]
+        found = "-" if kind == "verifier" else f"{row['shown'] / n:.1f}"
+        rate = f"{row['applied'] / row['shown']:.0%}" if row["shown"] else "-"
+        tested = f"{row['tested'] / row['verdicts']:.0%}" if row["verdicts"] else "-"
+        med = statistics.median
+        print(f"{kind:<18}{effort:<8}{n:>5}{found:>7}{rate:>8}{tested:>7}"
+              f"{med(row['turns']):>12.0f}{med(row['minutes']):>10.1f}{med(row['fresh']) / 1000:>14.0f}")
+
+
 def cmd_stats(args):
     runs, applied = load()
     window = [r for r in runs.values() if in_window(r, args.since, args.until)]
+    if args.by_effort:
+        return by_effort(window, applied)
     by_angle = defaultdict(lambda: defaultdict(int))
     for run in window:
         took = applied.get(run["run"], set())
@@ -225,6 +356,8 @@ def main():
     st = sub.add_parser("stats", help="raised, applied, and dropped findings per angle")
     st.add_argument("--since", help="YYYY-MM-DD, inclusive")
     st.add_argument("--until", help="YYYY-MM-DD, inclusive")
+    st.add_argument("--by-effort", action="store_true",
+                    help="per review agent and effort: findings, applied rate, and cost")
     st.set_defaults(fn=cmd_stats)
     mi = sub.add_parser("misses", help="third-party inline PR comments no run raised")
     mi.add_argument("--since", help="YYYY-MM-DD, inclusive")
