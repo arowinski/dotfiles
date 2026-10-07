@@ -1,0 +1,36 @@
+{
+  "network": {
+    "allowedDomains": [],
+    "deniedDomains": []
+  },
+  "filesystem": {
+    "denyRead": [
+      "/",
+      "/opt/homebrew/var",
+      "**/.env*",
+      "**/.npmrc",
+      "**/.netrc",
+      "**/.pypirc",
+      "**/.git-credentials",
+      "**/secrets.*",
+      "**/*.key",
+      "**/*.pem",
+      "**/id_rsa*",
+      "**/id_ed25519*",
+      "**/*.tfstate*"
+    ],
+    "allowRead": [
+      "~/.local/share/mise",
+      "/private/tmp/claude",
+      "/opt/homebrew",
+      "/System",
+      "/usr",
+      "/bin",
+      "/dev",
+      "/private/etc",
+      "/private/var/select"
+    ],
+    "allowWrite": ["/private/tmp/claude"],
+    "denyWrite": []
+  }
+}

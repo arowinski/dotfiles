@@ -111,17 +111,18 @@ ask psql *--file * "psql executes file — verify contents"
 ask psql *--file=* "psql executes file — verify contents"
 allow npx playwright test
 allow git-commit-context
-allow safe-python
-allow safe-ruby
-allow safe-node
+allow sandbox
+deny srt "Use sandbox <command> — it pins the policy in ~/.srt-settings.json"
+deny /**/srt "Use sandbox <command> — it pins the policy in ~/.srt-settings.json"
+deny /**/srt * "Use sandbox <command> — it pins the policy in ~/.srt-settings.json"
 allow expert-lsp-shim
-deny python3 "Use safe-python instead of python3"
+deny python3 "Use sandbox python3 instead of python3"
 allow skill-eval
-deny ruby "Use safe-ruby for one-liners, rails runner in Rails projects"
-deny node -e * "Throwaway JS eval — use safe-node (network-isolated), or safe-python for data"
-deny node --eval * "Throwaway JS eval — use safe-node (network-isolated), or safe-python for data"
-deny node -p * "Throwaway JS eval — use safe-node (network-isolated), or safe-python for data"
-deny node --print * "Throwaway JS eval — use safe-node (network-isolated), or safe-python for data"
+deny ruby "Use sandbox ruby for one-liners, rails runner in Rails projects"
+deny node -e * "Throwaway JS eval — use sandbox node (network-isolated), or sandbox python3 for data"
+deny node --eval * "Throwaway JS eval — use sandbox node (network-isolated), or sandbox python3 for data"
+deny node -p * "Throwaway JS eval — use sandbox node (network-isolated), or sandbox python3 for data"
+deny node --print * "Throwaway JS eval — use sandbox node (network-isolated), or sandbox python3 for data"
 deny elixir -e "Elixir eval runs in the live app: tidewave project_eval (dev-session.md), not a cold VM"
 deny elixir *.exs "A script that rewrites a file is sed -i with extra steps: use the Edit tool. Probes: tidewave project_eval"
 deny mix run -e * "Elixir eval runs in the live app: tidewave project_eval (dev-session.md), not a cold VM"

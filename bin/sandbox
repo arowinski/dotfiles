@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# Run a command under srt (Anthropic sandbox-runtime) with the policy in ~/.srt-settings.json:
+# no network, reads limited to SANDBOX_ROOTS, interpreters and system dirs, secret files denied,
+# writes only to Claude scratchpads (/private/tmp/claude-<uid>) and TMPDIR (/private/tmp/claude).
+# SANDBOX_ROOTS: colon-separated dirs scripts may read (default ~/gat:~/Dev).
+# Usage: sandbox python3 -c 'print("hello")'
+#        sandbox node script.js
+#        echo '{"key": "value"}' | sandbox ruby -rjson -e 'puts JSON.parse(STDIN.read)["key"]'
+
+# Absolute path: a mise shim fails in repos that pin a node without srt installed.
+SRT="${HOME}/.local/share/mise/installs/node/22/bin/srt"
+
+if [ ! -x "$SRT" ]; then
+  echo "sandbox: srt not found at $SRT — run: mise exec node@22 -- npm i -g @anthropic-ai/sandbox-runtime" >&2
+  exit 127
+fi
+
+if [ $# -eq 0 ]; then
+  echo "usage: sandbox <command> [args...]" >&2
+  exit 2
+fi
+
+# srt sets TMPDIR=/tmp/claude inside the sandbox and never creates it; the /tmp symlink itself
+# is unreadable under denyRead "/", so TMPDIR is reset to the /private spelling in the command.
+# TMP too: Ruby's tmpdir calls Etc.systmpdir, which on macOS rewrites TMPDIR to /var/folders.
+# mise shims warn when they can't write their cache; its state dir stays read-only because it
+# holds the config trust list.
+mkdir -p /private/tmp/claude
+
+# srt matches "**/" globs against the cwd, so each secret pattern is expanded under every root;
+# the roots and the per-user scratchpad dir are added here to keep machine paths out of the repo.
+SANDBOX_ROOTS="${SANDBOX_ROOTS:-$HOME/gat:$HOME/Dev}"
+SCRATCH="/private/tmp/claude-$(id -u)"
+settings() {
+  jq --arg roots "$SANDBOX_ROOTS" --arg scratch "$SCRATCH" '
+    ($roots | split(":") | map(select(. != ""))) as $r
+    | .filesystem.denyRead |= [.[] as $p | if ($p | startswith("**/")) then $r[] + "/" + $p else $p end]
+    | .filesystem.allowRead += $r + [$scratch]
+    | .filesystem.allowWrite += [$scratch]' "${HOME}/.srt-settings.json"
+}
+
+# env -i: srt passes the caller's environment through, API keys and tokens included.
+# srt joins plain arguments unquoted; -c with %q-escaped args keeps each one intact.
+exec env -i HOME="$HOME" USER="$USER" PATH="$PATH" LANG="${LANG:-en_US.UTF-8}" TERM="${TERM:-dumb}" MISE_QUIET=1 \
+  "$SRT" --settings <(settings) -c "TMPDIR=/private/tmp/claude TMP=/private/tmp/claude $(printf '%q ' "$@")"
