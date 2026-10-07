@@ -2,7 +2,7 @@
 name: post-review
 description: Filters code-review findings to the ones worth posting, drafts each as a question, previews, then posts to a GitHub PR as a single review with inline comments. Use after /review produces findings on someone else's PR, or for a fresh review landing on the PR. Also on "which are worth posting?", "filter findings", "be pragmatic about comments", "what's worth posting?", "what worth commenting?", "what's worth commenting on?" — previews and posts only on explicit confirmation (reply `skip` to draft without publishing). Comments are phrased as questions, not verdicts.
 argument-hint: [pr-number-or-url]
-allowed-tools: Bash(gh-comments:*), Bash(gh api:*), Bash(gh pr view:*), Bash(gh pr diff:*), Bash(git diff:*), Bash(git log:*), Read, AskUserQuestion, Skill
+allowed-tools: Bash(gh-comments:*), Bash(gh api:*), Bash(gh pr view:*), Bash(gh pr diff:*), Bash(git diff:*), Bash(git log:*), Bash(claude-review-ledger:*), Read, AskUserQuestion, Skill
 ---
 
 # Post Review
@@ -31,7 +31,7 @@ Source priority:
 
 For each finding capture: file path, line number on the PR head ref, category (security / bug / perf / etc., per Step 4) and severity (blocker / major / nit / info), the claim, the suggested change or question.
 
-`/review` produces structured findings (Claim / Evidence / Reasoning / Fix, plus the verifier verdict). Use Evidence and Reasoning to inform the comment body — they're the raw material for a clear question.
+`/review` produces structured findings (Claim / Evidence / Reasoning / Fix, plus the verifier verdict). Use Evidence and Reasoning to inform the comment body — they're the raw material for a clear question. Keep each finding's report number and the run id `/review` printed when it recorded the run; Step 8 records against them.
 
 ### Step 3: Plausibility check
 
@@ -143,3 +143,5 @@ POST_REVIEW_PAYLOAD
 Use a long, unique heredoc sentinel (`POST_REVIEW_PAYLOAD`) so comment bodies that happen to contain `EOF` don't terminate the heredoc early. Single-quoted (`<<'...'`) prevents shell expansion inside the JSON.
 
 If the API rejects a comment because the line isn't part of the diff: the cited line wasn't changed in this PR. Either remove that comment, move it to a line that was changed, or fall back to a top-level PR comment via `gh api repos/{owner}/{repo}/issues/{pr}/comments` — confirm with the user before falling back.
+
+Once the review is posted, record the comments that came from `/review` findings: `claude-review-ledger applied <run id> <n,n,...>` with their report numbers. A posted finding is the reviewer's equivalent of an applied one; without the record the ledger counts it as ignored. Findings Step 2 produced itself have no run and are not recorded.

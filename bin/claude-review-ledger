@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Ledger of /review runs: what each run raised, which findings the user
-applied, and which third-party inline PR comments no run raised.
+applied (or posted, on someone else's PR), and which third-party inline PR
+comments no run raised.
 
   claude-review-ledger add [--tree PATH] [--pr N] < rows    prints the run id
   claude-review-ledger applied RUN N[,N...]
