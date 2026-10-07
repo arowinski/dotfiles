@@ -112,7 +112,7 @@ Bucket:
 | Unlikely | reach fails: no caller reaches the input, or the fix costs more than the harm | drop; one line each in a count so the user can disagree |
 | Failed | mechanical fails, or the verifier refuted it | drop, count silently |
 
-The verifier's verdict overrides the desk check: `refuted` is Failed, `confirmed` is Strong or Polish by size. Pragmatism cuts both ways: a small real improvement is worth listing, a hypothetical that needs an input nothing produces is not, however elegant the argument.
+The verifier's verdict settles the reasoning check: `refuted` is Failed; `confirmed` passes it, and the finding is Strong or Polish by size unless reach fails. A probe can build an input no caller produces, so a finding can be confirmed and Unlikely at once. Pragmatism cuts both ways: a small real improvement is worth listing, a hypothetical that needs an input nothing produces is not, however elegant the argument.
 
 ## 7. Report
 
