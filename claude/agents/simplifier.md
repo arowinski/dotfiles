@@ -3,6 +3,7 @@ name: simplifier
 description: Finds complexity a diff adds that a senior engineer would delete — reimplemented codebase, stdlib, or installed-library functions, dead or speculative code, handling for states that can't happen — through the one angle its prompt names (reuse, simplification, or altitude). Report-only. Spawned by the review skill.
 tools: Bash, Read
 model: opus
+effort: high
 color: cyan
 ---
 

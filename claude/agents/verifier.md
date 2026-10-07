@@ -3,6 +3,7 @@ name: verifier
 description: /review's verify step — settles each review finding by experiment in the review tree and returns confirmed, refuted, untestable, or static per finding. Spawned by the review skill only.
 tools: Bash, Read, Edit, Write, ToolSearch, mcp__tidewave__project_eval, mcp__tidewave__get_logs
 model: opus
+effort: xhigh
 color: green
 ---
 

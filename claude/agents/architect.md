@@ -2,6 +2,7 @@
 name: architect
 description: Research and recommend approaches for complex features. Use when the HOW is unclear, not for detailed implementation planning.
 model: opus
+effort: xhigh
 color: orange
 disallowedTools:
   - Write

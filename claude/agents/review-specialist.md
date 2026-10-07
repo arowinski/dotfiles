@@ -3,6 +3,7 @@ name: review-specialist
 description: Reviews a diff through the single angle its prompt names and reports findings. Spawned with an angle by the review and triage-review skills only.
 tools: Bash, Read
 model: opus
+effort: high
 color: yellow
 ---
 
