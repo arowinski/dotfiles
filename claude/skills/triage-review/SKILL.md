@@ -66,7 +66,7 @@ For each:
 Per actionable comment, pick one:
 
 - **Fix** — reviewer is right; apply a code change
-- **Push back** — reviewer is wrong or missing context; needs a reply explaining
+- **Push back** — reviewer is wrong or missing context; needs a reply explaining. Its reasoning cites evidence: a run (eval, test, schema dump) for a runtime claim, the `path:line` read otherwise
 - **Clarify** — comment is ambiguous; needs a question back to the reviewer
 
 Only **Fix** produces action in this skill. Push back and Clarify are recommendations the user acts on outside it.
