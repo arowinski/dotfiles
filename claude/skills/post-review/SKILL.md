@@ -29,7 +29,7 @@ Source priority:
 1. If the conversation has prior `/review` output, use those findings as input
 2. Otherwise, gather context: `gh pr view <pr>`, `gh pr diff <pr>`, read changed files, then produce findings
 
-For each finding capture: file path, line number on the PR head ref, category (security / bug / perf / etc., per Step 4) and severity (blocker / major / nit / info), the claim, the suggested change or question.
+For each finding capture: file path, line number on the PR head ref, category (security / bug / perf / etc., per Step 4) and severity (blocker / major / nit / polish / info), the claim, the suggested change or question.
 
 `/review` produces structured findings (Claim / Evidence / Reasoning / Fix, plus the verifier verdict). Use Evidence and Reasoning to inform the comment body — they're the raw material for a clear question. Keep each finding's report number and the run id `/review` printed when it recorded the run; Step 8 records against them.
 
@@ -55,11 +55,12 @@ For each surviving finding, ask: would the PR author thank you for this comment,
 - Accessibility: a11y violations (ARIA missing/wrong, contrast, semantic HTML gone wrong)
 - Framework: React key-prop / hook-rule warnings, DOM API misuse
 - Missing tests for new public behavior
+- Polish: a cleanup that deletes code and keeps behaviour — a reimplemented codebase, stdlib, or library helper, dead or speculative code, handling for a state nothing produces. Every finding in `/review`'s Polish section lands here.
 
 **DROP** (pure nits — author can ignore safely):
 - Style/formatting a formatter (`mix format`, `rubocop`, `prettier`) would fix anyway
 - Naming preference without a project-convention violation
-- "Could use X instead" when both X and current work
+- Swapping one working idiom for another of the same size
 - Optional refactors ("worth extracting" without a third caller)
 - Personal preference (prefer `case` over `cond`, `Map.get` over `[]`)
 - Suggestions that duplicate what existing tests/types already guarantee
