@@ -229,7 +229,7 @@ def format_run(r):
     return out
 
 
-def collect_skill_runs(path, sid, encoded):
+def collect_skill_runs(path, sid, encoded, target_prefix=None):
     """One run per user-initiated skill: a typed /skill (a `<command-name>` message
     without `<local-command-stdout>`, which marks UI commands) or a Skill tool_use
     with no run open. A run ends at the next real prompt; Skill calls inside it
@@ -310,6 +310,10 @@ def collect_skill_runs(path, sid, encoded):
                         open_run["agents"][inp.get("model") or "inherit"] += 1
     close(None)
 
+    # A session can span days; keep the runs that started on the target one.
+    if target_prefix:
+        runs = [r for r in runs if r["start"] and str(r["start"].date()) == target_prefix]
+
     subs = subagent_runs(sid, encoded)
     for r in runs:
         for start, usage in subs:
@@ -324,6 +328,20 @@ def installed_skills():
     return sorted(names)
 
 
+def errors_in(msg):
+    """Errored tool results in a message. The harness files them under role "user"."""
+    if msg.get("role") != "user" or not isinstance(msg.get("content"), list):
+        return []
+    out = []
+    for block in msg["content"]:
+        if isinstance(block, dict) and block.get("type") == "tool_result" and block.get("is_error"):
+            text = block.get("content")
+            if isinstance(text, list):
+                text = " ".join(b.get("text", "") for b in text if isinstance(b, dict))
+            out.append((text or "")[:200])
+    return out
+
+
 def analyze_session(sid, project, target_date=None):
     encoded = project.replace("/", "-")
     path = PROJECTS / encoded / f"{sid}.jsonl"
@@ -332,6 +350,7 @@ def analyze_session(sid, project, target_date=None):
     target_prefix = str(target_date) if target_date else None
 
     tools = defaultdict(int)
+    subagent_tools = defaultdict(int)
     skills = defaultdict(int)  # skill name -> Skill tool invocations
     tool_errors = []
     models = defaultdict(int)
@@ -350,11 +369,13 @@ def analyze_session(sid, project, target_date=None):
             if e.get("teamName"):
                 teams.add(e["teamName"])
 
+            # A session can span days; count only what happened on the target one.
+            on_day = not target_prefix or e.get("timestamp", "").startswith(target_prefix)
             msg = e.get("message", {})
-            if model := msg.get("model"):
+            if on_day and (model := msg.get("model")):
                 models[model] += 1
 
-            if msg.get("role") == "assistant" and isinstance(msg.get("content"), list):
+            if on_day and msg.get("role") == "assistant" and isinstance(msg.get("content"), list):
                 for block in msg["content"]:
                     if isinstance(block, dict) and block.get("type") == "tool_use":
                         name = block.get("name", "?")
@@ -373,11 +394,7 @@ def analyze_session(sid, project, target_date=None):
                 # Real user prompts are strings; array-content user messages are
                 # tool_result entries from the harness, not prompts. Skip those.
                 if isinstance(content, str) and content:
-                    on_target_date = (
-                        not target_prefix
-                        or (e.get("timestamp", "")).startswith(target_prefix)
-                    )
-                    if on_target_date:
+                    if on_day:
                         kind = None
                         if OVERACT_PATTERNS.search(content):
                             kind = "overact"
@@ -393,16 +410,33 @@ def analyze_session(sid, project, target_date=None):
                             )
                     last_edit = None
 
-            if msg.get("role") == "tool" and isinstance(msg.get("content"), list):
-                for block in msg["content"]:
-                    if isinstance(block, dict) and block.get("is_error"):
-                        tool_errors.append(block.get("text", "")[:200])
+            if on_day:
+                tool_errors.extend(errors_in(msg))
+
+    # Subagents make about half of all tool calls; their transcripts sit beside the session's.
+    for sub in sorted((PROJECTS / encoded / sid / "subagents").glob("agent-*.jsonl")):
+        with open(sub) as f:
+            for line in f:
+                try:
+                    e = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                if target_prefix and not e.get("timestamp", "").startswith(target_prefix):
+                    continue
+                msg = e.get("message") or {}
+                if msg.get("role") == "assistant" and isinstance(msg.get("content"), list):
+                    for block in msg["content"]:
+                        if isinstance(block, dict) and block.get("type") == "tool_use":
+                            subagent_tools[block.get("name", "?")] += 1
+                tool_errors.extend(errors_in(msg))
 
     commit_messages = count_net_commits(git_commands, project)
     return {
         "tools": dict(tools),
+        "subagent_tools": dict(subagent_tools),
         "skills": dict(skills),
-        "skill_runs": collect_skill_runs(path, sid, encoded),
+        "skill_runs": collect_skill_runs(path, sid, encoded, target_prefix),
+        "tool_error_count": len(tool_errors),
         "tool_errors": tool_errors[:10],
         "models": dict(models),
         "teams": sorted(teams),
@@ -671,7 +705,9 @@ def main():
 
     by_project = defaultdict(lambda: {"user": [], "agent": []})
     all_errors = []
+    error_count = 0
     all_tools = defaultdict(int)
+    all_subagent_tools = defaultdict(int)
     all_models = defaultdict(int)
     all_teams = set()
     total_commits = 0
@@ -770,9 +806,12 @@ def main():
                 short_sessions += 1
 
         all_errors.extend(detail.get("tool_errors", []))
+        error_count += detail.get("tool_error_count", 0)
         total_commits += detail.get("commits", 0)
         for t, c in detail.get("tools", {}).items():
             all_tools[t] += c
+        for t, c in detail.get("subagent_tools", {}).items():
+            all_subagent_tools[t] += c
         for m, c in detail.get("models", {}).items():
             all_models[m] += c
         all_teams.update(detail.get("teams", []))
@@ -797,9 +836,10 @@ def main():
             "work_prompts": total_work_prompts,
             "commits": total_commits,
             "short_sessions": short_sessions,
-            "tool_errors": len(all_errors),
+            "tool_errors": error_count,
             "models": dict(all_models),
             "top_tools": dict(sorted(all_tools.items(), key=lambda x: -x[1])[:10]),
+            "top_subagent_tools": dict(sorted(all_subagent_tools.items(), key=lambda x: -x[1])[:10]),
             "teams": sorted(all_teams),
             "overact_signals": total_overact,
             "query_signals": total_query,
