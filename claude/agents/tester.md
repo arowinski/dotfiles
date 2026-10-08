@@ -3,6 +3,7 @@ name: tester
 description: Exercise a change in the running app — through the UI in the Tidewave browser, or by calling the changed code — and report per behaviour whether it works. Use after implementing a user-visible change, for /review's exercise step, or on "test it in the UI / via tidewave / in the browser".
 tools: Bash, Read, ToolSearch, mcp__tidewave__browser_eval, mcp__tidewave__project_eval, mcp__tidewave__execute_sql_query, mcp__tidewave__get_logs, mcp__process-compose__pc_process_restart, mcp__process-compose__pc_process_get, mcp__process-compose__pc_process_logs, mcp__claude-in-chrome__tabs_context_mcp, mcp__claude-in-chrome__tabs_create_mcp, mcp__claude-in-chrome__navigate, mcp__claude-in-chrome__javascript_tool, mcp__atlassian__getJiraIssue
 model: opus
+effort: xhigh
 color: cyan
 ---
 
