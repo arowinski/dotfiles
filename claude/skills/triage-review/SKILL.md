@@ -12,8 +12,8 @@ Fetch PR review comments, classify them, investigate the code, recommend actions
 
 ### 0. Pick the side
 
-- **Author side** — the comments are on my PR and the ask is to act on them. Steps 1–9 below.
-- **Reviewer side** — I left the comments and the ask is whether the author addressed them ("are my comments addressed?", "anything left?", "approvable?"). Step 1, then the reviewer-side pass. Skip step 2 — its buckets discard already-replied threads, which is exactly what this side has to verify.
+- **Author side**: the comments are on my PR and the ask is to act on them. Steps 1–9 below.
+- **Reviewer side**: I left the comments and the ask is whether the author addressed them ("are my comments addressed?", "anything left?", "approvable?"). Step 1, then the reviewer-side pass. Skip steps 2–9; the reviewer-side pass buckets by its own states.
 
 When the PR author is the user, it's author side. Otherwise, filter to the comments the user wrote and go reviewer side.
 
@@ -37,7 +37,7 @@ Classify into one of four buckets:
 - **Stale** — the cited line no longer exists in the current file
 - **Actionable** — none of the above
 
-Skip the first three. Investigate only Actionable.
+Drop Stale. The other three go to step 3: a reply or a later change is a claim to verify, not a reason to skip.
 
 ### Reviewer-side pass
 
@@ -54,12 +54,13 @@ Present as a table: `# | file:line | my comment (excerpt) | state | evidence`. T
 
 Stop there. This skill never runs `gh pr review --approve`; the user does that. If they ask for reply text, draft it under the reviewer-facing-text rule in step 4.
 
-### 3. Investigate each actionable comment
+### 3. Verify each comment
 
-For each:
-- Read the cited file and surrounding code
-- Run `git diff` or `git log` for code history context
-- Form an opinion: reviewer is right, partly right, or wrong
+Settle inline the comments whose text is its own evidence: typo, naming, wording. Send the rest to one `review-specialist` agent. Its prompt carries the repo path, the PR base and head, and per comment its bucket, author, `path:line`, full text, `at=` timestamp, and any replies, plus this angle:
+
+"Verification of PR review comments at the current head. Return one verdict per comment you were given, in place of the findings format: a comment the reviewer got wrong carries its evidence too, since that evidence is the push-back. Actionable: is the reviewer's claim true (right, partly right, or wrong). Already-fixed: does the change since `at=` answer the concern (addressed, partly, or not). Already-replied: does the reply's reasoning hold (holds or not). Read the cited code, its callers, and the history of the lines; settle a runtime claim with a read-only command (test, eval) rather than by reading. Evidence per verdict: `path:line`, or the command and its output. Non-scope: defects no comment raises."
+
+Done when every non-stale comment has a verdict with evidence. Already-fixed that's addressed and already-replied that holds count as handled; the rest go to step 4 as actionable.
 
 ### 4. Categorize the action
 
@@ -82,7 +83,7 @@ Show one table:
 | 1 | lib/x.ex:42 | @alice | "should validate input" | fix | input flows from public API; alice is right |
 | 2 | lib/y.ex:88 | @bob | "use let_it_be" | push back | already memoized via @cache; bob missed it |
 
-Plus a one-line summary: "X actionable (Y fix, Z push back, W clarify). N already-handled."
+Plus a one-line summary: "X actionable (Y fix, Z push back, W clarify). N verified handled, S stale."
 
 ### 6. User selects fixes
 
