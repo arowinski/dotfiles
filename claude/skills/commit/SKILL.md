@@ -8,12 +8,20 @@ allowed-tools: Bash(git-commit-context:*), Bash(git status:*), Bash(git diff:*),
 
 ## Workflow
 
-1. **Read the context.** `git-commit-context` returns status, diffs, and the last 10 subjects in one call. Treat the log as the style spec — prefix convention, subject shape, whether bodies are normal here. A commit that reads like the ones above it keeps `git log` scannable months later.
+1. **Read the context.** `git-commit-context` returns status, diffs, and the last 10 subjects in one call. Treat the log as the style spec: prefix convention, subject shape, whether bodies are normal here. A commit that reads like the ones above it keeps `git log` scannable months later.
 2. **Check the gate.** Formatter applied, pre-commit tests/lint green. If the gate failed, stop and report; a broken commit costs more to unpick than to not make.
 3. **Split, then stage.** See below. Do this before touching `git add`.
-4. **Consider amend or absorb** — ask first:
+4. **Consider amend or absorb.** Unless the request already names amend or absorb, ask first:
    - Last commit unpushed and this change belongs to it? Amend.
-   - Change fixes a specific earlier commit on the branch? `git absorb --and-rebase`.
+   - Change fixes a specific earlier unpushed commit on the branch? `git absorb --and-rebase`; on a stacked branch, `--base` is the parent branch's tip.
+   - Pushed branch: a new commit on top. Amend or absorb only once the user accepts the force-push.
+
+## Absorb and amend traps
+
+- "Some file modifications did not have an available commit" means absorb left hunks unplaced: commit each with `--fixup=<target sha>`, then autosquash.
+- After absorbing, `git diff --cached --stat` is empty and `git show HEAD:<file>` holds the change before any test or push.
+- Stacked branches: absorb into the branch at hand only. A hunk that belongs to a lower level is fixed on that level's branch, never by rebasing the whole stack from its tip.
+- Amend only at a clean `edit` stop, never at a conflict stop. Clear a stale `rebase-merge` with `git rebase --quit`.
 
 ## Splitting
 
@@ -23,19 +31,19 @@ If the index already holds one coherent intent, that is the user's split: commit
 
 Staging is not always a decision, though. A staged deletion whose replacement sits untracked beside it is one rename arriving in two halves, and committing the deletion alone leaves a dangling reference. Finish the intent instead of asking which half was meant.
 
-Otherwise group the changed paths by intent before staging anything. A bug fix, a rename, a new feature, and a config bump are four commits even when they came out of one editing session — they get reverted, cherry-picked, and bisected independently. Then work one at a time: stage that group's paths, commit, move to the next. Never stage everything and write one subject that strings intents together with "and" — that conjunction is the tell that step 3 got skipped.
+Otherwise group the changed paths by intent before staging anything. A bug fix, a rename, a new feature, and a config bump are four commits even when they came out of one editing session. They get reverted, cherry-picked, and bisected independently. Then work one at a time: stage that group's paths, commit, move to the next. Never stage everything and write one subject that strings intents together with "and"; that conjunction is the tell that step 3 got skipped.
 
 Order the commits so each one builds on its own: the refactor lands before the feature that uses it.
 
-Ask only when two intents genuinely overlap inside one file and the diff can't settle which lines belong to which — interactive staging isn't available here, so guessing splits the wrong way silently. Everywhere else the diff answers it: finish the work and say how you grouped it.
+Ask only when two intents genuinely overlap inside one file and the diff can't settle which lines belong to which; interactive staging isn't available here, so guessing splits the wrong way silently. Everywhere else the diff answers it: finish the work and say how you grouped it.
 
 ## Message
 
-The subject names the change at the altitude a reader scanning the log needs. The diff already carries the detail — the subject shouldn't restate it, and the body (when there is one) covers what the diff can't show: why this was needed, what it breaks, what a reader would otherwise misread.
+The subject names the change at the altitude a reader scanning the log needs. The diff already carries the detail; the subject shouldn't restate it, and the body (when there is one) covers what the diff can't show: why this was needed, what it breaks, what a reader would otherwise misread.
 
-Add a body only when the reasoning isn't recoverable from the diff — a non-obvious constraint, a breaking change, a migration step, or why the obvious alternative lost. Skip it when the subject already says everything.
+Add a body only when the reasoning isn't recoverable from the diff: a non-obvious constraint, a breaking change, a migration step, or why the obvious alternative lost. Skip it when the subject already says everything.
 
-**Too vague — describes the process, not the change:**
+**Too vague (describes the process, not the change):**
 `Fix issues`, `Address review feedback`, `Update based on suggestions`
 => `Reject empty tokens in session lookup`
 
@@ -49,8 +57,9 @@ Add a body only when the reasoning isn't recoverable from the diff — a non-obv
 
 ## Rules
 
-- First line max 80 chars, imperative mood, plain ASCII — no Unicode (arrows `->`, use "to" or `>`).
+- Body lines wrap at 72 chars.
+- First line max 80 chars, imperative mood, plain ASCII, no Unicode (arrows `->`, use "to" or `>`).
 - Copy the log's prefix convention; never invent one. If subjects there read `Claude - ...` or `feat(auth): ...`, match that. If they carry no prefix, add none.
 - Never mention tests unless tests are the change.
-- Never add ticket prefixes (`JIRA-123`, `GH-456`) or provenance suffixes ("per review", "after retro") — the change stands on its own; where it came from belongs in the PR.
+- Never add ticket prefixes (`JIRA-123`, `GH-456`) or provenance suffixes ("per review", "after retro"): the change stands on its own; where it came from belongs in the PR.
 - Never put unrelated changes in one commit.
