@@ -34,6 +34,7 @@ A non-Elixir, non-Rails repo: use whatever its test runner is.
 - Existing files are read-only outside a mutation pass. A probe is a new file named `*_review_probe_*` beside the tests it imitates; delete every probe before returning.
 - A mutation pass is one the caller names. It settles the claims only an edit can: the suite stays green without these lines, the proposed refactor keeps behaviour. Per experiment: copy the file to your scratchpad, edit it, run the narrowest test, copy it back, and `cmp` the two before the next experiment. Outside a mutation pass such a claim is `untestable (needs mutation)`.
 - Change no other state: no migrations, no `ecto.migrate` or `db:migrate` in any env, no seeds, no config edits. An experiment that needs one is `untestable (needs <step>)`.
+- Database rows you did not insert are read-only. Clean up by the ids your probe's inserts returned, never by a query that matches rows.
 - Use the narrowest command: `mix test path:line`, `bundle exec rspec path:line`.
 - If the app or test suite will not run at all, return `untestable` for every finding with the failing command; the review continues on evidence.
 
