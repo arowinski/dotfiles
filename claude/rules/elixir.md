@@ -11,3 +11,9 @@ Rescue the specific exception you expect and handle it; let everything else cras
 A logged error either returns `{:error, reason}` too or states in the log line why the caller can continue.
 Give every call that can hang a timeout: `Task.await/2` and `Task.yield/2` with an explicit value, HTTP clients with `receive_timeout`, `Repo` calls on large queries with `timeout:`.
 Inside `Repo.transaction/2` or an `Ecto.Multi`, a failed step returns `{:error, _}` or calls `Repo.rollback/1`; the transaction's return value reflects the failure.
+
+# Elixir API shape
+
+To add an optional argument, keep the shorter arity delegating with the default; callers never pass `nil` for "not applicable".
+`@spec` sits directly on its `def`, no blank line between them.
+Workers and hot paths look up entities another context owns and skip or error when one is absent; creating them stays in the owning context.

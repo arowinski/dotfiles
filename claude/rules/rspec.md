@@ -3,7 +3,7 @@ paths:
   - "**/*_spec.rb"
 ---
 
-Test behavior, not implementation. Test public interfaces, never private methods.
+Test behavior, not implementation.
 
 Before writing tests:
 1. Search for existing test files and factories
@@ -16,7 +16,7 @@ Setup → Exercise → Verify. Separate phases with blank lines. No phase commen
 **For new specs:**
 - Define variables inline (`user = build(:user)`), not with `let` or `let!`
 - Use named helper methods instead of `before` or `after` hooks
-- Context names start with "when" or "with"; nested contexts use "and". Max 2 context levels deep — flatten rather than nest further.
+- Context names start with "when" or "with"; nested contexts use "and". Max 2 context levels deep; flatten rather than nest further.
 - For classes with a single public method, omit the method describe block
 
 **For existing specs:**
@@ -36,8 +36,9 @@ Setup → Exercise → Verify. Separate phases with blank lines. No phase commen
 action = -> { MyService.call(user) }
 expect(&action).to change(User, :count).by(1)
 ```
+A multi-line action is `action = proc do ... end`; `-> { }` stays on one line.
 
-**For verifying method calls — stub then verify:**
+**For verifying method calls, stub then verify:**
 ```ruby
 allow(UserCreator).to receive(:create)
 MyService.call
@@ -46,6 +47,6 @@ expect(UserCreator).to have_received(:create).with(email: "test@example.com")
 
 ## Avoid
 
-- `expect(...).to receive(...)` — use `allow` then `have_received`
-- `allow_any_instance_of` — stub specific instances
+- `expect(...).to receive(...)`: use `allow` then `have_received`
+- `allow_any_instance_of`: stub specific instances
 - `.map` / manual iteration when a matcher like `match_array`, `contain_exactly`, `include`, or `hash_including` would work
