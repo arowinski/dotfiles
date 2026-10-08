@@ -7,7 +7,7 @@ allowed-tools: Bash(gh-comments:*), Bash(gh api:*), Bash(gh pr view:*), Bash(gh 
 
 # Post Review
 
-Filter code-review findings to the ones worth posting, draft each as a question, preview, then post to a PR as a single review with inline comments. The preview doubles as a dry run — reply `skip` and nothing publishes.
+Filter code-review findings to the ones worth posting, draft each as a question, preview, then post to a PR as a single review with inline comments. The preview doubles as a dry run: reply `skip` and nothing publishes.
 
 **You do NOT:** post unsolicited reviews, post separate comment-per-finding, or post without an explicit user "post" confirmation.
 
@@ -20,7 +20,7 @@ If $ARGUMENTS contains a PR number or URL, use that. Otherwise:
 1. `gh pr view <pr-or-empty> --json number,url -q '"\(.url | split("/") | .[3]) \(.url | split("/") | .[4]) \(.number) \(.url)"'`
 2. If no PR is associated with the current branch and no arg given, stop and ask the user which PR
 
-Capture: `{owner}`, `{repo}`, PR number. Owner and repo come out of the PR URL, which always names the base repo. Don't reach for `headRepository` — on a cross-fork PR the head repo is the fork, and the review API needs the base. (`gh pr view --json` has no `baseRepository` field.)
+Capture: `{owner}`, `{repo}`, PR number. Owner and repo come out of the PR URL, which always names the base repo. Don't reach for `headRepository`: on a cross-fork PR the head repo is the fork, and the review API needs the base. (`gh pr view --json` has no `baseRepository` field.)
 
 ### Step 2: Gather findings
 
@@ -31,14 +31,14 @@ Source priority:
 
 For each finding capture: file path, line number on the PR head ref, category (security / bug / perf / etc., per Step 4) and severity (blocker / major / nit / polish / info), the claim, the suggested change or question.
 
-`/review` produces structured findings (Claim / Evidence / Reasoning / Fix, plus the verifier verdict). Use Evidence and Reasoning to inform the comment body — they're the raw material for a clear question. Keep each finding's report number and the run id `/review` printed when it recorded the run; Step 8 records against them.
+`/review` produces structured findings (Claim / Evidence / Reasoning / Fix, plus the verifier verdict). Use Evidence and Reasoning to inform the comment body; they're the raw material for a clear question. Keep each finding's report number and the run id `/review` printed when it recorded the run; Step 8 records against them.
 
 ### Step 3: Plausibility check
 
 Before drafting any comment, double-check each finding against current state:
 
-1. Confirm the line is actually in the diff and on the side you expect (RIGHT for added/modified, LEFT for deleted) — reuse the `gh pr diff` from Step 2 if already fetched
-2. Read the full file at the cited path — confirm the surrounding context doesn't already address the concern
+1. Confirm the line is actually in the diff and on the side you expect (RIGHT for added/modified, LEFT for deleted); reuse the `gh pr diff` from Step 2 if already fetched
+2. Read the full file at the cited path; confirm the surrounding context doesn't already address the concern
 3. Confirm the cited code actually says what the finding claims (no off-by-one, no misread)
 4. Drop findings that don't survive this check. False positives erode trust faster than missing comments add value.
 
@@ -46,7 +46,7 @@ Before drafting any comment, double-check each finding against current state:
 
 For each surviving finding, ask: would the PR author thank you for this comment, or sigh? Categorize:
 
-**KEEP** (real concerns — post these):
+**KEEP** (real concerns; post these):
 - Security: auth bypass, injection, secret exposure, SSRF, deserialization
 - Correctness: logic that doesn't match stated behavior, contract violations, missing edge cases
 - Bugs: off-by-one, nil/undefined access, race conditions, missing error handling on real failure paths
@@ -55,9 +55,9 @@ For each surviving finding, ask: would the PR author thank you for this comment,
 - Accessibility: a11y violations (ARIA missing/wrong, contrast, semantic HTML gone wrong)
 - Framework: React key-prop / hook-rule warnings, DOM API misuse
 - Missing tests for new public behavior
-- Polish: a cleanup that deletes code and keeps behaviour — a reimplemented codebase, stdlib, or library helper, dead or speculative code, handling for a state nothing produces. Every finding in `/review`'s Polish section lands here.
+- Polish: a cleanup that deletes code and keeps behaviour (a reimplemented codebase, stdlib, or library helper, dead or speculative code, handling for a state nothing produces). Every finding in `/review`'s Polish section lands here.
 
-**DROP** (pure nits — author can ignore safely):
+**DROP** (pure nits; author can ignore safely):
 - Style/formatting a formatter (`mix format`, `rubocop`, `prettier`) would fix anyway
 - Naming preference without a project-convention violation
 - Swapping one working idiom for another of the same size
@@ -66,30 +66,31 @@ For each surviving finding, ask: would the PR author thank you for this comment,
 - Suggestions that duplicate what existing tests/types already guarantee
 - "Consider refactoring" / "could be cleaner" with no concrete change
 
-**FLAG** (ambiguous — ask before deciding):
+**FLAG** (ambiguous; you decide):
 - Could be real or nit depending on team norms
 - Borderline (naming slightly off but not rule-violating)
 - Performance that may or may not matter at expected scale
 
-For FLAG items, use `AskUserQuestion` (Keep / Drop / Skip) before drafting.
+Settle each FLAG item yourself as KEEP or DROP, then go straight to drafting; the value filter is your job. Drop a "confirm intent" finding when the code's default is already the sensible choice; a clarifying question earns a comment only when the default is genuinely ambiguous or likely wrong. The preview lists each dropped finding on its own line so the user can pull one back with `edit`.
 
 If you can't write the comment in one sentence the author can act on, drop it. Better to post 2 strong findings than 8 mixed ones.
 
 ### Step 5: Draft each comment as a question
 
-**REQUIRED**: Before drafting any comment text, load BOTH the `clear-writing` skill AND the `human-writing` skill via the Skill tool. clear-writing tightens sentences; human-writing strips LLM tells and adds peer voice. Apply both to every comment body and the review summary. Do not draft without them loaded.
+**REQUIRED**: Before drafting any comment text, load BOTH the `clear-writing` skill AND the `human-writing` skill via the Skill tool. clear-writing tightens sentences; human-writing strips LLM tells and adds peer voice. Apply both to every comment body. Do not draft without them loaded.
 
-**Every redraft goes through the same check.** "Make it more concise", "drop the summary", "shorter" and every other revision request is a change of length, never a license to drop the rules. Before showing a revised draft, walk the loaded checklists over it again — in particular human-writing's rule on file paths and links, the one this skill's drafts break most often. If the rules scrolled out of context, reload the skills rather than working from memory of them.
+**Every redraft goes through the same check.** "Make it more concise", "drop the second one", "shorter" and every other revision request is a change of length, never a license to drop the rules. Before showing a revised draft, walk the loaded checklists over it again, in particular human-writing's rule on file paths and links, the one this skill's drafts break most often. If the rules scrolled out of context, reload the skills rather than working from memory of them.
 
 Each comment must:
 
 - Default shape: question first, then a sentence on WHY you're asking. The question is the prompt for the author; the why grounds it in concrete evidence so they can engage with the actual concern. Examples:
-  - "Should this also handle nil? `customer.plan` is nullable per schema L12 — `.price` would crash."
-  - "Is swallowing the error intentional? Caller at `lib/api.ex:88` checks `{:error, _}` and would silently get `nil` here."
+  - "Should this also handle nil? `customer.plan` is nullable per schema L12, so `.price` would crash."
+  - "Could this return `{:error, reason}` instead of `nil`? Caller at `lib/api.ex:88` matches `{:error, _}` and would miss the failure."
   - "Would `cast_assoc` fit? Manual `put_assoc` skips validation; the parent changeset's `validate_required` won't see missing children."
   - Pure-question comments (no why) are OK only when the question itself is unambiguous from the cited code.
-- **Stop at the why.** Do NOT propose solutions, list alternatives, run tests inside the comment, paste analysis paragraphs, or recommend specific code. Investigation belongs in the plausibility check phase, not in the comment body. The reviewer asks; the author decides. A draft that includes "Consider X, Y, or Z" or "I ran the test suite and..." or a proposed code snippet is overreach — trim to the question + one why sentence.
-- Acknowledge uncertainty when relevant — "If this is intentional, ignore.", "Possibly a misread, but..."
+- The question carries the point itself ("Could the check read the `Moderator` rows?"); a real finding opens with the concrete question, never "intentional?" or "is this deliberate?".
+- **Stop at the why.** Do NOT propose solutions, list alternatives, run tests inside the comment, paste analysis paragraphs, or recommend specific code. Investigation belongs in the plausibility check phase, not in the comment body. The reviewer asks; the author decides. A draft that includes "Consider X, Y, or Z" or "I ran the test suite and..." or a proposed code snippet is overreach; trim to the question + one why sentence.
+- Acknowledge uncertainty when relevant: "Possibly a misread, but..."
 - Reference concrete code with backticks; line numbers only when not obvious from inline placement
 - Keep to 1–3 sentences unless the rationale genuinely needs more
 
@@ -102,7 +103,6 @@ One payload, one POST. Not one POST per comment.
 ```json
 {
   "event": "COMMENT",
-  "body": "<optional one-line overall summary, empty if nothing to add>",
   "comments": [
     {"path": "lib/foo.ex", "line": 42, "body": "<question text>"},
     {"path": "lib/bar.ex", "line": 17, "side": "LEFT", "body": "<question text>"}
@@ -110,24 +110,28 @@ One payload, one POST. Not one POST per comment.
 }
 ```
 
+The payload has no `body`: inline comments carry the content, and a summary is filler the author reads past. Add one only with text the user hands over.
+
 `line` refers to the line on the PR head ref (RIGHT side, default). Set `"side": "LEFT"` only when commenting on a deleted line.
 
-### Step 7: Preview (REQUIRED — STOP HERE)
+### Step 7: Preview (REQUIRED, STOP HERE)
 
 Print the review in chat in this shape, ordered highest-severity first:
 
-**Summary:** `<body or "(none)">`
+**Body:** only when the user supplied one, verbatim.
 
 **Inline comments:**
 
-- **[security]** `lib/foo.ex:42` — `<full body>`
-- **[bug]** `lib/bar.ex:17` (LEFT) — `<full body>`
+- **[security]** `lib/foo.ex:42`: `<full body>`
+- **[bug]** `lib/bar.ex:17` (LEFT): `<full body>`
+
+**Dropped:** one line per dropped finding.
 
 Then stop. The user replies one of:
 
-- `post` — submit as shown
-- `edit` — user revises specific comments or the summary
-- `skip` — don't post; the drafted comments above stay in the conversation as a dry run
+- `post`: submit as shown
+- `edit`: user revises specific comments or pulls back a dropped one
+- `skip`: don't post; the drafted comments above stay in the conversation as a dry run
 
 Do not POST until the reply is `post`.
 
@@ -137,12 +141,12 @@ Pipe the JSON payload via heredoc and extract the review URL:
 
 ```bash
 gh api repos/{owner}/{repo}/pulls/{pr}/reviews --input - <<'POST_REVIEW_PAYLOAD' | jq -r .html_url
-{ "event": "COMMENT", "body": "...", "comments": [...] }
+{ "event": "COMMENT", "comments": [...] }
 POST_REVIEW_PAYLOAD
 ```
 
 Use a long, unique heredoc sentinel (`POST_REVIEW_PAYLOAD`) so comment bodies that happen to contain `EOF` don't terminate the heredoc early. Single-quoted (`<<'...'`) prevents shell expansion inside the JSON.
 
-If the API rejects a comment because the line isn't part of the diff: the cited line wasn't changed in this PR. Either remove that comment, move it to a line that was changed, or fall back to a top-level PR comment via `gh api repos/{owner}/{repo}/issues/{pr}/comments` — confirm with the user before falling back.
+If the API rejects a comment because the line isn't part of the diff: the cited line wasn't changed in this PR. Move the comment to a line that was changed, or drop it and relay the point to the user in chat. Comments stay inline; a top-level PR comment is never the fallback.
 
 Once the review is posted, record the comments that came from `/review` findings: `claude-review-ledger applied <run id> <n,n,...>` with their report numbers. A posted finding is the reviewer's equivalent of an applied one; without the record the ledger counts it as ignored. Findings Step 2 produced itself have no run and are not recorded.
