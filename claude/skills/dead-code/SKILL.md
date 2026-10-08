@@ -15,11 +15,11 @@ Delete what nothing calls. Every candidate carries evidence; every deletion is p
 
 Scope is the argument, else the whole project. Collect candidates with the command output or empty grep as evidence; a candidate without evidence is not a candidate.
 
-- `mix compile --force --warnings-as-errors` — the compiler names unused private functions, aliases, imports, and variables.
+- `mix compile --force --warnings-as-errors`: the compiler names unused private functions, aliases, imports, and variables.
 - `mix xref graph --sink lib/<file>.ex` listing only the file itself = orphan module. Public functions have no xref mode: grep `fun_name(`, `.fun_name`, `&Mod.fun_name/`, and the HEEx component forms `<.fun_name` and `<Mod.fun_name` across `lib/`; hits only inside its own module or tests = candidate.
 - `mix deps.unlock --check-unused` for lock drift; a dep in `mix.exs` with no module of its app referenced under `lib/` and `config/` = candidate.
 
-The reference grep covers atom and string forms too — `:fun_name`, `"fun_name"` — because that is how dynamic dispatch and `phx-*` event names name things.
+The reference grep covers atom and string forms too (`:fun_name`, `"fun_name"`) because that is how dynamic dispatch and `phx-*` event names name things.
 
 ## 2. Tier
 
@@ -37,4 +37,4 @@ Done when every candidate is deleted, skipped with the failure named, or listed 
 
 ## 4. Report
 
-Deleted (`path` — name), Skipped (item — failing test), Left for you (DANGER, and CAUTION items with a live dynamic reference), lines removed, and the final suite output in the same message.
+Deleted (`path`: name), Skipped (item: failing test), Left for you (DANGER, and CAUTION items with a live dynamic reference), lines removed, and the final suite output in the same message.

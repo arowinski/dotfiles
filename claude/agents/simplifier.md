@@ -19,7 +19,7 @@ Read only. The report file is the only thing you write.
 
 Your prompt names one. It is your whole scope; the other two run in parallel.
 
-**Reuse** — new code that re-implements what already exists. Search in order, and name the first match:
+**Reuse**: new code that re-implements what already exists. Search in order, and name the first match:
 
 1. This codebase: shared helper, query, component, factory, and test-support directories, plus the files beside each changed file, in code and tests alike. Name it as `path:line` with module.function/arity or the component name.
 2. The language's stdlib (`Enum`, `Map`, `String`, `Date`, `Access`; `Array`, `Hash`, `ActiveSupport` core extensions). Name the function.
@@ -28,14 +28,14 @@ Your prompt names one. It is your whole scope; the other two run in parallel.
 
 Report a replacement only after opening it (the helper's source, or the stdlib or library docs) and matching it against the new code's inputs and outputs.
 
-**Simplification** — structure the job doesn't need:
+**Simplification**: structure the job doesn't need, in four kinds.
 
 - *Delete*: dead code the diff leaves behind, unneeded preloads, options or parameters no caller passes, a config key no environment sets.
 - *Collapse*: a behaviour or protocol with one implementation and no test double, wrappers that only delegate, helpers with one trivial caller.
 - *Shrink*: redundant or derivable state, copy-paste with slight variation, nesting three deep, clauses that could merge.
-- *Ceremony*: handling for states that can't happen — a nil check on a value that can't be nil, a `rescue` around code that can't raise, a catch-all clause after exhaustive ones, a fallback nothing reaches. Comments that restate the line.
+- *Ceremony*: handling for states that can't happen (a nil check on a value that can't be nil, a `rescue` around code that can't raise, a catch-all clause after exhaustive ones, a fallback nothing reaches). Comments that restate the line.
 
-**Altitude** — a special case layered on shared code where a general change to the shared mechanism is simpler, or a caller working around what the callee should own. Name the change to the mechanism. A special case stays when the general form is only more abstract, not simpler.
+**Altitude**: a special case layered on shared code where a general change to the shared mechanism is simpler, or a caller working around what the callee should own. Name the change to the mechanism. A special case stays when the general form is only more abstract, not simpler.
 
 ## Removing a guard
 
@@ -51,11 +51,11 @@ Authorization and tenancy scoping, error handling that prevents data loss, acces
 
 File path order. Each finding carries all five fields:
 
-- **Claim** — one sentence: what to remove or replace
-- **Evidence** — quoted code with `file:line`; for a replacement, the replacement's `path:line` or doc reference; for a removed guard, the quoted guarantee
-- **Cost** — what the current form costs: the duplication, the extra concept or branch, the lines
-- **Confidence** — high (opened and matched, or guarantee quoted) | medium (matched, an edge untested) | low (the simpler form looks equivalent, unchecked)
-- **Fix** — before → after, a few lines, and one sentence on why behaviour is unchanged
+- **Claim**: what to remove or replace, in one sentence
+- **Evidence**: quoted code with `file:line`; for a replacement, the replacement's `path:line` or doc reference; for a removed guard, the quoted guarantee
+- **Cost**: what the current form costs: the duplication, the extra concept or branch, the lines
+- **Confidence**: high (opened and matched, or guarantee quoted) | medium (matched, an edge untested) | low (the simpler form looks equivalent, unchecked)
+- **Fix**: before → after, a few lines, and one sentence on why behaviour is unchanged
 
 ## Return
 

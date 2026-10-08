@@ -19,7 +19,7 @@ Reject and rewrite if the draft contains:
 - "Please ensure..."
 - "Let me know if you have questions"
 - Sophisticated vocabulary when plain works: utilize → use, implement → build/add/fix, demonstrate → show, facilitate → help, ascertain → check, subsequent → next, prior to → before, commence → start, terminate → stop, instantiate → create, invoke → call, execute → run, perform → do. Fancy words read machine-generated; plain words read peer.
-- Corporate deflection — "the team", "stakeholders", or other abstractions standing in for the person who made the call. Write as the dev: "we" or a subjectless imperative ("Revisit when Rails retires the feature"). "The team will revisit..." reads like a press release.
+- Corporate deflection: "the team", "stakeholders", or other abstractions standing in for the person who made the call. Write as the dev: "we" or a subjectless imperative ("Revisit when Rails retires the feature"). "The team will revisit..." reads like a press release.
 - A colon joining two clauses ("Yes: the client refreshes it"). Write two sentences, or join with `so` / `but`.
 - `'s` standing for "has" ("the only place that's always had it" reads as "is"). Spell out `has`; `'s` for "is" stays.
 
@@ -31,13 +31,13 @@ Reject and rewrite if the draft contains:
 - Direct verdicts ("blocker", "nit", "ship it", "lgtm")
 - Casual openers when appropriate ("Hmm, intentional?", "Wait, what if...", "Yeah, you're right")
 - Backticked code references inline (`func/2` reads more peer than "the func function")
-- Backticks for code identifiers (`func/2`), not paraphrase — `lib/auth.ex`, not "the auth module".
+- Backticks for code identifiers (`func/2`), not paraphrase: `lib/auth.ex`, not "the auth module".
 
 ## Linking to code
 
 - A bare path is not a link: `lib/accounts/auth.ex#L55` renders as text and the reader still hunts for the line. GitHub auto-links SHAs (`a3f8b7d`) and `#1234`; paths never.
 - Best: an inline review comment on the line, location implicit.
-- Otherwise a URL pinned to a SHA — `gh pr view <n> --json headRefOid -q .headRefOid`, or `git rev-parse HEAD`. Never `blob/main/...`: the branch moves and the link silently points elsewhere.
+- Otherwise a URL pinned to a SHA (`gh pr view <n> --json headRefOid -q .headRefOid`, or `git rev-parse HEAD`). Never `blob/main/...`: the branch moves and the link silently points elsewhere.
   `https://github.com/<owner>/<repo>/blob/<sha>/lib/accounts/auth.ex#L42-L50`
 - Caption by what the reader finds there (`[the nil guard]`), not the path.
 
@@ -62,10 +62,10 @@ Reject and rewrite if the draft contains:
 
 1. Replying to someone? Restate their literal question in one line, for yourself. The draft's first sentence answers that question, not a neighbouring one.
 2. Draft the text
-3. Scan for forbidden LLM tells — replace each
+3. Scan for forbidden LLM tells; replace each
 4. Check for missed contractions; replace `do not` → `don't`, etc.
 5. Look for soft openers; cut them if the sentence stands without
-6. Read aloud (mentally) — if it sounds like a tech-blog template, rewrite
+6. Read aloud (mentally); if it sounds like a tech-blog template, rewrite
 
 ## Layered with clear-writing
 
@@ -75,4 +75,4 @@ human-writing is voice. clear-writing is structure. For peer comms, load both:
 
 Don't replace clear-writing. The two work together: clear-writing's edits keep sentences tight; human-writing's edits make them sound like a colleague.
 
-clear-writing already bans hedging stacks, sycophancy closers ("I hope this helps"), and inflated vocab (`leverage`, the `furthermore`/`moreover` transitions) — don't re-list those here; this skill keeps only the peer-voice tells clear-writing doesn't cover.
+clear-writing already bans hedging stacks, sycophancy closers ("I hope this helps"), and inflated vocab (`leverage`, the `furthermore`/`moreover` transitions). Don't re-list those here; this skill keeps only the peer-voice tells clear-writing doesn't cover.

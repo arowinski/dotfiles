@@ -90,7 +90,7 @@ Compute path: `<git-common-dir>/claude/plans/<branch-name>.md` where `<git-commo
 - **## Goal**: what we're trying to achieve, one paragraph
 - **## Approach**: high-level strategy, 3-7 sentences, including the why
 - **## Invariants** (reworks only): one line per kept invariant: the guarantee, enforcing `path:line`, test or `untested`
-- **## Files**: one line per file to create or modify: `path — what changes · MIRROR: path:line — what to copy · VALIDATE: <command>`. The pattern sits on the file it applies to, so the implementer meets it at the moment of the edit. Characterization tests for `untested` invariants come first.
+- **## Files**: one line per file to create or modify: `` `path`: what changes · MIRROR: `path:line` (what to copy) · VALIDATE: `<command>` ``. The pattern sits on the file it applies to, so the implementer meets it at the moment of the edit. Characterization tests for `untested` invariants come first.
 - **## Risks**: what could break, edge cases, assumptions, things to watch
 - **## Alternatives considered**: the two designs not chosen, one sentence each on their shape and why the chosen one beats them
 - **## Open questions**: anything that needs user input, a spike, or that no architect could resolve

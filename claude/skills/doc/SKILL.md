@@ -14,7 +14,7 @@ background: false
 # Doc
 
 Docs explain WHY a module exists, who it works with, what's non-obvious, and what real usage looks like.
-One standard, both directions: writing means writing to it; reviewing means diffing against it — fix wrong
+One standard, both directions: writing means writing to it; reviewing means diffing against it. Fix wrong
 claims first, then delete every sentence that fails the gates.
 
 Core rule: **document only what the code can't say.** If the signature, `schema` block, `use` line, render,
@@ -65,18 +65,18 @@ documented module documents; it never promotes a trivial module out of `@moduled
 
 Answer in working memory (not as visible output sections):
 
-1. **WHY, in domain terms?** Not "Oban worker" — "drains the event outbox so downstream systems receive
+1. **WHY, in domain terms?** Not "Oban worker" but "drains the event outbox so downstream systems receive
    published events." One sentence.
 2. **Who calls it, what does it call?** `rg -n` for `alias <Module>` and `<Module>.`.
 3. **What surprising constraint or invariant?** Concurrency, idempotency, irreversible side effects,
    auth/scope assumptions, retry semantics, ordering. None nameable = genuinely simple; move on.
-4. **What does real usage look like?** A real snippet from the codebase — config, router line, call site.
+4. **What does real usage look like?** A real snippet from the codebase: config, router line, call site.
    Never a synthetic placeholder or a fake module name.
 
 Can't answer 1 + 2 → return the questions instead of a draft; a fabricated answer is worse than no draft.
 
 Then match sibling modules (same directory, same role). Count what they document before deciding what this
-one documents — `for f in <dir>/*.ex; do echo "$f $(grep -c '^\s*def ' $f) $(grep -c '@doc [^f]' $f) $(grep -c
+one documents: `for f in <dir>/*.ex; do echo "$f $(grep -c '^\s*def ' $f) $(grep -c '@doc [^f]' $f) $(grep -c
 '@spec ' $f) $(grep -c '@type ' $f)"; done`. A construct the siblings document gets documented in their
 wording; one they leave bare stays bare. Convention beats minimalism, and it is the only exception to the
 per-construct rules in step 6.
@@ -89,7 +89,7 @@ per-construct rules in step 6.
 4. `## <Concept>` H2 per major idea
 5. `## Examples` or `## Configuration` with a real snippet
 
-Callouts: plain-caps `IMPORTANT:` / `WARNING:` / `NOTE:`. No `**bold**` in `@moduledoc`/`@doc` — visible
+Callouts: plain-caps `IMPORTANT:` / `WARNING:` / `NOTE:`. No `**bold**` in `@moduledoc`/`@doc`: visible
 asterisks in source (bold is fine in plain Markdown docs and READMEs).
 
 Length is an outcome, not a target: the fewest sentences that answer the four questions and the per-type
@@ -118,12 +118,12 @@ pure helper): the four questions suffice.
 - **Code comments** state a constraint the code can't show (WHY). Delete WHAT-comments: restated data
   shapes, clause walkthroughs, `# adds two numbers` over `add/2`.
 
-### 7. Prose pass — clear-writing
+### 7. Prose pass: clear-writing
 
 After drafting, run every sentence through the full clear-writing checklist (preloaded in the agent). Its
 rules are inherited, not restated here. Doc-specific additions:
 
-- Express the idea, not the code. Backtick a symbol only when the reader needs the exact identifier — to
+- Express the idea, not the code. Backtick a symbol only when the reader needs the exact identifier to
   grep, call, or match it. "Blocks when the limit is reached" beats "uses `block_limit`"
 - Spell out project-internal abbreviations, keep canonical casing. Industry acronyms (URL, HTTP, SPA) stay;
   lowercase literal file/function names stay as code references
@@ -132,12 +132,12 @@ rules are inherited, not restated here. Doc-specific additions:
 
 Check, in order:
 
-1. Every factual claim matches current code, checked by reading it — wrong beats fluffy; fix stale claims
+1. Every factual claim matches current code, checked by reading it. Wrong beats fluffy; fix stale claims
    before style work. Reading answers every question here, so leave `mix compile` and `mix test` alone
-2. Every backticked module resolves to a real `defmodule` — one `rg -n` with every name alternated
+2. Every backticked module resolves to a real `defmodule`: one `rg -n` with every name alternated
 3. `@spec` arities match; `@type t` fields match the struct/schema
 4. Doctests run without setup; no `@doc` on private functions
-5. Redundancy pass: per sentence, "does the code, or an earlier sentence of this doc, already say this?" — delete if yes
+5. Redundancy pass: per sentence, "does the code, or an earlier sentence of this doc, already say this?" If yes, delete it
 6. Sentence pass: read the draft sentence by sentence. Each one has a subject and a verb and opens on a
    word. One that opens on a backticked symbol or hangs a list off a colon ("Submitted or missing:
    `{...}`") is rewritten as a sentence
@@ -148,7 +148,7 @@ Check, in order:
 You cannot ask the user and you never write to the file: the main session shows your report, gets
 Apply / Edit / Skip per file, and applies.
 
-The report is the only copy — compose each draft straight into it. Drafting into a scratch file writes
+The report is the only copy; compose each draft straight into it. Drafting into a scratch file writes
 every sentence twice, at a cost that exceeds the drafting itself.
 
 Per file, in order:
@@ -161,16 +161,16 @@ End the report with the file list and "Apply / Edit / Skip per file".
 
 ## Quality gates
 
-**Forbidden openings** — rewrite drafts starting with "Module for", "Provides functionality for",
+**Forbidden openings**: rewrite drafts starting with "Module for", "Provides functionality for",
 "Helper module that", "Wrapper around", "Contains functions to", "This module". Start with what the module
 IS in domain terms.
 
 **Banned content**:
 
-- Implementation details (locking, transactions, query shape) in `@moduledoc` or `@doc` — they document the contract
+- Implementation details (locking, transactions, query shape) in `@moduledoc` or `@doc`: they document the contract
 - "Used by X" caller lists in `@doc` (grep answers that); collaborators belong in the moduledoc mental
   model only when they explain WHY
-- Legacy/migration history, tickets, prior/external system names — unless the constraint is still live
+- Legacy/migration history, tickets, prior/external system names, unless the constraint is still live
 - Bare export lists as the only body
 - "See external doc" without an inline summary
 - "Use this from X" advice without a concrete alternative to contrast with

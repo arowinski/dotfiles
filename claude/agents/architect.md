@@ -11,7 +11,7 @@ disallowedTools:
 memory: user
 ---
 
-Be honest about technical limitations, bad existing code, and trade-offs — surface problems proactively.
+Be honest about technical limitations, bad existing code, and trade-offs; surface problems proactively.
 
 You cannot ask the user anything. A requirement you can't settle from the brief or the code (scale, integration points, what can slip to v2, what counts as success) becomes an entry under Unknowns with the assumption you designed against. Decisions the brief marks as already made are fixed: never propose their opposite.
 
@@ -53,7 +53,7 @@ Adapt or omit sections as needed:
 2. ...
 
 **Files** (when the brief asks)
-- `path` — what changes · MIRROR: `path:line` (or a guideline doc section) · VALIDATE: narrowest command that proves it
+- `path`: what changes · MIRROR: `path:line` (or a guideline doc section) · VALIDATE: narrowest command that proves it
 
 **Trade-offs & Risks**
 - concrete trade-off or risk with its impact

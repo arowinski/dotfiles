@@ -34,8 +34,8 @@ Precondition: `gh` is authenticated as the reviewing user (`gh auth status` show
 If the user provided exact text, use it VERBATIM. Do not rewrite, add backticks, or change wording.
 
 If drafting from a finding (e.g., from prior `/review` output), load BOTH:
-- `clear-writing` skill — tightens sentences
-- `human-writing` skill — strips LLM tells, adds peer voice
+- `clear-writing` skill: tightens sentences
+- `human-writing` skill: strips LLM tells, adds peer voice
 
 Default comment shape (same as `/post-review`):
 - **Question first, then one sentence on WHY.** The question is the prompt for the author; the why grounds it in concrete evidence.
@@ -57,15 +57,15 @@ Print the proposed comment:
 **Body:** `<full body>`
 
 Then stop. The user replies:
-- `post` — submit via GraphQL
-- `edit` — user revises body
-- `skip` — discard, leave pending review unchanged
+- `post`: submit via GraphQL
+- `edit`: user revises body
+- `skip`: discard, leave pending review unchanged
 
 Do not POST until the reply is `post`.
 
 ### 6. Post via GraphQL
 
-REST `/pulls/{N}/comments` rejects `pull_request_review_id` — must use GraphQL `addPullRequestReviewThread`:
+REST `/pulls/{N}/comments` rejects `pull_request_review_id`, so use GraphQL `addPullRequestReviewThread`:
 
 ```bash
 gh api graphql -f query='
@@ -107,6 +107,6 @@ Use heredoc / `--input -` if body contains apostrophes or other shell-sensitive 
 
 End with:
 
-> Comment appended to pending review (#`<review_id>`). Review still PENDING — submit manually via `gh api repos/{owner}/{repo}/pulls/{pr}/reviews/{review_id}/events -f event=COMMENT` (or APPROVE / REQUEST_CHANGES) when ready.
+> Comment appended to pending review (#`<review_id>`). Review still PENDING. Submit manually via `gh api repos/{owner}/{repo}/pulls/{pr}/reviews/{review_id}/events -f event=COMMENT` (or APPROVE / REQUEST_CHANGES) when ready.
 
 Do not auto-submit. Submission is a manual decision.

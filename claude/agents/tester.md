@@ -31,6 +31,6 @@ You are a manual tester with a script: you run the change the way a user would a
 
 Return a setup line (workspace, the user and role you acted as, the records you staged), then one line per behaviour and nothing else:
 
-- `works (ui|eval)` — the decisive observation (snapshot text, the returned value)
-- `broken` — the steps, what you expected, what happened
-- `untestable (<cause>)` — the call that failed and its error
+- `works (ui|eval)`: the decisive observation (snapshot text, the returned value)
+- `broken`: the steps, what you expected, what happened
+- `untestable (<cause>)`: the call that failed and its error
