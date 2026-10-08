@@ -21,21 +21,21 @@ When the PR author is the user, it's author side. Otherwise, filter to the comme
 
 `gh-comments <pr-number>` returns three sections: `==CONVERSATION==` (top-level PR thread), `==REVIEWS==` (inline review comments), `==STANDALONE==` (inline, no review). PR number defaults to the current branch's open PR.
 
-**Reviewer side MUST use `gh-comments --all <pr-number>`.** The default hides resolved threads, and an author who fixes a comment usually resolves it — so the plain call drops exactly the comments that were handled and biases the answer toward "not addressed".
+**Reviewer side MUST use `gh-comments --all <pr-number>`.** The default hides resolved threads, and an author who fixes a comment usually resolves it, so the plain call drops exactly the comments that were handled and biases the answer toward "not addressed".
 
 Then check whether HEAD is the PR's head branch (`gh pr view <pr> --json headRefName`, compare against the branch `git status` reports):
 
-- **Author side** — must match. Steps 3 and 7 read and edit files in the working tree, so off the PR branch the already-fixed and stale buckets are wrong and any fix lands on the wrong code. If it doesn't match, stop and tell the user to check the PR out.
-- **Reviewer side** — a checkout is nice, not required. Off the branch, work from `gh pr diff` and `gh pr view` and say so in the evidence column; don't read working-tree files and present them as the PR's state.
+- **Author side**: must match. Steps 3 and 7 read and edit files in the working tree, so off the PR branch the already-fixed and stale buckets are wrong and any fix lands on the wrong code. If it doesn't match, stop and tell the user to check the PR out.
+- **Reviewer side**: a checkout is nice, not required. Off the branch, work from `gh pr diff` and `gh pr view` and say so in the evidence column; don't read working-tree files and present them as the PR's state.
 
 ### 2. Triage each comment
 
 Classify into one of four buckets:
 
-- **Already-replied** — the comment author or someone else already responded in the thread
-- **Already-fixed** — the cited line changed since the comment was posted. gh-comments gives no commit SHA, only the `at=` timestamp, which is UTC: `git log --since='<at> UTC' -- <path>`, then read the file. Keep the `UTC` suffix — git reads a bare timestamp as local time and would shift the window by your offset
-- **Stale** — the cited line no longer exists in the current file
-- **Actionable** — none of the above
+- **Already-replied**: the comment author or someone else already responded in the thread
+- **Already-fixed**: the cited line changed since the comment was posted. gh-comments gives no commit SHA, only the `at=` timestamp, which is UTC: `git log --since='<at> UTC' -- <path>`, then read the file. Keep the `UTC` suffix; git reads a bare timestamp as local time and would shift the window by your offset
+- **Stale**: the cited line no longer exists in the current file
+- **Actionable**: none of the above
 
 Drop Stale. The other three go to step 3: a reply or a later change is a claim to verify, not a reason to skip.
 
@@ -43,16 +43,16 @@ Drop Stale. The other three go to step 3: a reply or a later change is a claim t
 
 For each comment the user left, decide the state from the code, not from the thread's tone:
 
-- **Addressed** — the cited code changed and the change answers the concern. Name the commit or the current line that shows it.
-- **Partly addressed** — some of the concern is handled, the rest isn't. Say which half is missing.
-- **Answered, no change** — the author replied with a reason and no code change was needed. Say whether the reason holds.
-- **Not addressed** — nothing moved and nothing was said.
+- **Addressed**: the cited code changed and the change answers the concern. Name the commit or the current line that shows it.
+- **Partly addressed**: some of the concern is handled, the rest isn't. Say which half is missing.
+- **Answered, no change**: the author replied with a reason and no code change was needed. Say whether the reason holds.
+- **Not addressed**: nothing moved and nothing was said.
 
 Verify each one against the current head (`git log --oneline <base>..<head>`, `gh pr diff`, read the file). "The author replied 'done'" is not evidence.
 
-Present as a table: `# | file:line | my comment (excerpt) | state | evidence`. The `line` gh-comments prints is the line as of the comment, not now — if the file shifted, give the current line in evidence and keep the original in the column. Then answer the approvability question directly — approve / changes still needed / blocked on a reply — in one line with the reason.
+Present as a table: `# | file:line | my comment (excerpt) | state | evidence`. The `line` gh-comments prints is the line as of the comment, not now; if the file shifted, give the current line in evidence and keep the original in the column. Then answer the approvability question directly (approve / changes still needed / blocked on a reply) in one line with the reason.
 
-Stop there. This skill never runs `gh pr review --approve`; the user does that. If they ask for reply text, draft it under the reviewer-facing-text rule in step 4.
+Stop there. The verdict is the deliverable. Submit only when the user's whole reply is the command ("approve", "approve it", "submit"): run `gh pr review <pr> --approve` with no body and no extra chat confirmation, and re-issue it unchanged if the gate hook bounces the first call. Any qualifier or opinion ("meh approve, let's trust", "looks approvable", "ok approve") makes it their verdict, and the turn ends. If they ask for reply text, draft it under the reviewer-facing-text rule in step 4.
 
 ### 3. Verify each comment
 
@@ -66,13 +66,13 @@ Done when every non-stale comment has a verdict with evidence. Already-fixed tha
 
 Per actionable comment, pick one:
 
-- **Fix** — reviewer is right; apply a code change
-- **Push back** — reviewer is wrong or missing context; needs a reply explaining. Its reasoning cites evidence: a run (eval, test, schema dump) for a runtime claim, the `path:line` read otherwise
-- **Clarify** — comment is ambiguous; needs a question back to the reviewer
+- **Fix**: reviewer is right; apply a code change
+- **Push back**: reviewer is wrong or missing context; needs a reply explaining. Its reasoning cites evidence: a run (eval, test, schema dump) for a runtime claim, the `path:line` read otherwise
+- **Clarify**: comment is ambiguous; needs a question back to the reviewer
 
 Only **Fix** produces action in this skill. Push back and Clarify are recommendations the user acts on outside it.
 
-**Reviewer-facing text** — before writing any push-back/clarify reasoning, or any reply draft the user asks for mid-flow, load `Skill(clear-writing)` + `Skill(human-writing)` first: peer voice, question-shaped, no AI tells. This skill still never *posts* — it only drafts the text for the user.
+**Reviewer-facing text**: before writing any push-back/clarify reasoning, or any reply draft the user asks for mid-flow, load `Skill(clear-writing)` + `Skill(human-writing)` first, for peer voice, question-shaped wording, no AI tells. This skill never posts replies or comments; it only drafts the text for the user. Reply text the user supplies is used verbatim. Replies live inside inline threads; a point with no thread gets its answer in chat, never as a top-level PR comment.
 
 ### 5. Present the action plan
 
@@ -87,17 +87,17 @@ Plus a one-line summary: "X actionable (Y fix, Z push back, W clarify). N verifi
 
 ### 6. User selects fixes
 
-Use `AskUserQuestion` to pick which Fix items to apply: "all", specific numbers, or "skip".
+Ask in prose which Fix items to apply: "all", specific numbers, or "skip".
 
 ### 7. Apply each fix with accept gate
 
 For each selected Fix:
 1. Show the proposed diff inline
-2. Use `AskUserQuestion` with options: Apply / Edit / Skip
+2. Ask in prose: apply, edit, or skip
 3. Apply only on "Apply". On "Edit", take the user's revision and re-show the diff. On "Skip", move on.
 
-An explicit imperative in the reply ("go", "go on", "apply", "do it") is the Apply selection for that one
-change — don't re-ask it. The next change gets its own gate; one "go" never covers the rest.
+An explicit imperative or assent in the reply ("go", "go on", "ok", "apply", "do it") is the Apply selection for that one
+change; don't re-ask it. The next change gets its own gate; one "go" never covers the rest.
 
 Never apply silently. Never batch without per-change confirmation.
 
