@@ -10,7 +10,9 @@ comments no run raised.
 
 A row is tab-separated: number (- for a dropped finding), section, angle,
 path[:line], verdict, claim. Sections are the report's: blocker major nit
-polish info weak, and unlikely failed for the dropped ones.
+polish info weak, and unlikely failed for the dropped ones. Verdicts are
+confirmed refuted static desk, or "untestable (<cause>)"; a correctness,
+security, efficiency, or acceptance finding is refused as static or desk.
 
 Run inside Claude Code, add also records what each review agent the run
 spawned ran at (effort, model, turns, minutes, input tokens), read from the
@@ -33,6 +35,8 @@ PROJECTS = Path.home() / ".claude" / "projects"
 SECTIONS = ("blocker", "major", "nit", "polish", "info", "weak", "unlikely", "failed")
 DROPPED = ("unlikely", "failed")
 VERDICTS = ("confirmed", "refuted", "untestable", "static", "desk")
+# Angles whose findings need a run at every severity (claude/agents/verifier.md)
+MUST_RUN = {"correctness", "security", "efficiency", "acceptance"}
 REVIEW_AGENTS = ("review-specialist", "simplifier", "verifier", "tester")
 # A gap this long between an agent's messages is waiting (the verifier idles until
 # its mutation pass, an agent resumed later), not work, and stays out of its minutes.
@@ -63,12 +67,19 @@ def parse_row(lineno, raw):
     n, section, angle, loc, verdict, claim = fields
     if section not in SECTIONS:
         sys.exit(f"row {lineno}: section {section!r} not one of {' '.join(SECTIONS)}")
-    if verdict not in VERDICTS:
-        sys.exit(f"row {lineno}: verdict {verdict!r} not one of {' '.join(VERDICTS)}")
+    untestable = re.fullmatch(r"untestable \((.+)\)", verdict)
+    cause = untestable.group(1) if untestable else None
+    if untestable:
+        verdict = "untestable"
+    elif verdict not in VERDICTS or verdict == "untestable":
+        sys.exit(f"row {lineno}: verdict {verdict!r} not one of confirmed refuted static desk 'untestable (<cause>)'")
+    if verdict in ("static", "desk") and MUST_RUN.intersection(re.split(r"[+,]", angle)):
+        sys.exit(f"row {lineno}: a {angle} finding needs a run, not {verdict}: send it to the verifier's"
+                 " second pass, or record 'untestable (<cause>)' with what blocked the run")
     if section in DROPPED and n != "-" or section not in DROPPED and not n.isdigit():
         sys.exit(f"row {lineno}: a {section} finding takes {'-' if section in DROPPED else 'its report number'}, got {n!r}")
     m = re.fullmatch(r"(.+?)(?::(\d+)(?:-\d+)?)?", loc)
-    return {
+    row = {
         "n": None if n == "-" else int(n),
         "section": section,
         "angle": angle,
@@ -77,6 +88,9 @@ def parse_row(lineno, raw):
         "verdict": verdict,
         "claim": claim,
     }
+    if cause:
+        row["cause"] = cause
+    return row
 
 
 def append(entry):
