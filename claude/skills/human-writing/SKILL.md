@@ -20,6 +20,8 @@ Reject and rewrite if the draft contains:
 - "Let me know if you have questions"
 - Sophisticated vocabulary when plain works: utilize → use, implement → build/add/fix, demonstrate → show, facilitate → help, ascertain → check, subsequent → next, prior to → before, commence → start, terminate → stop, instantiate → create, invoke → call, execute → run, perform → do. Fancy words read machine-generated; plain words read peer.
 - Corporate deflection — "the team", "stakeholders", or other abstractions standing in for the person who made the call. Write as the dev: "we" or a subjectless imperative ("Revisit when Rails retires the feature"). "The team will revisit..." reads like a press release.
+- A colon joining two clauses ("Yes: the client refreshes it"). Write two sentences, or join with `so` / `but`.
+- `'s` standing for "has" ("the only place that's always had it" reads as "is"). Spell out `has`; `'s` for "is" stays.
 
 ## Permitted human voice
 
@@ -58,11 +60,12 @@ Reject and rewrite if the draft contains:
 
 ## How to apply
 
-1. Draft the text
-2. Scan for forbidden LLM tells — replace each
-3. Check for missed contractions; replace `do not` → `don't`, etc.
-4. Look for soft openers; cut them if the sentence stands without
-5. Read aloud (mentally) — if it sounds like a tech-blog template, rewrite
+1. Replying to someone? Restate their literal question in one line, for yourself. The draft's first sentence answers that question, not a neighbouring one.
+2. Draft the text
+3. Scan for forbidden LLM tells — replace each
+4. Check for missed contractions; replace `do not` → `don't`, etc.
+5. Look for soft openers; cut them if the sentence stands without
+6. Read aloud (mentally) — if it sounds like a tech-blog template, rewrite
 
 ## Layered with clear-writing
 
