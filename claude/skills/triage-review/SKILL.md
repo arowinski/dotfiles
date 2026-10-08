@@ -102,6 +102,8 @@ Never apply silently. Never batch without per-change confirmation.
 
 ### 8. Re-review
 
+A next step the user already named ("when done amend, rebase") replaces this step and step 9: go straight to it once the fixes are applied.
+
 After all approved fixes are applied, run the `review-specialist` agent on the uncommitted diff. Its prompt carries the repo path, the comments the fixes answer (author, `path:line`, text, and the fix you applied for each), and this angle:
 
 "Re-review of fixes made in response to PR review comments. For each comment, does the diff address the concern it raises; one that is only partly addressed or answered by a different change is a finding. Then, only in lines the diff changes, any new defect the fixes introduced. Non-scope: code the diff leaves untouched, and comments marked push back or clarify."
