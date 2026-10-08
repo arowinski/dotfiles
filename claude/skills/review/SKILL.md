@@ -78,6 +78,7 @@ Read every report file. Merge findings that share file, line, and claim into one
 1. The review tree is the session's tree: `git rev-parse --show-toplevel` from the session cwd equals the review tree path. A sibling worktree fails this.
 2. Elixir in the diff → Tidewave is loaded (`ToolSearch "select:mcp__tidewave__project_eval"` returns it) and live (`project_eval` of `System.version()` answers).
 3. Rails in the diff → `bundle exec rspec --version` answers from the review tree.
+4. Elixir or Rails in the diff → the test database is current: one test file covering a changed module (`mix test <path>`, `bundle exec rspec <path>`) runs to its assertions instead of failing on a pending migration or a missing table. If it fails that way, prepare the test database the way the project does (its justfile recipe first, else `MIX_ENV=test mix ecto.migrate` or `bin/rails db:test:prepare`) and rerun the check. The verifier may not migrate, so a stale test database left here turns every runtime experiment into `untestable`.
 
 Check 2 fails with Tidewave loaded but silent, and `ws status` shows the workspace stopped → start it yourself: `ws run` with `run_in_background: true`, then re-run check 2 until `project_eval` answers. A running workspace whose app will not answer or compile (a reloader that demands a server restart after a config change) → restart only the app process, never the whole workspace, because `ws restart` on a live workspace can corrupt its postgres; say so in one line and carry on.
 
