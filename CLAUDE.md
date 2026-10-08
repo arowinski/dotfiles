@@ -15,8 +15,11 @@ No tests or linters in this repo — skip pre-commit checks.
 
 Bash calls resolve in this order (sessions run in auto mode):
 1. `dippy/config` via `bin/dippy-auto` (PreToolUse hook). In auto mode only explicit rules reach Claude Code: every `deny`, and every `ask` whose message starts `Confirm:`. dippy's `allow` and its built-in handlers' asks apply only outside auto mode.
-2. `claude/settings.json` `permissions.allow` — approves without the classifier.
-3. Anything else goes to the auto-mode classifier.
+2. `~/.claude/hooks/rtk-rewrite.sh` (PreToolUse hook, installed by rtk, not in this repo) returns `allow` for every command it rewrites unless a settings.json deny/ask rule matches it.
+3. `claude/settings.json` `permissions.allow` — approves without the classifier.
+4. Anything else goes to the auto-mode classifier.
+
+Hook decisions rank deny > ask > allow, so only a dippy `Confirm:` ask or `deny` stops a command; dropping its `permissions.allow` prefix does not, because rtk still allows it.
 
 - Hard gate (push, merge, posting, prod access): `ask <pattern> "Confirm: <why>"` in `dippy/config`.
 - Convention to enforce: `deny <pattern> "<what to use instead>"` in `dippy/config`.
