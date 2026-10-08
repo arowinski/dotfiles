@@ -156,6 +156,7 @@ deny perl -0pi* * "In-place perl edit — use the Edit tool (per-file Edits for 
 allow claude-retro
 allow claude-review-ledger
 allow claude-panes
+allow tmux-ws-running
 allow gh-comments
 allow gh pr view
 allow gh pr checks

@@ -81,6 +81,7 @@
       "Bash(claude-retro:*)",
       "Bash(claude-review-ledger:*)",
       "Bash(claude-panes:*)",
+      "Bash(tmux-ws-running:*)",
       "Bash(ws:*)",
       "Bash(ensure-docker:*)",
       "Bash(ws-popup:*)",

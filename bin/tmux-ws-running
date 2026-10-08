@@ -1,0 +1,10 @@
+#!/bin/bash
+#
+# Store workspaces by state in the global @ws_running / @ws_stopped options
+# (" ant bee "), which the window tabs in tmux.conf match their names against.
+# Renders nothing — tmux.conf calls it from status-right purely for the
+# periodic tick.
+
+list=$(ws ls 2>/dev/null)
+names() { awk -v s="$1" '$4 == s { printf "%s ", $1 }' <<<"$list"; }
+tmux set -g @ws_running " $(names running)" \; set -g @ws_stopped " $(names stopped)"
