@@ -180,7 +180,8 @@
       "Bash(security find-internet-password *)",
       "Bash(security dump-keychain *)",
       "Bash(ssh-add -l)",
-      "Bash(ssh-add -L)"
+      "Bash(ssh-add -L)",
+      "mcp__atlassian__*Confluence*"
     ],
     "ask": [],
     "defaultMode": "auto"
