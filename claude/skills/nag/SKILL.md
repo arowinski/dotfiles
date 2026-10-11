@@ -25,7 +25,7 @@ Ask only where the answer changes what gets built: a different module, schema, i
 
 ## Facts are yours, decisions are theirs
 
-Never ask for a fact you can look up: read the code, grep, check git. Spawn an Explore agent only when the lookup is a real exploration (many files, unknown location), and keep asking the rest of the frontier while it runs; only the questions downstream of it wait. Every decision goes to the user, and you wait.
+Never ask for a fact you can look up: read the code, grep, check git. Spawn an Explore agent with `model: "haiku"` only when the lookup is a real exploration (many files, unknown location), and keep asking the rest of the frontier while it runs; only the questions downstream of it wait. Every decision goes to the user, and you wait.
 
 ## Round format
 
