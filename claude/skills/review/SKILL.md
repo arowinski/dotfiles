@@ -32,7 +32,7 @@ Write the diff once to `<scratchpad>/review-diff.patch`; every agent reads that 
 - **Size**: added + removed lines in the patch. Under 50 is a *small* diff.
 - **Languages**: extensions of changed files. `.ex`/`.exs` present enables the docs angle.
 - **Plan file**: `<git-common-dir>/claude/plans/<branch>.md` if present.
-- **Ticket**: from the plan file, the PR title or body (`ENG-\d+` or the project's key), or the branch name (`eng-555`). If found, fetch title, description, acceptance criteria, and comments via Atlassian MCP. A ticket enables the acceptance angle.
+- **Ticket**: from the plan file, the PR title or body (`ENG-\d+` or the project's key), or the branch name (`eng-555`). If found, fetch title, description, acceptance criteria, and comments via Atlassian MCP and write them verbatim to `<scratchpad>/review-ticket.md`: agents read that file, since review-specialist and simplifier have no Atlassian tool. A ticket enables the acceptance angle.
 - **PR thread**: when the scope is a PR, `gh-comments --all <pr>` (resolved threads included). Step 6 uses it.
 - **Doc inventory**, deterministic:
 
@@ -44,7 +44,7 @@ Write the diff once to `<scratchpad>/review-diff.patch`; every agent reads that 
           -o -path '*docs/guidelines/*.md' -o -path '*docs/how-to/*.md' \) -print
   ```
 
-  `wc -w` the list. Identical counts beside each other (`AGENTS.md` next to `CLAUDE.md`) are one file under two names: keep one. Always include `~/.claude/CLAUDE.md`, repo-root `CLAUDE.md`, repo-root `README.md`, and each `~/.claude/rules/*.md` whose `paths:` glob matches a changed file. If the corpus cannot sit beside the diff in one agent, say so in the report rather than letting an agent sample silently.
+  `wc -w` the list. Identical counts beside each other (`AGENTS.md` next to `CLAUDE.md`) are one file under two names: keep one. Always include `~/.claude/CLAUDE.md`, repo-root `CLAUDE.md`, every `CLAUDE.md` in a directory between the repo root and `~`, repo-root `README.md`, each `~/.claude/rules/*.md` without `paths:`, and each one whose `paths:` glob matches a changed file. If the corpus cannot sit beside the diff in one agent, say so in the report rather than letting an agent sample silently.
 
 ## 3. Fan-out
 
@@ -64,7 +64,7 @@ Launch every firing angle in a single message via the Agent tool with `run_in_ba
 | altitude | always | simplifier, opus |
 | docs | `.ex`/`.exs` in diff | doc-writer fork via `/doc branch` |
 
-**Every prompt carries**: the review tree's path as the repo to run in, the patch path, its report path `<scratchpad>/review-<angle>.md`, the size and language facts, the plan and ticket summaries, the angle's name, and "Answer independently. Do not coordinate." A review-specialist prompt also gets the angle's paragraph from the Angles section at the end of this file as its whole scope and "Scope strictly to lines the diff adds or changes"; a simplifier's angles and scope are its own. Conformance and discovery also get the doc list. The finding format, severity scale, read-only rule, and report return are each agent's own; do not restate them.
+**Every prompt carries**: the review tree's path as the repo to run in, the patch path, its report path `<scratchpad>/review-<angle>.md`, the size and language facts, the plan summary, the ticket file path, the angle's name, and "Answer independently. Do not coordinate." No prompt carries a list of settled or do-not-flag items: a finding a user decision already settles is dropped in step 6, where it is counted. A review-specialist prompt also gets the angle's paragraph from the Angles section at the end of this file as its whole scope and "Scope strictly to lines the diff adds or changes"; a simplifier's angles and scope are its own. Conformance and discovery also get the doc list. The finding format, severity scale, read-only rule, and report return are each agent's own; do not restate them.
 
 **Every prompt returns the same way**: the agent writes its full report to its report path with a Bash redirect (the scratchpad sits under `/private/tmp`, which the hook allows) and returns a short receipt ending in the path: a review-specialist sends the Coverage line (conformance and discovery only) and finding counts by severity, a simplifier its finding count. A background agent's inline result is cut at about 5K characters, so the file is the report and the return is the receipt.
 
@@ -89,7 +89,7 @@ Any check still failing → ask in prose, one question: which is missing, and th
 
 Dispatch exactly one `verifier` agent with the review tree path and every deduped finding (angle, `path:line`, claim, reasoning), whatever angle raised it. Its experiments, the `static` label, and the rules for probes and state are its own; do not restate them, and do not split the findings across several verifiers. An experiment the orchestrator runs inline counts as none. The step 7 Coverage line carries the verifier's tally.
 
-**Exercise the diff.** In the same message as the verifier, dispatch the `tester` agent with the review tree path, the patch path, the PR number, the ticket key, and the plan path when step 2 found them. It builds its own behaviour list from those, runs each line in the live app (UI through the Tidewave browser, backend through `project_eval`), and returns one line per behaviour: `works (ui|eval)`, `broken`, or `untestable (<cause>)`. Every `broken` line becomes a finding, severity by its harm, angle `exercise`, verdict `confirmed`, and goes through step 6 like any other.
+**Exercise the diff.** In the same message as the verifier, dispatch the `tester` agent with the review tree path, the patch path, the PR number, the ticket file path, and the plan path when step 2 found them. It builds its own behaviour list from those, runs each line in the live app (UI through the Tidewave browser, backend through `project_eval`), and returns one line per behaviour: `works (ui|eval)`, `broken`, or `untestable (<cause>)`. Every `broken` line becomes a finding, severity by its harm, angle `exercise`, verdict `confirmed`, and goes through step 6 like any other.
 
 **Second pass.** Once the verifier and the tester have both returned, a finding the tester saw happen in the app is `confirmed`, citing the tester's line. Then send the same verifier a mutation pass via SendMessage: every finding it left `static` or `untestable`, unfiltered. The verifier, not you, decides which an eval or an edit-and-run settles. In the same message, send the tester every such finding whose claim shows in the app (a page, a count, a refresh). Their new verdicts replace the old ones, and the step 7 Coverage line counts them.
 
@@ -102,7 +102,7 @@ Orchestrator, no extra agents. For each finding, four checks:
 - **Fix coherence**: the fix addresses the claim.
 - **Reach and cost**: a caller in this repo produces the triggering input (name the caller check that shows it), and the fix costs less than the harm.
 
-Everything the branch changes is in scope; "pre-existing" applies only to lines outside the diff. A 500 instead of a 4xx on malformed input to an authenticated internal route, a sub-second race, and a guard for an unreachable state fail reach; data-integrity and injection findings keep it. A finding the PR thread already explains or marks WIP is Unlikely, citing the thread; one an open thread raises cites that thread in its Evidence.
+Everything the branch changes is in scope; "pre-existing" applies only to lines outside the diff. A 500 instead of a 4xx on malformed input to an authenticated internal route, a sub-second race, and a guard for an unreachable state fail reach; data-integrity and injection findings keep it. A finding the PR thread already explains or marks WIP is Unlikely, citing the thread; so is one re-raising a decision the user already made (in memory, the plan, or this session), citing where it was made; one an open thread raises cites that thread in its Evidence.
 
 A convention finding cites the pattern in 3–5 sibling files. Where the tree and a guideline's example disagree, the tree wins; a guideline rule the tree already follows is enforced as written.
 
@@ -115,7 +115,7 @@ Bucket:
 | Strong | all four pass | present, numbered |
 | Polish | passes all but the harm is small and the fix is a few lines that leave the code plainly better | present, numbered, own section |
 | Weak | mechanical passes, reasoning has a gap | present with the gap named |
-| Unlikely | reach fails: no caller reaches the input, the fix costs more than the harm, or the PR thread already settles it | drop; one line each in a count so the user can disagree |
+| Unlikely | reach fails: no caller reaches the input, the fix costs more than the harm, or the PR thread or a user decision already settles it | drop; one line each in a count so the user can disagree |
 | Failed | mechanical fails, or the verifier refuted it | drop, count silently |
 
 The verifier's verdict settles the reasoning check: `refuted` is Failed; `confirmed` passes it, and the finding is Strong or Polish by size unless reach fails. A probe can build an input no caller produces, so a finding can be confirmed and Unlikely at once. Pragmatism cuts both ways: a small real improvement is worth listing, a hypothetical that needs an input nothing produces is not, however elegant the argument.
