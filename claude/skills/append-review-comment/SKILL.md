@@ -13,10 +13,10 @@ allowed-tools: Bash(gh api:*), Bash(gh pr view:*), Bash(gh auth status:*), Bash(
 
 ### 1. Resolve PR
 
-If $ARGUMENTS contains a PR number or URL, use it. Otherwise:
+Pass a PR number or URL from $ARGUMENTS; with none, `gh` uses the current branch's PR.
 
-1. `gh pr view --json number,url,baseRepository -q '"\(.baseRepository.owner.login) \(.baseRepository.name) \(.number)"'`
-2. Capture `{owner}`, `{repo}`, PR number from `baseRepository` (not `headRepository`, which is the fork for cross-fork PRs).
+1. `gh pr view <pr-or-empty> --json number,url -q '"\(.url | split("/") | .[3]) \(.url | split("/") | .[4]) \(.number)"'`
+2. Capture `{owner}`, `{repo}`, PR number. The PR URL always names the base repo, which the review API needs; `headRepository` is the fork on a cross-fork PR, and `--json` has no `baseRepository` field.
 
 ### 2. Find or create the pending review
 
