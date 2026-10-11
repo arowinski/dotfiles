@@ -90,6 +90,7 @@
       "Bash(sandbox:*)",
       "Bash(claude-retro:*)",
       "Bash(claude-review-ledger:*)",
+      "Bash(claude-usage:*)",
       "Bash(claude-panes:*)",
       "Bash(tmux-ws-running:*)",
       "Bash(ws:*)",

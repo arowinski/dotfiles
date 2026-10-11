@@ -24,6 +24,13 @@ Don't report stats. Find the 2-3 most notable sessions and explain what happened
 
 **Agent effort** — in the 7-day loop, run `claude-review-ledger stats --by-effort --since <30 days ago>`. Compare one agent's levels once each has 10+ runs: a level that costs more turns or minutes per agent without more `found`, `applied`, or `tested` is the finding, and the fix is the `effort:` line in `claude/agents/<agent>.md`. Under 10 runs for a level, say so in one line and move on.
 
+**Token use**: in the 7-day loop, run `claude-usage` (this week against the week before). Totals follow workload, so judge by the per-call and share figures. Each figure tracks one lever:
+- `interactive.share_input_over_200k`, `avg_context_k`, `session_peak_k`: how far sessions run before a handover (the footer gauge turns yellow at 30%, red at 60%, toasts at 70%)
+- `interactive.rebuilds_after_gap`: long sessions resumed after the 1h prompt cache expired, each one rewriting the whole context
+- `interactive.first_call_k_p50`, `subagents.first_call_k`: fixed overhead per session and per agent type (CLAUDE.md, skill and agent listings, `omitClaudeMd`, agent `tools:` lists)
+
+Done when every fix the retro log marks applied inside either week, retro entries and entries logged outside a retro alike, is named with its figure's two values and a verdict: moved the right way, flat, or worse. Flat or worse is the finding.
+
 **Queries** — `query_samples` are "why did you X" prompts. Design questions as often as overreach, so read each one and classify it by hand; never report `query_signals` as a count.
 
 **Churning** — flag sessions where `model_calls_per_prompt` is notably higher than others. Cross-reference with the prompt text and commit count to judge whether the high ratio was justified (complex task) or wasteful (simple task, Claude spinning). Compare the session's `intent` (first prompt) against what was actually committed.
@@ -76,7 +83,7 @@ After presenting, append a summary to `~/.claude/retro-log.md`:
 - [finding 1]
 - [finding 2]
 - Fixes proposed: [list]
-- Fixes applied: [list, if any were applied this session]
+- Fixes applied: [each fix → the figure that judges it, and its baseline]
 - Dropped: [proposals retired at their third flag, one reason each]
 ```
 

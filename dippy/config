@@ -155,6 +155,7 @@ deny perl -pi* * "In-place perl edit — use the Edit tool (per-file Edits for b
 deny perl -0pi* * "In-place perl edit — use the Edit tool (per-file Edits for bulk)"
 allow claude-retro
 allow claude-review-ledger
+allow claude-usage
 allow claude-panes
 allow tmux-ws-running
 allow gh-comments

@@ -1,0 +1,194 @@
+#!/usr/bin/env python3
+"""Token use of Claude Code sessions: the last N days against the N days before.
+
+  claude-usage [--days N]
+
+Reads the transcripts under ~/.claude/projects and prints JSON, one block per
+window. Interactive sessions are the `cli` entrypoint, headless ones every
+other entrypoint (`claude -p`, the Agent SDK), subagents the transcripts under
+<session>/subagents/. Context is what one model call sent: uncached, cache
+written and cache read input together. Counts are tokens, not dollars: prices
+change per model, the ratios here don't.
+"""
+
+import argparse
+import json
+import statistics
+from collections import defaultdict
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+
+PROJECTS = Path.home() / ".claude" / "projects"
+LONG_CONTEXT = 200_000  # long-session threshold for share_input_over_200k
+CACHE_TTL = timedelta(hours=1)  # Claude Code writes the prompt cache with the 1h TTL
+
+
+def parse_ts(s):
+    return datetime.fromisoformat(s.replace("Z", "+00:00"))
+
+
+def context(u):
+    return (u.get("input_tokens") or 0) + (u.get("cache_creation_input_tokens") or 0) + (
+        u.get("cache_read_input_tokens") or 0
+    )
+
+
+def read_transcript(path):
+    """The entrypoint, the model calls oldest first as (time, usage), one per
+    message id, and the times of handover runs and compactions."""
+    entry, calls, handovers, compactions = None, [], [], []
+    seen = set()
+    with open(path, "rb") as f:
+        for line in f:
+            if entry is None and b'"entrypoint":"' in line:
+                entry = line.split(b'"entrypoint":"', 1)[1].split(b'"', 1)[0].decode()
+            is_compaction = b'"compact_boundary"' in line
+            is_handover = b"command-name>/handover<" in line or b'"skill":"handover"' in line
+            if b'"usage"' not in line and not is_compaction and not is_handover:
+                continue
+            try:
+                e = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if not e.get("timestamp"):
+                continue
+            ts = parse_ts(e["timestamp"])
+            if is_compaction:
+                compactions.append(ts)
+            if is_handover:
+                handovers.append(ts)
+            msg = e.get("message") or {}
+            if e.get("type") == "assistant" and msg.get("usage") and msg.get("model") != "<synthetic>":
+                if msg.get("id") not in seen:
+                    seen.add(msg.get("id"))
+                    calls.append((ts, msg["usage"]))
+    return entry, calls, handovers, compactions
+
+
+def agent_type(path):
+    try:
+        meta = json.loads(path.with_suffix(".meta.json").read_text())
+    except (OSError, json.JSONDecodeError):
+        return "?"
+    return meta.get("customAgentType") or meta.get("agentType") or "?"
+
+
+def new_window():
+    return {
+        "interactive": defaultdict(float, peaks=[], firsts=[]),
+        "headless": defaultdict(float),
+        "subagents": defaultdict(float, firsts=defaultdict(list)),
+    }
+
+
+def add_calls(w, calls, in_window):
+    for i, (ts, u) in enumerate(calls):
+        if not in_window(ts):
+            continue
+        c = context(u)
+        w["calls"] += 1
+        w["input"] += c
+        w["cache_write"] += u.get("cache_creation_input_tokens") or 0
+        w["output"] += u.get("output_tokens") or 0
+        if c > LONG_CONTEXT:
+            w["input_over_long"] += c
+        if i > 0:
+            prev_ts, prev_u = calls[i - 1]
+            prev = context(prev_u)
+            is_rebuild = prev > 20_000 and (u.get("cache_read_input_tokens") or 0) < prev / 2
+            if is_rebuild and ts - prev_ts > CACHE_TTL:
+                w["rebuilds_after_gap"] += 1
+                w["rebuild_write"] += u.get("cache_creation_input_tokens") or 0
+
+
+def pct(xs, q):
+    xs = sorted(xs)
+    return xs[min(len(xs) - 1, int(q * len(xs)))] if xs else None
+
+
+def mtok(n):
+    return round(n / 1e6, 1)
+
+
+def ktok(n):
+    return None if n is None else round(n / 1e3)
+
+
+def summary(w):
+    i, h, s = w["interactive"], w["headless"], w["subagents"]
+    return {
+        "interactive": {
+            "sessions": len(i["peaks"]),
+            "calls": int(i["calls"]),
+            "input_mtok": mtok(i["input"]),
+            "cache_write_mtok": mtok(i["cache_write"]),
+            "output_mtok": mtok(i["output"]),
+            "avg_context_k": ktok(i["input"] / i["calls"]) if i["calls"] else None,
+            "share_input_over_200k": round(i["input_over_long"] / i["input"], 2) if i["input"] else None,
+            "session_peak_k": {"p50": ktok(pct(i["peaks"], 0.5)), "p90": ktok(pct(i["peaks"], 0.9))},
+            "first_call_k_p50": ktok(pct(i["firsts"], 0.5)),
+            "rebuilds_after_gap": {"count": int(i["rebuilds_after_gap"]), "write_mtok": mtok(i["rebuild_write"])},
+            "handover_runs": int(i["handovers"]),
+            "compactions": int(i["compactions"]),
+        },
+        "subagents": {
+            "runs": sum(len(v) for v in s["firsts"].values()),
+            "input_mtok": mtok(s["input"]),
+            "cache_write_mtok": mtok(s["cache_write"]),
+            "first_call_k": {
+                t: {"runs": len(v), "avg": ktok(statistics.mean(v))}
+                for t, v in sorted(s["firsts"].items(), key=lambda kv: -len(kv[1]))
+                if len(v) >= 3
+            },
+        },
+        "headless": {"calls": int(h["calls"]), "input_mtok": mtok(h["input"])},
+    }
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--days", type=int, default=7, help="window length (default 7)")
+    days = timedelta(days=parser.parse_args().days)
+
+    now = datetime.now(timezone.utc)
+    bounds = {"current": (now - days, now), "previous": (now - 2 * days, now - days)}
+    windows = {name: new_window() for name in bounds}
+    oldest = (now - 2 * days).timestamp()
+
+    for path in PROJECTS.glob("**/*.jsonl"):
+        if path.stat().st_mtime < oldest:
+            continue
+        entry, calls, handovers, compactions = read_transcript(path)
+        if not calls:
+            continue
+        is_sub = path.parent.name == "subagents"
+        kind = "subagents" if is_sub else "interactive" if entry == "cli" else "headless"
+        for name, (since, until) in bounds.items():
+
+            def in_window(ts, since=since, until=until):
+                return since <= ts < until
+
+            w = windows[name][kind]
+            add_calls(w, calls, in_window)
+            first_ts, first_u = calls[0]
+            if is_sub:
+                if in_window(first_ts):
+                    w["firsts"][agent_type(path)].append(context(first_u))
+            elif kind == "interactive":
+                in_calls = [context(u) for ts, u in calls if in_window(ts)]
+                if in_calls:
+                    w["peaks"].append(max(in_calls))
+                if in_window(first_ts):
+                    w["firsts"].append(context(first_u))
+                w["handovers"] += sum(1 for ts in handovers if in_window(ts))
+                w["compactions"] += sum(1 for ts in compactions if in_window(ts))
+
+    print(json.dumps(
+        {name: {"since": since.date().isoformat(), "until": until.date().isoformat(), **summary(windows[name])}
+         for name, (since, until) in bounds.items()},
+        indent=2,
+    ))
+
+
+if __name__ == "__main__":
+    main()
