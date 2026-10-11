@@ -1,4 +1,6 @@
 karabiner/automatic_backups
-.claude/
+.claude/*
+!.claude/settings.json
+!.claude/rules/
 zsh/cache/
 claude/skills/synced/

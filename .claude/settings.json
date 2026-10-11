@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(~/.claude/**)",
+      "WebFetch(domain:elixirstatus.com)",
+      "WebFetch(domain:hn.algolia.com)",
+      "WebFetch(domain:lobste.rs)",
+      "WebFetch(domain:news.ycombinator.com)"
+    ]
+  },
+  "skillOverrides": {
+    "optimize-skill": "on",
+    "claude-api": "on",
+    "plugin-authoring": "on",
+    "news": "user-invocable-only",
+    "retro": "user-invocable-only",
+    "review": "user-invocable-only",
+    "triage-review": "user-invocable-only",
+    "post-review": "user-invocable-only",
+    "append-review-comment": "user-invocable-only",
+    "pr": "user-invocable-only",
+    "jira": "user-invocable-only",
+    "resolving-merge-conflicts": "user-invocable-only",
+    "doc": "user-invocable-only"
+  },
+  "deniedMcpServers": [
+    { "serverName": "atlassian" },
+    { "serverName": "sentry" },
+    { "serverName": "grafana" }
+  ]
+}
