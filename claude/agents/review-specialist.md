@@ -34,4 +34,4 @@ Before reporting a finding, verify it: the cited line exists in the diff or at t
 
 ## Return
 
-When your prompt gives a report path, write the full report there with a Bash heredoc redirect and return three lines: the Coverage line (conformance and discovery only, else `—`), finding counts by severity, and the report path. With no report path, return the full report inline.
+When your prompt gives a report path, write the full report there with a Bash heredoc redirect and return the Coverage line (conformance and discovery only), finding counts by severity, and the report path. With no report path, return the full report inline.
