@@ -306,8 +306,16 @@ def third_party_comments(repo, pr, me):
     return [c for c in comments if c["user"] not in (author, me)]
 
 
+def same_file(a, b):
+    """One path ends with the other at a / boundary: a finding stored absolute, or
+    relative to a package (app/... for packages/app/...), still matches the
+    repo-relative path GitHub gives a comment."""
+    short, long = sorted((a, b), key=len)
+    return long == short or long.endswith("/" + short)
+
+
 def near(finding, comment):
-    if finding["path"] != comment["path"]:
+    if not same_file(finding["path"], comment["path"]):
         return False
     return finding["line"] is None or comment["line"] is None or abs(finding["line"] - comment["line"]) <= NEAR
 
