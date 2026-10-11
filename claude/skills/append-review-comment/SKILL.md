@@ -37,10 +37,19 @@ If drafting from a finding (e.g., from prior `/review` output), load BOTH:
 - `clear-writing` skill: tightens sentences
 - `human-writing` skill: strips LLM tells, adds peer voice
 
-Default comment shape (same as `/post-review`):
-- **Question first, then one sentence on WHY.** The question is the prompt for the author; the why grounds it in concrete evidence.
-- Stop at the why. Do NOT propose solutions, list alternatives, paste analysis paragraphs, run tests inside the comment, or recommend specific code. The reviewer asks; the author decides.
-- Pure-question comments (no why) are OK only when the question is unambiguous from the cited code.
+Comment shape, kept in sync with `/post-review`'s "Each comment must":
+
+- Default shape: question first, then a sentence on WHY you're asking. The question is the prompt for the author; the why grounds it in concrete evidence so they can engage with the actual concern. Examples:
+  - "Should this also handle nil? `customer.plan` is nullable per schema L12, so `.price` would crash."
+  - "Could this return `{:error, reason}` instead of `nil`? Caller at `lib/api.ex:88` matches `{:error, _}` and would miss the failure."
+  - Pure-question comments (no why) are OK only when the question itself is unambiguous from the cited code.
+- The question carries the point itself; a real finding opens with the concrete question, never "intentional?" or "is this deliberate?".
+- **Stop at the why.** Do NOT propose solutions, list alternatives, run tests inside the comment, paste analysis paragraphs, or recommend specific code. The reviewer asks; the author decides.
+- Acknowledge uncertainty when relevant: "Possibly a misread, but..."
+- Reference concrete code with backticks; line numbers only when not obvious from inline placement
+- Keep to 1–3 sentences unless the rationale genuinely needs more
+
+Avoid imperatives ("you should", "this must"), praise filler ("nice, but..."), and preambles before the question.
 
 ### 4. Determine target line(s)
 
