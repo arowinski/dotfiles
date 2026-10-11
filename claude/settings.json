@@ -15,6 +15,7 @@
       "Read(~/gat/*)",
       "Grep(~/gat/*)",
       "Edit(~/.claude/retro-log.md)",
+      "Edit(~/.claude/retro-pending.md)",
       "Edit(~/.claude/news-history.md)",
       "Read(~/.claude/news-history.md)",
       "WebSearch",

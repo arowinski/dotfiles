@@ -50,6 +50,7 @@ allow-redirect /private/tmp/**
 allow-redirect /dev/null
 allow-redirect ~/.claude/jobs/**
 allow-redirect ~/.claude/retro-log.md
+allow-redirect ~/.claude/retro-pending.md
 # Shell keywords inside loops; dippy tokenizes them as commands
 allow break
 allow continue

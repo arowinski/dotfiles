@@ -4,7 +4,7 @@ Dotbot links `~/.claude/*`, `~/.bin`, `~/.dippy/config` and the rest into this r
 
 Tests live only in `claude/mods/*/hooks/*.test.ts`; nothing else here has tests or linters.
 
-Log each change meant to improve Claude's behaviour or token use in `~/.claude/retro-log.md` the day it lands, under `## YYYY-MM-DD (outside a retro)`, in `claude/commands/retro.md`'s `Fixes applied` format, so the next `/retro` can judge it.
+Log each change meant to improve Claude's behaviour or token use in `~/.claude/retro-pending.md` the day it lands, as a pending line in `claude/commands/retro.md`'s Log format, so the next `/retro` can judge it.
 
 New script in `bin/`: a `permissions.allow` entry in `claude/settings.json` to skip the classifier, plus an `allow` in `dippy/config` for Manual mode.
 

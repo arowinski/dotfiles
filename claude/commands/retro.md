@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 Run a daily retrospective on Claude Code usage.
 
-1. Read the retro log at `~/.claude/retro-log.md` (if it exists) — check last 3-5 entries for recurring issues and unresolved fixes
+1. Read `~/.claude/retro-log.md` (a summary of older retros, then the last 5 in full) for recurring issues and retired proposals, and `~/.claude/retro-pending.md` for applied fixes awaiting a verdict
 2. Run `claude-retro $ARGUMENTS` (defaults to today)
 3. Analyze the JSON output. If the day was clean, say so and stop.
 
@@ -29,7 +29,7 @@ Don't report stats. Find the 2-3 most notable sessions and explain what happened
 - `interactive.rebuilds_after_gap`: long sessions resumed after the 1h prompt cache expired, each one rewriting the whole context
 - `interactive.first_call_k_p50`, `subagents.first_call_k`: fixed overhead per session and per agent type (CLAUDE.md, skill and agent listings, `omitClaudeMd`, agent `tools:` lists)
 
-Done when every fix the retro log marks applied inside either week, retro entries and entries logged outside a retro alike, is named with its figure's two values and a verdict: moved the right way, flat, or worse. Flat or worse is the finding.
+**Pending fixes** — every line of `retro-pending.md` whose figure today's data covers gets its figure's two values and a verdict: moved the right way, flat, or worse. Flat or worse is the finding. A line older than 14 days that no figure covered gets a verdict from what the retros since saw, or a reason to wait.
 
 **Queries** — `query_samples` are "why did you X" prompts. Design questions as often as overreach, so read each one and classify it by hand; never report `query_signals` as a count.
 
@@ -59,6 +59,8 @@ Cost: adds 6 extra `claude-retro` calls per /retro run.
 
 **What went wrong** — narrate the friction. Use prompts as evidence.
 
+**Verdicts** — each judged pending fix: figure before → after, verdict.
+
 **Recurring** — issues from past retros that are still showing up. Apply-or-drop: a fix
 flagged in 3 prior retros gets applied in this session (ask go per change) or retired
 from the log with the reason. Nothing carries past its third flag.
@@ -82,9 +84,17 @@ After presenting, append a summary to `~/.claude/retro-log.md`:
 
 - [finding 1]
 - [finding 2]
+- Verdicts: [each judged pending fix: figure before → after, verdict]
 - Fixes proposed: [list]
-- Fixes applied: [each fix → the figure that judges it, and its baseline]
 - Dropped: [proposals retired at their third flag, one reason each]
 ```
 
 Keep entries concise — 3-5 bullets max per day. The log is for future retros to reference, not a full report.
+
+Each applied fix goes into `~/.claude/retro-pending.md` as one pending line; a fix with nothing to measure or watch gets none:
+
+```
+- YYYY-MM-DD [fix] → [figure that judges it], baseline [value], expect [direction]
+```
+
+Delete each pending line this retro judged. Then, past 5 retro entries in the log, fold the oldest into `## Summary` at the top: a recurring issue's flag count and last date, a dropped proposal and its reason, a caveat about reading `claude-retro` figures. The rest of that entry goes.
