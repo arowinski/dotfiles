@@ -140,8 +140,6 @@
       "mcp__atlassian__getAccessibleAtlassianResources",
       "mcp__atlassian__search",
       "mcp__atlassian__searchJiraIssuesUsingJql",
-      "mcp__atlassian__fetch",
-      "mcp__atlassian__atlassianUserInfo",
       "mcp__atlassian__getVisibleJiraProjects",
       "mcp__atlassian__getTransitionsForJiraIssue",
       "mcp__atlassian__getIssueLinkTypes",
@@ -151,7 +149,6 @@
       "mcp__process-compose__pc_process_logs",
       "mcp__process-compose__pc_process_get",
       "mcp__process-compose__pc_process_list",
-      "mcp__process-compose__pc_process_ports",
       "mcp__process-compose__pc_project_state",
       "mcp__process-compose__pc_project_is_ready"
     ],
@@ -182,6 +179,35 @@
       "Bash(ssh-add -l)",
       "Bash(ssh-add -L)",
       "mcp__atlassian__*Confluence*",
+      "mcp__atlassian__addWorklogToJiraIssue",
+      "mcp__atlassian__atlassianUserInfo",
+      "mcp__atlassian__fetch",
+      "mcp__atlassian__getContentFormatGuide",
+      "mcp__atlassian__getJiraIssueRemoteIssueLinks",
+      "mcp__claude-in-chrome__gif_creator",
+      "mcp__claude-in-chrome__list_connected_browsers",
+      "mcp__claude-in-chrome__select_browser",
+      "mcp__claude-in-chrome__switch_browser",
+      "mcp__claude-in-chrome__shortcuts_list",
+      "mcp__claude-in-chrome__shortcuts_execute",
+      "mcp__claude-in-chrome__upload_image",
+      "mcp__grafana__analyze_loki_labels",
+      "mcp__grafana__check_datasources_health",
+      "mcp__grafana__get_datasource",
+      "mcp__grafana__query_loki_patterns",
+      "mcp__grafana__search_dashboards",
+      "mcp__grafana__search_folders",
+      "mcp__process-compose__pc_process_logs_truncate",
+      "mcp__process-compose__pc_process_ports",
+      "mcp__process-compose__pc_process_scale",
+      "mcp__process-compose__pc_project_dependency_graph",
+      "mcp__sentry__analyze_issue_with_seer",
+      "mcp__sentry__find_dropped_events",
+      "mcp__sentry__search_metrics",
+      "mcp__sentry__search_profiles",
+      "mcp__sentry__search_replays",
+      "ScheduleWakeup",
+      "ReportFindings",
       "AskUserQuestion"
     ],
     "ask": [],
@@ -305,21 +331,18 @@
     ]
   },
   "enabledPlugins": {
-    "ruby-lsp@claude-plugins-official": true,
-    "skill-creator@claude-plugins-official": true
+    "skill-creator@claude-plugins-official": false,
+    "cc-plugin-diff@builtin": false,
+    "cc-plugin-telemetry@builtin": false
   },
-  "extraKnownMarketplaces": {
-    "caveman": {
-      "source": {
-        "source": "github",
-        "repo": "JuliusBrussee/caveman"
-      }
-    }
-  },
+  "extraKnownMarketplaces": {},
   "sandbox": {
     "enabled": false
   },
   "feedbackSurveyRate": 0,
+  "feedbackDrafts": "off",
+  "spinnerTipsEnabled": false,
+  "disableClaudeAiConnectors": true,
   "alwaysThinkingEnabled": true,
   "modelSettings": {
     "claude-opus-5-5": {
