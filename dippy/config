@@ -127,8 +127,8 @@ deny elixir -e "Elixir eval runs in the live app: tidewave project_eval (dev-ses
 deny elixir *.exs "A script that rewrites a file is sed -i with extra steps: use the Edit tool. Probes: tidewave project_eval"
 deny mix run -e * "Elixir eval runs in the live app: tidewave project_eval (dev-session.md), not a cold VM"
 deny mix run *.exs "Probes run in the live app: tidewave project_eval (dev-session.md), not a cold VM"
-deny mise x "mise is active in zshenv: pin the version in the project's mise.toml/.ruby-version and run the bare command"
-deny mise exec "mise is active in zshenv: pin the version in the project's mise.toml/.ruby-version and run the bare command"
+deny mise x "mise is active in zshenv: run the bare command (in a ws workspace with the wrong env: ws env <name>; elsewhere pin the version in mise.toml/.ruby-version)"
+deny mise exec "mise is active in zshenv: run the bare command (in a ws workspace with the wrong env: ws env <name>; elsewhere pin the version in mise.toml/.ruby-version)"
 deny sleep "Foreground wait — use run_in_background + the task notification, or the Monitor tool; never poll with sleep/for/until loops"
 deny /**/rg "Use bare 'rg'"
 deny /**/rg * "Use bare 'rg'"
@@ -144,6 +144,10 @@ allow command -v *
 deny unalias * "unalias prefix — no aliases to bypass in tool calls; use the bare command"
 deny gatt "Use the ws helper — it wraps gatt (ws status <name>, ws logs, ws restart)"
 deny gatt * "Use the ws helper — it wraps gatt (ws status <name>, ws logs, ws restart)"
+deny docker start postgres-* "Use ws db up <name>: it keeps the golden-dump restore check"
+# A kubeconfig goes to a scratch file, never ~/.kube/config (last match wins)
+deny aws eks update-kubeconfig * "Write the kubeconfig to a scratch file: add --kubeconfig <file>"
+allow aws eks update-kubeconfig *--kubeconfig *
 # In-place file edits → use the Edit tool (single file) or per-file Edits for bulk.
 # Denied, not asked: Edit is always available, reviewable, and prompt-free.
 deny sed -i* "In-place edit — use the Edit tool (per-file Edits for bulk)"
