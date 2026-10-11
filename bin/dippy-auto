@@ -8,11 +8,16 @@
 #
 # Outside auto mode dippy's decision passes through unchanged.
 #
+# A typed `rtk` / `rtk proxy` prefix is stripped before dippy sees the command:
+# no rule here matches the prefixed form, so `rtk git push` skipped every gate.
+#
 # Wired in claude/settings.json under hooks.PreToolUse with matcher "Bash".
 set -euo pipefail
 
 input=$(cat)
-out=$(printf '%s' "$input" | dippy)
+out=$(printf '%s' "$input" |
+  jq -c '.tool_input.command |= (. // "" | gsub("(?<p>^|[;&|(]\\s*)rtk\\s+(proxy\\s+)?"; "\(.p)"))' |
+  dippy)
 mode=$(printf '%s' "$input" | jq -r '.permission_mode // empty')
 
 if [ "$mode" = auto ]; then
