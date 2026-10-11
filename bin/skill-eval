@@ -22,7 +22,9 @@ text beyond the names it must call, and a missing name fails loudly.
 Usage:
   skill-eval triggers --skill <dir> --evals <queries.json> [--fixture <dir>]
                       [--iterations 3] [--runs 3] [--timeout 150] [--model <id>]
+                      [--effort medium]
   skill-eval ab --skill <dir> --cases <cases.json> [--fixture <dir>] [--runs 1]
+                [--effort medium]
 
 queries.json: [{"query": "...", "should_trigger": true}, ...]
 cases.json:   [{"id": "slop", "prompt": "..."}, ...]
@@ -118,6 +120,7 @@ def run_single_query(query, skill_name, skill_description, timeout, project_root
            "--verbose", "--include-partial-messages"]
     if model:
         cmd.extend(["--model", model])
+    cmd.extend(["--effort", _os.environ["SKILL_EVAL_EFFORT"]])
     # Eval runs are real agent runs. A skill whose tools write to something
     # outside this machine (a tracker, a PR, a chat) would do it for real,
     # dozens of times over, so those tools get blocked at the CLI.
@@ -247,10 +250,10 @@ def default_fixture(workdir):
     return repo
 
 
-def run_claude(prompt, cwd, model, timeout=300):
+def run_claude(prompt, cwd, model, effort, timeout=300):
     """One direct run, no probe command file. Returns (text, skills_loaded)."""
     cmd = ["claude", "-p", prompt, "--output-format", "stream-json", "--verbose",
-           "--include-partial-messages"]
+           "--include-partial-messages", "--effort", effort]
     if model:
         cmd.extend(["--model", model])
     env = {k: v for k, v in os.environ.items() if k != "CLAUDECODE"}
@@ -330,6 +333,7 @@ def cmd_triggers(args):
 
     os.environ["SKILL_EVAL_FIXTURE"] = str(fixture)
     os.environ["SKILL_EVAL_LIVE_SKILL"] = str(skill_md)
+    os.environ["SKILL_EVAL_EFFORT"] = args.effort
     if args.disallow:
         os.environ["SKILL_EVAL_DISALLOW"] = args.disallow
     sys.path.insert(0, str(workdir))
@@ -409,7 +413,7 @@ def report(result, original, evals, fixture, args):
     print("| query | expected | skills loaded |")
     print("|---|---|---|")
     for item in failures(history, best_desc):
-        text, skills = run_claude(item["query"], fixture, args.model)
+        text, skills = run_claude(item["query"], fixture, args.model, args.effort)
         del text
         print("| %s | %s | %s |" % (
             item["query"][:60].replace("|", "/"),
@@ -472,7 +476,7 @@ def cmd_ab(args):
                     work = workdir / ("work-%s-%s-%d" % (arm, case["id"], n))
                     shutil.copytree(str(fixture), str(work), symlinks=True)
                     text, skills = run_claude(case["prompt"], work, args.model,
-                                              timeout=args.timeout)
+                                              args.effort, timeout=args.timeout)
                     # Some skills deliver a file, not chat text - a plan, a
                     # rewritten doc. Keep whatever the run wrote, or the thing
                     # being measured dies with the work dir.
@@ -518,7 +522,9 @@ def main():
                    help="refuse to start above this many nested sessions")
     t.add_argument("--workers", type=int, default=10)
     t.add_argument("--timeout", type=int, default=150)
-    t.add_argument("--model", default="claude-opus-5")
+    t.add_argument("--model", default="opus")
+    t.add_argument("--effort", default="medium",
+                   help="passed to claude -p; without it runs inherit the saved effortLevel")
     t.add_argument("--disallow", default="",
                    help="comma-separated tools to block in eval runs, e.g. "
                         "'mcp__atlassian__createJiraIssue,mcp__atlassian__editJiraIssue'. "
@@ -537,7 +543,9 @@ def main():
     a.add_argument("--timeout", type=int, default=300,
                    help="seconds per run; raise it for skills that spawn "
                         "research agents, whose runs take minutes")
-    a.add_argument("--model", default="claude-opus-5")
+    a.add_argument("--model", default="opus")
+    a.add_argument("--effort", default="medium",
+                   help="passed to claude -p; without it runs inherit the saved effortLevel")
     a.set_defaults(func=cmd_ab)
 
     args = p.parse_args()
