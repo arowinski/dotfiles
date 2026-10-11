@@ -115,8 +115,8 @@ pure helper): the four questions suffice.
 - **Doctests** (`## Examples` with `iex>`) only for pure, deterministic, small functions. Anything touching
   `Repo`, Oban, PubSub, `DateTime.utc_now`, `:rand`, PIDs/refs, or output over ~5 lines gets a plain code
   block with `# => result`.
-- **Code comments** state a constraint the code can't show (WHY). Delete WHAT-comments: restated data
-  shapes, clause walkthroughs, `# adds two numbers` over `add/2`.
+- **Code comments** mark only what the code can't make clear: a gotcha, or a deliberate choice that looks
+  wrong. Delete WHAT-comments: restated data shapes, clause walkthroughs, `# adds two numbers` over `add/2`.
 
 ### 7. Prose pass: clear-writing
 
