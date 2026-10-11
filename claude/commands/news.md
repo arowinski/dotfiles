@@ -1,44 +1,71 @@
 ---
-description: Developer news feed — Elixir/Phoenix + AI first, then Ruby/Rails, security, popular tech
+description: Developer news feed: Elixir/Phoenix + AI first, then Ruby/Rails, security, popular tech
 argument-hint: [topic or empty for general]
+model: haiku
+effort: high
+context: fork
+disable-model-invocation: true
 ---
 
-Search for recent news relevant to a senior developer working with AI agents and developer tooling.
+News feed for a senior developer working with AI agents and developer tooling. With an argument, run WebSearch on that topic only, then steps 3 to 7.
 
-If argument provided, focus on that topic. Otherwise search by tier:
+## Steps
 
-**Tier 1 (always covered, top of the feed):**
-- Elixir / Phoenix ecosystem: Elixir core + releases, Phoenix, LiveView, Ecto, OTP/BEAM, and ecosystem libs/tools (Ash, Oban, Tidewave, Nx/Bumblebee, Broadway, Igniter, Req, mix/hex tooling)
+1. **Window.** `grep -m1 '^## ' ~/.claude/news-history.md` prints the last run's date. The window runs from that date (inclusive) to today; with no history file, the last 7 days. A candidate is an item dated inside the window, or a support end from the endoflife.date line (it prints only the next 30 days). Search engines return stale pages, so a result counts only once you have its date.
+
+2. **Collect.** In one parallel batch, run each command below as its own Bash call, copied exactly:
+
+   ```
+   gh api repos/elixir-lang/elixir/releases --jq '[.[] | select(.tag_name | test("latest") | not)][0:4][] | "\(.tag_name)\t\(.published_at)"'
+   gh api repos/erlang/otp/releases --jq '.[0:4][] | "\(.tag_name)\t\(.published_at)"'
+   for p in phoenix phoenix_live_view ecto ash oban req igniter tidewave bandit plug nx; do echo "== $p"; curl -s https://hex.pm/api/packages/$p | jq -r '.releases[0:3][] | "\(.version)\t\(.inserted_at)"'; done
+   gh api '/advisories?ecosystem=erlang&per_page=10' --jq '.[] | "\(.published_at)\t\(.severity)\t\(.ghsa_id)\t\(.summary)"'
+   gh api 'repos/anthropics/claude-code/releases?per_page=10' --jq '.[] | "\(.tag_name)\t\(.published_at)"'
+   gh api 'repos/rails/rails/releases?per_page=5' --jq '.[] | "\(.tag_name)\t\(.published_at)"'
+   gh api 'repos/ruby/ruby/releases?per_page=3' --jq '.[] | "\(.tag_name)\t\(.published_at)"'
+   for p in rails ruby elixir erlang postgresql; do curl -s https://endoflife.date/api/$p.json | jq -r --arg p $p '(now|strftime("%Y-%m-%d")) as $t | ((now+30*86400)|strftime("%Y-%m-%d")) as $e | .[] | (["bug fixes",.support],["security",.eol]) as [$k,$d] | select(($d|type)=="string" and $d>=$t and $d<=$e) | "\($p) \(.cycle)\t\($k) end \($d)"'; done
+   curl -s https://elixirstatus.com/rss | grep -oE '<title><!\[CDATA\[[^]]*\]\]></title>|<pubDate>[^<]*</pubDate>|<guid>[^<]*</guid>' | sed -E 's/<!\[CDATA\[//; s/\]\]>//; s/<[^>]+>//g' | paste - - - | head -20
+   curl -s "https://hn.algolia.com/api/v1/search?tags=front_page" | jq -r '.hits[] | "\(.points)\t\(.title)\t\(.url // ("https://news.ycombinator.com/item?id=" + .objectID))"'
+   curl -s https://lobste.rs/hottest.json | jq -r '.[0:25][] | "\(.score)\t\(.title)\t\(.url // .comments_url)"'
+   ```
+
+   In the same batch, two WebSearch calls (`mode: standard`), each with the current month and year in the query: AI coding agent and MCP releases; CVEs and supply-chain incidents.
+
+   Core releases come only from the `gh api` lines: they carry CVEs and never surface on elixirstatus. The advisory feed lags new GHSAs by days, so a CVE named in release notes counts even before the feed lists it. Thinking Elixir is not a source: the podcast ended at episode 309 on 2026-06-23.
+
+3. **Dedupe.** Check each candidate against the history file with `grep -n -i` on its name and version, every candidate in one command (e.g. `grep -n -iE "oban 2\.24|claude code 2\.1\.29[0-9]|CVE-2026-75758"`). Grep is the check because older entries sit deep in the file. Drop candidates already listed. Nothing left: say so and stop.
+
+4. **Read in full.** A summary comes from the source, never from a title or version number. For each remaining candidate:
+   - GitHub release: `gh api repos/<owner>/<repo>/releases/tags/<tag> --jq .body`, the whole body. Hex packages publish notes on the GitHub tag `v<version>`.
+   - CVE or GHSA: `gh api repos/<owner>/<repo>/security-advisories/<GHSA-id> --jq '"\(.severity)\t\(.summary)"'`, and put the severity in the summary.
+   - Aggregator or elixirstatus story: WebFetch the link.
+
+5. **Pick.** Apply the tier rules below. Up to 10 items, ordered by tier. On a quiet day the list is shorter: three solid items beat ten padded ones. At equal substance, the higher tier wins.
+
+6. **Present** one flat numbered list, no tier headers, each item exactly three lines:
+
+   ```
+   1. <name> <version or headline> (<date>): <what changed, one line>
+      Why it matters: <who is affected and what they do, one line>
+      Source: <url>
+   ```
+
+   Close with one line: `Nothing in window: <source>, <source>, ...`, listing each step-2 source that errored or had nothing in the window.
+
+7. **Log** with the Edit tool. The history file is `# News History`, then one `## YYYY-MM-DD` section per run, newest first. Insert today's section directly under `# News History` (or add to the top of today's section if it exists), one bullet per presented item: `- <name> <version> (<date>): <summary line>`.
+
+## Tiers
+
+**Tier 1**, always covered, every minor release counts:
+- Elixir / Phoenix ecosystem: Elixir core, OTP/BEAM, Phoenix, LiveView, Ecto, and ecosystem libs/tools (Ash, Oban, Tidewave, Nx/Bumblebee, Broadway, Igniter, Req, mix/hex tooling)
 - AI: Claude Code / Anthropic updates, AI coding agents and tools, MCP servers and integrations, LLM developer tooling and workflows
 
 **Tier 2:**
 - Ruby / Rails and other notable language/framework releases
 - Security: notable CVEs and supply-chain incidents (beyond MCP)
 
-**Tier 3 (only if genuinely popular or important):**
-- General tech: infra/devops tooling (CI, build, deploy, observability), databases, major industry news
+**Tier 3**, from the HN and Lobsters lists only. An item qualifies by meeting one of two bars:
+- Popular: HN ≥ 200 points or Lobsters ≥ 50, and the story is infra/devops tooling (CI, build, deploy, observability), a database, or major industry news.
+- Actionable: a dated change the reader must act on (deprecation, support end, certificate or runtime deadline), at any score.
 
-Run multiple web searches in parallel — dedicate at least one or two to the Elixir/Phoenix ecosystem every run, even when it's quiet (search elixirstatus, ElixirForum, library changelogs).
-
-Elixir releases need a direct check, not a search — searching alone misses them. Every run, hit both:
-- `gh api repos/elixir-lang/elixir/releases` and `gh api repos/erlang/otp/releases` for core (core releases carry CVEs and never surface on elixirstatus).
-- `curl -s https://hex.pm/api/packages/<name>` for phoenix, phoenix_live_view, ecto, ash, oban, req, igniter, tidewave, bandit, nx — the JSON lists versions with `inserted_at`, so a two-day window is a diff, not a judgment call.
-
-Thinking Elixir is not a source: the podcast ended at episode 309 on 2026-06-23.
-
-Aggregator pass: fetch Hacker News front page (`https://hn.algolia.com/api/v1/search?tags=front_page`) and Lobsters hottest (`https://lobste.rs/hottest.json`) to catch what's broadly popular. Tier 3 items should come from here — popularity on aggregators is the bar for "generic tech worth including". Tier 1/2 items don't need aggregator presence.
-
-Weighting: surface even minor Elixir/Phoenix/LiveView/Ecto/Ash releases and significant AI-tooling changes. When trimming to 5-10 items, order by tier and keep Tier 1 items over equal-substance items below.
-
-Present 5-10 items as one flat numbered list ordered by tier — no tier headers or section labels. Each item:
-- One-line summary of what happened
-- Why it matters
-- Source link
-
-Skip hype, marketing, listicles, and "best AI tools" roundups. Technical substance only.
-
-## History
-
-After presenting, append each item's one-line summary to `~/.claude/news-history.md` with today's date.
-
-Before presenting, read `~/.claude/news-history.md` (if it exists). Skip items already listed — only show what's new. If all results were already seen, say so and stop.
+Tier 1 and 2 items need no aggregator presence. Every tier: technical substance only, so hype, marketing, listicles, and "best AI tools" roundups stay out.
