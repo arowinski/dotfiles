@@ -1,10 +1,6 @@
 ---
 name: doc
-description: |
-  Write and review Elixir documentation against one standard — `@moduledoc`, `@doc`, `@spec`, `@type`, and doctests.
-  TRIGGER (user prompt only): "document this", "add doc", "write moduledoc", "draft moduledoc", "module is missing a doc", "run docs through /doc", "review the docs", "cut fluff from docs", "trim docs", "go over docs/comments", or asks to write/add/generate/review `@moduledoc`/`@doc`.
-  Pass the file path as the argument, or `branch` for a sweep of changed files. Runs in a fresh context and returns drafts to gate.
-  For non-Elixir prose, use clear-writing.
+description: Elixir docs (`@moduledoc`, `@doc`, `@spec`, `@type`, doctests), written or reviewed on user request: "document this", "review the docs", "go over docs/comments". Takes a file path or `branch`.
 argument-hint: [path to .ex file | branch]
 context: fork
 agent: doc-writer

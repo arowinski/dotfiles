@@ -1,6 +1,6 @@
 ---
 name: append-review-comment
-description: Add an inline comment to an existing PENDING PR review (or start one if none exists). Use when iteratively drafting a review — read a line, add a comment, keep reading — instead of batching everything at once. Differs from /post-review (which creates a fresh review with all comments via REST in one shot); this skill appends to an in-flight pending review via GraphQL.
+description: Add inline comments to a pending (draft) PR review, starting one if needed: "create a draft review", "add to the pending review", "append".
 argument-hint: [pr-number-or-url] [optional inline comment body]
 allowed-tools: Bash(gh api:*), Bash(gh pr view:*), Bash(gh auth status:*), Bash(git:*), Read, AskUserQuestion, Skill
 ---

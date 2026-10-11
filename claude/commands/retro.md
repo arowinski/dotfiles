@@ -1,6 +1,7 @@
 ---
 description: Daily retro analyzing Claude Code usage across projects
 argument-hint: [today|yesterday|YYYY-MM-DD]
+disable-model-invocation: true
 ---
 
 Run a daily retrospective on Claude Code usage.

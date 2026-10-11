@@ -1,6 +1,6 @@
 ---
 name: jira
-description: Write and update Jira tickets — the summary, description, acceptance criteria and fields, not just the API call. Use whenever work is being recorded in the tracker, however the user phrases it: "create a jira ticket", "file a ticket", "raise a bug", "log this as a task", "put it in the backlog", "we should track this", "write up a story", "turn these TODOs into tickets", or a request to rewrite an existing issue or add acceptance criteria to one (PDE-4412 and the like). The word "Jira" is usually absent; ticket intent is the signal. Not for reading or checking the status of an existing issue, not for a GitHub issue or a PR body, not for planning the work itself, and not for debugging the Atlassian MCP connection.
+description: Jira tickets, new or rewritten: file a ticket, raise a bug, track this, put it in the backlog, turn TODOs into tickets, add acceptance criteria to PDE-4412. Ticket intent is the signal; "Jira" is usually unsaid.
 allowed-tools: mcp__atlassian__createJiraIssue, mcp__atlassian__editJiraIssue, mcp__atlassian__getJiraIssue, mcp__atlassian__getVisibleJiraProjects, mcp__atlassian__getJiraIssueTypeMetaWithFields, mcp__atlassian__getJiraProjectIssueTypesMetadata, mcp__atlassian__createIssueLink, mcp__atlassian__getIssueLinkTypes, Read, AskUserQuestion
 ---
 

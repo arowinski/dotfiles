@@ -1,6 +1,6 @@
 ---
 name: human-writing
-description: Use when drafting text read by another human as peer-to-peer communication — PR review comments, replies to reviewer feedback, GitHub/GitLab issue comments, Slack messages, code-review thread responses. Focuses on voice and tone so the text sounds like a colleague, not an AI. Differs from clear-writing (which handles structural prose quality across all contexts including docs); use both for peer comms — clear-writing for sentence-level edit, human-writing for voice.
+description: Peer voice for text a colleague reads: PR, issue and ticket comments, review replies, Slack.
 ---
 
 # Human Writing

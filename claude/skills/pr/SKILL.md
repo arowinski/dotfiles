@@ -1,6 +1,6 @@
 ---
 name: pr
-description: Creates or edits pull requests with automatic title/template formatting. Use when asked to create or edit a PR — "create a PR", "let's have a PR", "open/draft a PR", "make a PR for this", "create drafts for the others" — or to change an existing one — "update the PR desc/title/body", "rework the description".
+description: Create or edit a pull request: "open/draft a PR", "update/improve the PR description".
 allowed-tools: Bash(git fetch:*), Bash(git diff:*), Bash(git log:*), Bash(git branch:*), Bash(git remote:*), Bash(git push:*), Bash(git symbolic-ref:*), Bash(git rev-parse:*), Bash(gh pr create:*), Bash(gh pr edit:*), Bash(gh pr list:*), Bash(gh pr view:*), Bash(gh repo view:*), Read, AskUserQuestion, Skill, mcp__atlassian__getJiraIssue, mcp__atlassian__getAccessibleAtlassianResources
 ---
 

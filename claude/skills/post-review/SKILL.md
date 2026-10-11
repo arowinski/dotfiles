@@ -1,6 +1,6 @@
 ---
 name: post-review
-description: Filters code-review findings to the ones worth posting, drafts each as a question, previews, then posts to a GitHub PR as a single review with inline comments. Use after /review produces findings on someone else's PR, or for a fresh review landing on the PR. Also on "which are worth posting?", "filter findings", "be pragmatic about comments", "what's worth posting?", "what worth commenting?", "what's worth commenting on?" — previews and posts only on explicit confirmation (reply `skip` to draft without publishing). Comments are phrased as questions, not verdicts.
+description: Post a review on someone else's PR: pick the findings worth posting ("anything worth posting/commenting on?") and post them as one review with inline comments.
 argument-hint: [pr-number-or-url]
 allowed-tools: Bash(gh-comments:*), Bash(gh api:*), Bash(gh pr view:*), Bash(gh pr diff:*), Bash(git diff:*), Bash(git log:*), Bash(claude-review-ledger:*), Read, AskUserQuestion, Skill
 ---

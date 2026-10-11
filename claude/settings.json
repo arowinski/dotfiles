@@ -187,6 +187,38 @@
     "defaultMode": "auto"
   },
   "model": "opus[1m]",
+  "skillOverrides": {
+    "dataviz": "user-invocable-only",
+    "code-review": "user-invocable-only",
+    "schedule": "user-invocable-only",
+    "run": "user-invocable-only",
+    "keybindings-help": "user-invocable-only",
+    "fewer-permission-prompts": "user-invocable-only",
+    "security-review": "user-invocable-only",
+    "init": "user-invocable-only",
+    "simplify": "user-invocable-only",
+    "artifact-capabilities": "user-invocable-only",
+    "update-config": "off",
+    "nag": "name-only",
+    "handover": "name-only",
+    "anthropic-skills:skill-creator": "off",
+    "anthropic-skills:built-in-browser": "off",
+    "anthropic-skills:chrome-browser": "off",
+    "anthropic-skills:computer-use": "off",
+    "anthropic-skills:docs": "off",
+    "anthropic-skills:docx": "off",
+    "anthropic-skills:google-workspace": "off",
+    "anthropic-skills:import-memory": "off",
+    "anthropic-skills:morning": "off",
+    "anthropic-skills:pdf": "off",
+    "anthropic-skills:pptx": "off",
+    "anthropic-skills:xlsx": "off",
+    "optimize-skill": "off",
+    "claude-api": "off",
+    "plugin-authoring": "off",
+    "news": "off",
+    "retro": "off"
+  },
   "hooks": {
     "Notification": [
       {

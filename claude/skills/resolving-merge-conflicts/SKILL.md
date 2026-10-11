@@ -1,6 +1,6 @@
 ---
 name: resolving-merge-conflicts
-description: Work an in-progress git merge or rebase conflict hunk by hunk, resolving each by the intent behind both sides, then run the project's checks. Use when a merge, rebase, cherry-pick, or stash pop stops on conflicts — "resolve the conflicts", "fix the merge conflict", "the rebase blew up", CONFLICT (content) in git output. Not for choosing a merge strategy or planning a rebase. Never aborts; finishes the operation only when the request said to.
+description: Git stopped on conflicts (merge, rebase, cherry-pick, stash pop): CONFLICT in git output, "resolve the conflicts", "the rebase blew up".
 allowed-tools: Bash(git:*), Bash(gh:*), Bash(gh-comments:*), Bash(just:*), Bash(mix:*), Bash(MIX_ENV=* mix:*), Bash(bundle exec:*), Bash(yarn:*), Read, Edit, mcp__atlassian__getJiraIssue
 ---
 

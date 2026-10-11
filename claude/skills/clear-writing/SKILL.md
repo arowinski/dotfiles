@@ -1,6 +1,6 @@
 ---
 name: clear-writing
-description: Check two exclusions first. Elixir documentation attributes and doctests — `@moduledoc`, `@doc`, `@spec`, `@typedoc` — always belong to /doc, whether the ask is to write one from scratch or clean one up; never handle those here. Text aimed at a person in a live thread — reviewer replies, issue comments, Slack — belongs to human-writing. Otherwise use this skill whenever the wording itself is the deliverable: drafting or reworking a README, doc page, code comment, commit message, PR description, release note, error string, UI copy, or report, plus any request to tighten, shorten, polish, de-jargon, cut fluff, or make something read better. Signal: prose is being produced or handed to you and the user cares how it sounds. Not for work about documents rather than their words — verifying docs still match reality, fixing links or a failing docs build, grepping stale references — and not for writing code or tests.
+description: Wording is the deliverable: draft or rework a README, doc page, code comment, release note, error string, UI copy or report, or make prose clearer or shorter ("more clear?", "more concise?", "tighten this"). Elixir `@moduledoc`/`@doc` go to doc.
 ---
 
 # Clear Writing
