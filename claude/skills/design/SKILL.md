@@ -1,7 +1,7 @@
 ---
 name: design
 description: Plan how to build a change before building it: "design/plan/scope this", "how should we approach/tackle X", "which way should we go, A or B?", "what would change if we moved X", or a Jira URL to work from.
-allowed-tools: Bash(git:*), Bash(mkdir:*), Read, Agent, AskUserQuestion, Write, mcp__atlassian__getJiraIssue, mcp__atlassian__getAccessibleAtlassianResources
+allowed-tools: Bash(git:*), Bash(mkdir:*), Read, Agent, Write, mcp__atlassian__getJiraIssue, mcp__atlassian__getAccessibleAtlassianResources
 argument-hint: [Jira URL, description, or empty]
 ---
 

@@ -181,7 +181,8 @@
       "Bash(security dump-keychain *)",
       "Bash(ssh-add -l)",
       "Bash(ssh-add -L)",
-      "mcp__atlassian__*Confluence*"
+      "mcp__atlassian__*Confluence*",
+      "AskUserQuestion"
     ],
     "ask": [],
     "defaultMode": "auto"

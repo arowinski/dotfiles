@@ -29,7 +29,7 @@ Never ask for a fact you can look up: read the code, grep, check git. Spawn an E
 
 ## Round format
 
-Write every round out as prose — each question with its context and the reason it matters, choices inline, recommended one first; never the AskUserQuestion picker:
+Write every round out as prose (each question with its context and the reason it matters, choices inline, recommended one first):
 
 ```
 **Q1 · <title>**

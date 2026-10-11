@@ -2,7 +2,7 @@
 name: post-review
 description: Post a review on someone else's PR: pick the findings worth posting ("anything worth posting/commenting on?") and post them as one review with inline comments.
 argument-hint: [pr-number-or-url]
-allowed-tools: Bash(gh-comments:*), Bash(gh api:*), Bash(gh pr view:*), Bash(gh pr diff:*), Bash(git diff:*), Bash(git log:*), Bash(claude-review-ledger:*), Read, AskUserQuestion, Skill
+allowed-tools: Bash(gh-comments:*), Bash(gh api:*), Bash(gh pr view:*), Bash(gh pr diff:*), Bash(git diff:*), Bash(git log:*), Bash(claude-review-ledger:*), Read, Skill
 ---
 
 # Post Review

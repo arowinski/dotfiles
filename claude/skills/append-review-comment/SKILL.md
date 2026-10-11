@@ -2,7 +2,7 @@
 name: append-review-comment
 description: Add inline comments to a pending (draft) PR review, starting one if needed: "create a draft review", "add to the pending review", "append".
 argument-hint: [pr-number-or-url] [optional inline comment body]
-allowed-tools: Bash(gh api:*), Bash(gh pr view:*), Bash(gh auth status:*), Bash(git:*), Read, AskUserQuestion, Skill
+allowed-tools: Bash(gh api:*), Bash(gh pr view:*), Bash(gh auth status:*), Bash(git:*), Read, Skill
 ---
 
 # Append Review Comment

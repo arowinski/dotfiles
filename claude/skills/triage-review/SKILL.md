@@ -1,7 +1,7 @@
 ---
 name: triage-review
 description: PR review comments, either side: on your PR, read them and weigh fixes ("see comments on PR", "check pr/123"); as reviewer, check the author's update against yours ("addressed?", "see changes now", "approvable?").
-allowed-tools: Bash(gh-comments:*), Bash(gh pr view:*), Bash(gh pr diff:*), Bash(git diff:*), Bash(git log:*), Bash(git status:*), Read, Edit, Write, Agent, AskUserQuestion, Skill
+allowed-tools: Bash(gh-comments:*), Bash(gh pr view:*), Bash(gh pr diff:*), Bash(git diff:*), Bash(git log:*), Bash(git status:*), Read, Edit, Write, Agent, Skill
 ---
 
 # Triage Review
