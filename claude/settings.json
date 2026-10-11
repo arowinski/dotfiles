@@ -349,6 +349,13 @@
       "effortLevel": "medium"
     }
   },
+  "pluginConfigs": {
+    "cc-plugin-agents-md@builtin": {
+      "options": {
+        "instructionFiles": "claude-md-and-agents-md"
+      }
+    }
+  },
   "autoUpdatesChannel": "latest",
   "tui": "default",
   "skipWorkflowUsageWarning": true,
