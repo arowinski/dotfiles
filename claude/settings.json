@@ -370,10 +370,12 @@
   "autoUpdatesChannel": "latest",
   "tui": "default",
   "skipWorkflowUsageWarning": true,
+  "preferredNotifChannel": "auto",
   "autoCompactEnabled": true,
   "switchModelsOnFlag": false,
   "teammateMode": "in-process",
-  "agentPushNotifEnabled": true,
+  "inputNeededNotifEnabled": true,
+  "agentPushNotifEnabled": false,
   "autoMode": {
     "environment": [
       "### Org-wide",
