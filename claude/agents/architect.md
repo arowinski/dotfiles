@@ -1,13 +1,10 @@
 ---
 name: architect
 description: Research and recommend approaches for complex features. Use when the HOW is unclear, not for detailed implementation planning.
+tools: Bash, Read, ToolSearch, SendMessage, WebFetch, WebSearch, mcp__tidewave__execute_sql_query, mcp__tidewave__project_eval, mcp__tidewave__get_docs, mcp__context7__resolve-library-id, mcp__context7__query-docs
 model: opus
 effort: xhigh
 color: orange
-disallowedTools:
-  - Write
-  - Edit
-  - NotebookEdit
 memory: user
 ---
 
