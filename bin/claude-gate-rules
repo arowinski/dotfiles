@@ -4,14 +4,13 @@
 #
 # The first Jira create/edit, the first review/comment post (`gh api
 # …/pulls/N/reviews|comments` with a mutating flag, `gh pr review`, `gh pr
-# comment`), the first PR body write (`gh pr create|edit` with a body flag),
-# and the first Edit/Write that adds an Elixir `@moduledoc`/`@doc`/`@typedoc`
-# block in a session are refused, with the governing skill's rules as the reason. The
+# comment`), and the first PR body write (`gh pr create|edit` with a body flag)
+# in a session are refused, with the governing skill's rules as the reason. The
 # model rewrites the payload with the rules in front of it and re-issues the
 # call; the retry passes (per-session marker, 20 minutes).
 #
 # Wired in claude/settings.json under hooks.PreToolUse with matcher
-# "mcp__atlassian__createJiraIssue|mcp__atlassian__editJiraIssue|Bash|Edit|Write".
+# "mcp__atlassian__createJiraIssue|mcp__atlassian__editJiraIssue|Bash".
 set -euo pipefail
 
 input=$(cat)
@@ -42,15 +41,6 @@ case "$tool" in
       review) rules=$(sed -n '/^## Forbidden LLM tells/,/^## Bad-vs-good/p' "$skills/human-writing/SKILL.md") ;;
       prbody) rules=$(sed -n '/^2\. Body/,/^### Step 5/p' "$skills/pr/SKILL.md") ;;
     esac
-    ;;
-  Edit|Write)
-    path=$(printf '%s' "$input" | jq -r '.tool_input.file_path // empty')
-    text=$(printf '%s' "$input" | jq -r '.tool_input.new_string // .tool_input.content // empty')
-    if printf '%s' "$path" | grep -qE '\.exs?$' && printf '%s' "$text" | grep -qE '@(moduledoc|doc|typedoc) (~[sS])?"""'; then
-      key=doc
-      lead="Elixir docs are drafted by the doc skill in a fresh-context fork: run /doc <file> and gate the draft it returns against these rules. If this edit applies a draft the fork already returned and the user approved, re-issue it unchanged. The retry passes."
-      rules=$(sed -n '/^## Quality gates/,$p' "$skills/doc/SKILL.md")
-    fi
     ;;
 esac
 [ -n "$key" ] || exit 0

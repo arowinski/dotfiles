@@ -252,7 +252,7 @@
         ]
       },
       {
-        "matcher": "mcp__atlassian__createJiraIssue|mcp__atlassian__editJiraIssue|Bash|Edit|Write",
+        "matcher": "mcp__atlassian__createJiraIssue|mcp__atlassian__editJiraIssue|Bash",
         "hooks": [
           {
             "type": "command",

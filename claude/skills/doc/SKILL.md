@@ -17,9 +17,8 @@ Docs explain WHY a module exists, who it works with, what's non-obvious, and wha
 One standard, both directions: writing means writing to it; reviewing means diffing against it. Fix wrong
 claims first, then delete every sentence that fails the gates.
 
-Core rule: **document only what the code can't say.** If the signature, `schema` block, `use` line, render,
-or function body shows it, prose that repeats it is deleted. Every sentence adds intent, invariant,
-collaborator, gotcha, or real usage.
+Before step 1, read the `# Elixir docs` section of `~/.claude/rules/elixir.md`: its core rule and quality
+gates are the standard every draft is held to.
 
 Target: `$ARGUMENTS`. A file path runs the workflow on that file. `branch` runs it on every changed
 `.ex`/`.exs` file from `git diff origin/main... --name-only` (swap `origin/main` for the default branch),
@@ -141,7 +140,7 @@ Check, in order:
 6. Sentence pass: read the draft sentence by sentence. Each one has a subject and a verb and opens on a
    word. One that opens on a backticked symbol or hangs a list off a colon ("Submitted or missing:
    `{...}`") is rewritten as a sentence
-7. Quality gates (below): the opening and every sentence pass
+7. Quality gates (`~/.claude/rules/elixir.md` and the section below): the opening and every sentence pass
 
 ### 9. Return
 
@@ -161,17 +160,8 @@ End the report with the file list and "Apply / Edit / Skip per file".
 
 ## Quality gates
 
-**Forbidden openings**: rewrite drafts starting with "Module for", "Provides functionality for",
-"Helper module that", "Wrapper around", "Contains functions to", "This module". Start with what the module
-IS in domain terms.
+Banned beside the rules file's list:
 
-**Banned content**:
-
-- Implementation details (locking, transactions, query shape) in `@moduledoc` or `@doc`: they document the contract
-- "Used by X" caller lists in `@doc` (grep answers that); collaborators belong in the moduledoc mental
-  model only when they explain WHY
-- Legacy/migration history, tickets, prior/external system names, unless the constraint is still live
 - Bare export lists as the only body
 - "See external doc" without an inline summary
 - "Use this from X" advice without a concrete alternative to contrast with
-- Test mentions in `@moduledoc`/`@doc`; a "canary" only when the test runs against a live external system

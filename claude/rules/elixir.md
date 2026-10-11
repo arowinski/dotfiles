@@ -17,3 +17,16 @@ Inside `Repo.transaction/2` or an `Ecto.Multi`, a failed step returns `{:error, 
 To add an optional argument, keep the shorter arity delegating with the default; callers never pass `nil` for "not applicable".
 `@spec` sits directly on its `def`, no blank line between them.
 Workers and hot paths look up entities another context owns and skip or error when one is absent; creating them stays in the owning context.
+
+# Elixir docs
+
+Core rule: **document only what the code can't say.** If the signature, `schema` block, `use` line, render, function body, or an earlier sentence of the doc shows it, prose that repeats it is deleted. Every sentence adds intent, invariant, collaborator, gotcha, or real usage.
+
+**Forbidden openings**: rewrite drafts starting with "Module for", "Provides functionality for", "Helper module that", "Wrapper around", "Contains functions to", "This module". Start with what the module IS in domain terms.
+
+**Banned content**:
+
+- Implementation details (locking, transactions, query shape) in `@moduledoc` or `@doc`: they document the contract
+- "Used by X" caller lists in `@doc` (grep answers that); collaborators belong in the moduledoc mental model only when they explain WHY
+- Legacy/migration history, tickets, prior/external system names, unless the constraint is still live
+- Test mentions in `@moduledoc`/`@doc`; a "canary" only when the test runs against a live external system
