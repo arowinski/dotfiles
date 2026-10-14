@@ -165,6 +165,7 @@
       "mcp__process-compose__pc_project_is_ready"
     ],
     "deny": [
+      "Artifact",
       "Read(~/gat/gat-local/*.env)",
       "Read(~/gat/gat-local/.env*)",
       "Read(~/.ssh/**)",
